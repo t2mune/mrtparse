@@ -1,0 +1,30 @@
+2014-02-02 Tetsumune KISO <t2mune@gmail.com>
+	* Release - mrtparse 0.4 released.
+	* Update - add a dictionaries to convert from a number to a string, and
+	vice versa.
+	* Update - update an example script 'print_all.py'.
+
+2014-01-30 Tetsumune KISO <t2mune@gmail.com>
+	* Update - add method val_asn in class Base to be compatible with 4-byte
+	ASN format 'x.y'.
+
+2014-01-27 Tetsumune KISO <t2mune@gmail.com>
+	* Release - mrtparse 0.3 released.
+	* Update - add class Bgp4Mp, BgpMessage and Nlri.
+
+2014-01-25 Tetsumune KISO <t2mune@gmail.com>
+	* Update - add methods for each data type in class Base.
+
+2014-01-23 Tetsumune KISO <t2mune@gmail.com>
+	* BugFix - IGP and EGP are in reverse.
+	* Update - add methods for each adttribute in class BGPAttr.
+
+2014-01-21 Tetsumuned KISO <t2mune@gmail.com>
+	* Release - mrtparse 0.2 released.
+	* New - created setup.py, ChangeLog.
+	* Update - a module name changed mrtparse from mrtdump.
+	* Update - placed all instances of MRT padyload class under self.mrt, 
+	to make it easy to initialize them in a loop of class Reader.
+
+2014-01-19 Tetsumune KISO <t2mune@gmail.com>
+	* Release - mrtdump 0.1 released.
