@@ -1,12 +1,15 @@
+2014-02-04 Tetsumune KISO <t2mune@gmail.com>
+	* Update - add a support for "EXTENDED_COMMUNITIES" attribute.
+
 2014-02-02 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.4 released.
 	* Update - add a dictionaries to convert from a number to a string, and
 	vice versa.
-	* Update - update an example script 'print_all.py'.
+	* Update - update an example script "print_all.py".
 
 2014-01-30 Tetsumune KISO <t2mune@gmail.com>
-	* Update - add method val_asn in class Base to be compatible with 4-byte
-	ASN format 'x.y'.
+	* Update - add method val_asn in class Base to support a 4-byte
+	ASN format "x.y".
 
 2014-01-27 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.3 released.

@@ -448,6 +448,8 @@ class BgpAttr(Base):
             self.originator_id(buf)
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
             self.cluster_list(buf)
+        elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+            self.communities(buf)
         elif self.type == BGP_ATTR_T['AS4_PATH']:
             as_len = 4
             self.as_path(buf)
