@@ -10,8 +10,8 @@ Created by
 Copyright (C) GREEN HIPPO. All rights reserved.
 '''
 
-import struct
-import socket
+import sys, struct, socket
+import gzip, bz2
 
 # mrtparse information
 __pyname__  = 'mrtparse'
@@ -21,6 +21,10 @@ __url__     = 'http://***'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__   = 't2mune@gmail.com, y.44snow@gmail.com, js333123@gmail.com'
 __license__ = '***'
+
+# Magic Number
+GZIP_MAGIC = '\x1f\x8b'
+BZ2_MAGIC  = '\x42\x5a\x68'
 
 # a variable to reverse the keys and values of dictionaries below
 dl = []
@@ -204,6 +208,8 @@ class Base:
             fmt = '>H'
         elif _len == 4:
             fmt = '>I'
+        elif _len == 8:
+            fmt = '>Q'
         else:
             return None
         if _len > 0 and len(buf) - self.p >= _len:
@@ -253,9 +259,24 @@ class Base:
         return asn
 
 class Reader(Base):
-    def __init__(self, f):
+    def __init__(self, arg):
         Base.__init__(self)
-        self.f = f
+
+        if hasattr(arg, 'read'):
+            self.f = arg
+        elif isinstance(arg, str):
+            f = file(arg, 'rb')
+            hdr = f.read(max(len(BZ2_MAGIC), len(GZIP_MAGIC)))
+            f.close()
+
+            if hdr.startswith(BZ2_MAGIC):
+                self.f = bz2.BZ2File(arg, 'rb')
+            elif hdr.startswith(GZIP_MAGIC):
+                self.f = gzip.GzipFile(arg, 'rb')
+            else:
+                self.f = open(arg, 'rb')
+        else:
+            sys.stderr.write("error: unsupported instance type\n")
 
     def close(self):
         self.f.close()
@@ -277,12 +298,12 @@ class Reader(Base):
         if len(hdr) == 0:
             self.close()
         elif len(hdr) < MRT_HDR_LEN:
-            print "error: mrt header is too short"
+            sys.stderr.write("error: mrt header is too short\n")
             self.close()
         self.mrt.unpack(hdr)
         data = self.f.read(self.mrt.len)
         if len(data) < self.mrt.len:
-            print "error: mrt data is too short"
+            sys.stderr.write("error: mrt data is too short\n")
             self.close()
 
         if (   self.mrt.type == MSG_T['BGP4MP_ET']
@@ -453,7 +474,7 @@ class BgpAttr(Base):
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
             self.unpack_cluster_list(buf)
         elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
-            self.unpack_communities(buf)
+            self.unpack_extended_communities(buf)
         elif self.type == BGP_ATTR_T['AS4_PATH']:
             as_len = 4
             self.unpack_as_path(buf)
@@ -507,7 +528,7 @@ class BgpAttr(Base):
         else:
             as_len = 4
         self.aggr['asn'] = self.val_asn(buf)
-        self.aggr['ip'] = self.val_addr(buf, TD_ST['AFI_IPv4'])
+        self.aggr['id'] = self.val_addr(buf, TD_ST['AFI_IPv4'])
 
     def unpack_communities(self, buf):
         attr_len = self.p + self.len
@@ -525,6 +546,13 @@ class BgpAttr(Base):
         self.cl_list = []
         while self.p < attr_len:
             self.cl_list.append(self.val_addr(buf, TD_ST['AFI_IPv4']))
+
+    def unpack_extended_communities(self, buf):
+        attr_len = self.p + self.len
+        self.ext_comm = []
+        while self.p < attr_len:
+            ext_comm = self.val_num(buf, 8)
+            self.ext_comm.append(ext_comm)
 
 class Bgp4Mp(Base):
     def __init__(self):

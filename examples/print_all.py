@@ -63,7 +63,7 @@ def print_bgp_msg(m):
             print '    Withdrawn Routes: %s/%d' % (withdrawn.prefix, withdrawn.plen)
         print '    Total Path Attribute Length: %d' % (m.bgp.msg.attr_len)
 
-        print_bgp_attr(m)
+        print_bgp_attr(m.bgp.msg.attr)
 
         for nlri in m.bgp.msg.nlri:
             print '    NLRI: %s/%d' % (nlri.prefix, nlri.plen)
@@ -78,7 +78,7 @@ def print_td_v2(m):
         print '    Peer Count: %d' % m.peer.count
 
         for entry in m.peer.entry:
-            print '    Peer Type: 0x%x' % entry.type
+            print '    Peer Type: 0x%02x' % entry.type
             print '    Peer BGP ID: %s' % entry.bgp_id
             print '    Peer IP Address: %s' % entry.ip
             print '    Peer AS: %s' % entry.asn
@@ -96,10 +96,10 @@ def print_td_v2(m):
             print '    Originated Time: %d(%s)' % (
                 entry.org_time, datetime.fromtimestamp(entry.org_time))
             print '    Attribute Length: %d' % entry.attr_len
-            print_bgp_attr(m)
+            print_bgp_attr(entry.attr)
 
-def print_bgp_attr(m):
-    for attr in m.bgp.msg.attr:
+def print_bgp_attr(attr_list):
+    for attr in attr_list:
         print '    Path Attribute Flag/Type/Length: 0x%02x/%d/%d' % (
             attr.flag, attr.type, attr.len)
         print '    %s:' % BGP_ATTR_T[attr.type],
@@ -116,7 +116,7 @@ def print_bgp_attr(m):
         elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
             print '%d' % attr.local_pref,
         elif attr.type == BGP_ATTR_T['AGGREGATOR']:
-            print '%s %s' % (attr.aggr['asn'], attr.aggr['ip']),
+            print '%s %s' % (attr.aggr['asn'], attr.aggr['id']),
         elif attr.type == BGP_ATTR_T['COMMUNITIES']:
             for comm in attr.comm:
                 print '%s' % comm,
@@ -125,13 +125,13 @@ def print_bgp_attr(m):
         elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
             print '%s' % attr.cl_list,
         elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
-            for comm in attr.comm:
-                print '%s' % comm,
+            for ext_comm in attr.ext_comm:
+                print '0x%016x' % ext_comm,
         elif attr.type == BGP_ATTR_T['AS4_PATH']:
             for seg in attr.as_path:
                 print '%s' % seg,
         elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-            print '%s %s' % (attr.aggr['asn'], attr.aggr['ip']),
+            print '%s %s' % (attr.aggr['asn'], attr.aggr['id']),
         print
 
 def main():
@@ -139,8 +139,9 @@ def main():
         print "Usage: %s FILENAME" % sys.argv[0]
         exit(1)
 
-    f = open(sys.argv[1], 'rb')
-    d = Reader(f)
+    #f = open(sys.argv[1], 'rb')
+    #d = Reader(f)
+    d = Reader(sys.argv[1])
 
     for m in d:
         print_mrt(m)

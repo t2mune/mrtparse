@@ -1,29 +1,33 @@
 2014-02-05 Tetsumune KISO <t2mune@gmail.com>
-	* Update - change a format of BGP attribute objects.
+	* Release - mrtparse 0.5 released.
+	* Update - added the ability to be passed a filename as an argument of class "Reader"
+	as well as file objects.
+	* BugFix - can't parse a "EXTENDED_COMMUNITES" attribute correctly.
+	* Update - changed a format of BGP attribute objects.
 
 2014-02-04 Tetsumune KISO <t2mune@gmail.com>
-	* Update - add a support for "EXTENDED_COMMUNITIES" attribute.
+	* Update - added a support for a "EXTENDED_COMMUNITIES" attribute.
 
 2014-02-02 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.4 released.
-	* Update - add a dictionaries to convert from a number to a string, and
+	* Update - added a dictionaries to convert from a number to a string, and
 	vice versa.
-	* Update - update an example script "print_all.py".
+	* Update - updated an example script "print_all.py".
 
 2014-01-30 Tetsumune KISO <t2mune@gmail.com>
-	* Update - add method val_asn in class Base to support a 4-byte
+	* Update - added method val_asn in class Base to support a 4-byte
 	ASN format "x.y".
 
 2014-01-27 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.3 released.
-	* Update - add class Bgp4Mp, BgpMessage and Nlri.
+	* Update - added class Bgp4Mp, BgpMessage and Nlri.
 
 2014-01-25 Tetsumune KISO <t2mune@gmail.com>
-	* Update - add methods for each data type in class Base.
+	* Update - added methods for each data type in class Base.
 
 2014-01-23 Tetsumune KISO <t2mune@gmail.com>
 	* BugFix - IGP and EGP are in reverse.
-	* Update - add methods for each adttribute in class BGPAttr.
+	* Update - added methods for each adttribute in class BGPAttr.
 
 2014-01-21 Tetsumuned KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.2 released.
