@@ -407,6 +407,7 @@ class RibEntries(Base):
         self.peer_index = self.val_num(buf, 2)
         self.org_time = self.val_num(buf, 4)
         attr_len = self.attr_len = self.val_num(buf, 2)
+
         self.attr = []
         while attr_len > 0:
             attr = BgpAttr()
@@ -423,107 +424,107 @@ class BgpAttr(Base):
         global as_len
         self.flag = self.val_num(buf, 1)
         self.type = self.val_num(buf, 1)
+
         if self.flag & 0x01L << 4:
             self.len = self.val_num(buf, 2)
         else:
             self.len = self.val_num(buf, 1)
+
         if self.len == 0: return self.p
+
         if self.type == BGP_ATTR_T['ORIGIN']:
-            self.origin(buf)
+            self.unpack_origin(buf)
         elif self.type == BGP_ATTR_T['AS_PATH']:
-            self.as_path(buf)
+            self.unpack_as_path(buf)
         elif self.type == BGP_ATTR_T['NEXT_HOP']:
-            self.next_hop(buf)
+            self.unpack_next_hop(buf)
         elif self.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
-            self.multi_exit_disc(buf)
+            self.unpack_multi_exit_disc(buf)
         elif self.type == BGP_ATTR_T['LOCAL_PREF']:
-            self.local_pref(buf)
+            self.unpack_local_pref(buf)
         elif self.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
             pass
         elif self.type == BGP_ATTR_T['AGGREGATOR']:
-            self.aggregator(buf)
+            self.unpack_aggregator(buf)
         elif self.type == BGP_ATTR_T['COMMUNITIES']:
-            self.communities(buf)
+            self.unpack_communities(buf)
         elif self.type == BGP_ATTR_T['ORIGINATOR_ID']:
-            self.originator_id(buf)
+            self.unpack_originator_id(buf)
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
-            self.cluster_list(buf)
+            self.unpack_cluster_list(buf)
         elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
-            self.communities(buf)
+            self.unpack_communities(buf)
         elif self.type == BGP_ATTR_T['AS4_PATH']:
             as_len = 4
-            self.as_path(buf)
+            self.unpack_as_path(buf)
         elif self.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-            self.aggregator(buf)
+            self.unpack_aggregator(buf)
         else:
-            self.val = None
             self.p += self.len
         return self.p
 
-    def origin(self, buf):
-        self.val = self.val_num(buf, 1)
+    def unpack_origin(self, buf):
+        self.origin = self.val_num(buf, 1)
 
-    def as_path(self, buf):
+    def unpack_as_path(self, buf):
         global as_len
         attr_len = self.p + self.len
-        as_path = []
+        self.as_path = []
         while self.p < attr_len:
             seg_val = []
             seg_type = self.val_num(buf, 1)
             seg_len = self.val_num(buf, 1)
             if seg_len == 0: next
+
             for i in range(seg_len):
                 seg_val.append(self.val_asn(buf))
-            if seg_type == 1:
-                as_path.append('{%s}' % ' '.join(seg_val))
-            else:
-                as_path.append(' '.join(seg_val))
-        self.val = ' '.join(as_path)
 
-    def next_hop(self, buf):
+            if seg_type == 1:
+                self.as_path.append('{%s}' % ' '.join(seg_val))
+            else:
+                self.as_path.append(' '.join(seg_val))
+
+    def unpack_next_hop(self, buf):
         if self.len == 4:
-            self.val = self.val_addr(buf, TD_ST['AFI_IPv4'])
+            self.next_hop = self.val_addr(buf, TD_ST['AFI_IPv4'])
         elif self.len == 16:
-            self.val = self.val_addr(buf, TD_ST['AFI_IPv6'])
+            self.next_hop = self.val_addr(buf, TD_ST['AFI_IPv6'])
         else:
             self.p += self.len
-            self.val = None
+            self.next_hop = None
 
-    def multi_exit_disc(self, buf):
-        self.val = self.val_num(buf, 4)
+    def unpack_multi_exit_disc(self, buf):
+        self.med = self.val_num(buf, 4)
 
-    def local_pref(self, buf):
-        self.val = self.val_num(buf, 4)
+    def unpack_local_pref(self, buf):
+        self.local_pref = self.val_num(buf, 4)
 
-    def aggregator(self, buf):
+    def unpack_aggregator(self, buf):
         global as_len
-        self.val = {}
+        self.aggr = {}
         if self.len < 8:
             as_len = 2
         else:
             as_len = 4
-        asn = self.val_asn(buf)
-        ip = self.val_addr(buf, TD_ST['AFI_IPv4'])
-        self.val = '%s %s' % (asn, ip)
+        self.aggr['asn'] = self.val_asn(buf)
+        self.aggr['ip'] = self.val_addr(buf, TD_ST['AFI_IPv4'])
 
-    def communities(self, buf):
+    def unpack_communities(self, buf):
         attr_len = self.p + self.len
-        comm = []
+        self.comm = []
         while self.p < attr_len:
             val = self.val_num(buf, 4)
-            comm.append('%d:%d' % 
+            self.comm.append('%d:%d' % 
                 ((val & 0xffff0000L) >> 16, val & 0x0000ffffL))
-        self.val = ' '.join(comm)
 
-    def originator_id(self, buf):
-        self.val = self.val_addr(buf, TD_ST['AFI_IPv4'])
+    def unpack_originator_id(self, buf):
+        self.org_id= self.val_addr(buf, TD_ST['AFI_IPv4'])
 
-    def cluster_list(self, buf):
+    def unpack_cluster_list(self, buf):
         attr_len = self.p + self.len
-        cluster = []
+        self.cl_list = []
         while self.p < attr_len:
-            cluster.append(self.val_addr(buf, TD_ST['AFI_IPv4']))
-        self.val = ' '.join(cluster)
+            self.cl_list.append(self.val_addr(buf, TD_ST['AFI_IPv4']))
 
 class Bgp4Mp(Base):
     def __init__(self):
@@ -539,12 +540,14 @@ class Bgp4Mp(Base):
             or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
             as_len = 4
+
         self.peer_as = self.val_asn(buf)
         self.local_as = self.val_asn(buf)
         self.ifindex = self.val_num(buf, 2)
         self.af = self.val_num(buf, 2)
         self.peer_ip = self.val_addr(buf, self.af)
         self.local_ip = self.val_addr(buf, self.af)
+
         if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
             or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
             self.old_state = self.val_num(buf, 2)
@@ -570,6 +573,7 @@ class BgpMessage(Base):
                 self.p += withdrawn.unpack(buf[self.p:], af)
                 self.withdrawn.append(withdrawn)
                 wd_len -= withdrawn.p
+
             attr_len = self.attr_len = self.val_num(buf, 2)
             self.attr = []
             while attr_len > 0:
@@ -577,6 +581,7 @@ class BgpMessage(Base):
                 self.p += attr.unpack(buf[self.p:])
                 self.attr.append(attr)
                 attr_len -= attr.p
+
             nlri_len = self.len - self.p
             self.nlri = []
             while nlri_len > 0:
