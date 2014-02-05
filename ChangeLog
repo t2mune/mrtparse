@@ -1,3 +1,6 @@
+2014-02-05 Tetsumune KISO <t2mune@gmail.com>
+	* Update - change a format of BGP attribute objects.
+
 2014-02-04 Tetsumune KISO <t2mune@gmail.com>
 	* Update - add a support for "EXTENDED_COMMUNITIES" attribute.
 
