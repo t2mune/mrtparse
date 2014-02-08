@@ -15,7 +15,7 @@ import gzip, bz2
 
 # mrtparse information
 __pyname__  = 'mrtparse'
-__version__ =  '0.6'
+__version__ =  '0.7'
 __descr__   = 'parse a MRT-format data'
 __url__     = 'http://***'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
@@ -23,8 +23,8 @@ __email__   = 't2mune@gmail.com, y.44snow@gmail.com, js333123@gmail.com'
 __license__ = '***'
 
 # Magic Number
-GZIP_MAGIC = '\x1f\x8b'
-BZ2_MAGIC  = '\x42\x5a\x68'
+GZIP_MAGIC = b'\x1f\x8b'
+BZ2_MAGIC  = b'\x42\x5a\x68'
 
 # a variable to reverse the keys and values of dictionaries below
 dl = []
@@ -253,13 +253,13 @@ class Base:
         else:
             _len = -1
         if len(args) != 0:
-            _len = args[0] / 8
+            _len = int(args[0] / 8)
             if args[0] % 8: _len += 1
         else:
             _len = _max
         if _len >= 0 and len(buf) - self.p >= _len:
             addr = socket.inet_ntop(
-                _af, buf[self.p:self.p+_len] + '\x00'*(_max - _len))
+                _af, buf[self.p:self.p+_len] + b'\x00'*(_max - _len))
         else:
             addr = None
         self.p += _len
@@ -281,7 +281,7 @@ class Reader(Base):
         if hasattr(arg, 'read'):
             self.f = arg
         elif isinstance(arg, str):
-            f = file(arg, 'rb')
+            f = open(arg, 'rb')
             hdr = f.read(max(len(BZ2_MAGIC), len(GZIP_MAGIC)))
             f.close()
 
@@ -300,6 +300,13 @@ class Reader(Base):
 
     def __iter__(self):
         return self
+
+    def next(self):
+        global as_len
+        as_len = 4
+        self.mrt = Mrt()
+        self.unpack()
+        return self.mrt
 
     def __next__(self):
         global as_len

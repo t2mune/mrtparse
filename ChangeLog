@@ -1,5 +1,8 @@
-2014-02-08 Tetsumune KISO <t2mune@gmail.com>
+2014-02-09 Tetsumune KISO <t2mune@gmail.com>
+	* Release - mrtparse 0.7 released.
 	* Update - added a support for python3.
+
+2014-02-08 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.6 released.
 	* Update - added a support for a "MP_REACH_NLRI", "MP_UNREACH_NLRI" attribute.
 
