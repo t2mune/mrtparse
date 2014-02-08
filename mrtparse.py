@@ -35,16 +35,16 @@ as_len = 4
 # AFI types
 # Assigend by IANA
 AFI_T = {
-    1L:'AFI_IPv4',
-    2L:'AFI_IPv6',
+    1:'AFI_IPv4',
+    2:'AFI_IPv6',
 }
 dl = dl + [AFI_T]
 
 # SAFI types
 # Assigend by IANA
 SAFI_T = {
-    1L:'SAFI_UNICAST',
-    2L:'SAFI_MULTICAST',
+    1:'SAFI_UNICAST',
+    2:'SAFI_MULTICAST',
 }
 dl = dl + [SAFI_T]
 
@@ -54,163 +54,163 @@ MRT_HDR_LEN = 12
 # Message types
 # Defined in RFC6396
 MSG_T = {
-    0L:'NULL',           # Deprecated in RFC6396
-    1L:'START',          # Deprecated in RFC6396
-    2L:'DIE',            # Deprecated in RFC6396
-    3L:'I_AM_DEAD',      # Deprecated in RFC6396
-    4L:'PEER_DOWN',      # Deprecated in RFC6396
-    5L:'BGP',            # Deprecated in RFC6396
-    6L:'RIP',            # Deprecated in RFC6396
-    7L:'IDRP',           # Deprecated in RFC6396
-    8L:'RIPNG',          # Deprecated in RFC6396
-    9L:'BGP4PLUS',       # Deprecated in RFC6396
-    10L:'BGP4PLUS_01',   # Deprecated in RFC6396
-    11L:'OSPFv2',
-    12L:'TD',
-    13L:'TD_V2',
-    16L:'BGP4MP',
-    17L:'BGP4MP_ET',
-    32L:'ISIS',
-    33L:'ISIS_ET',
-    48L:'OSPFv3',
-    49L:'OSPFv3_ET', 
+    0:'NULL',           # Deprecated in RFC6396
+    1:'START',          # Deprecated in RFC6396
+    2:'DIE',            # Deprecated in RFC6396
+    3:'I_AM_DEAD',      # Deprecated in RFC6396
+    4:'PEER_DOWN',      # Deprecated in RFC6396
+    5:'BGP',            # Deprecated in RFC6396
+    6:'RIP',            # Deprecated in RFC6396
+    7:'IDRP',           # Deprecated in RFC6396
+    8:'RIPNG',          # Deprecated in RFC6396
+    9:'BGP4PLUS',       # Deprecated in RFC6396
+    10:'BGP4PLUS_01',   # Deprecated in RFC6396
+    11:'OSPFv2',
+    12:'TD',
+    13:'TD_V2',
+    16:'BGP4MP',
+    17:'BGP4MP_ET',
+    32:'ISIS',
+    33:'ISIS_ET',
+    48:'OSPFv3',
+    49:'OSPFv3_ET', 
 }
 dl = dl + [MSG_T]
 
 # BGP,BGP4PLUS,BGP4PLUS_01 subtypes
 # Deprecated in RFC6396
 BGP_ST = {
-    0L:'BGP_NULL',
-    1L:'BGP_UPDATE',
-    2L:'BGP_PREF_UPDATE',
-    3L:'BGP_STATE_CHANGE',
-    4L:'BGP_SYNC', 
-    5L:'BGP_OPEN',
-    6L:'BGP_NOTIFY',
-    7L:'BGP_KEEPALIVE',
+    0:'BGP_NULL',
+    1:'BGP_UPDATE',
+    2:'BGP_PREF_UPDATE',
+    3:'BGP_STATE_CHANGE',
+    4:'BGP_SYNC', 
+    5:'BGP_OPEN',
+    6:'BGP_NOTIFY',
+    7:'BGP_KEEPALIVE',
 }
 dl = dl + [BGP_ST]
 
 # TD subtypes
 # Defined in RFC6396
 TD_ST = {
-    1L:'AFI_IPv4',
-    2L:'AFI_IPv6',
+    1:'AFI_IPv4',
+    2:'AFI_IPv6',
 }
 dl = dl + [AFI_T]
 
 # TD_V2 subtypes
 # Defined in RFC6396
 TD_V2_ST = {
-    1L:'PEER_INDEX_TABLE',
-    2L:'RIB_IPV4_UNICAST',
-    3L:'RIB_IPV4_MULTICAST',
-    4L:'RIB_IPV6_UNICAST',
-    5L:'RIB_IPV6_MULTICAST',
-    6L:'RIB_GENERIC',
+    1:'PEER_INDEX_TABLE',
+    2:'RIB_IPV4_UNICAST',
+    3:'RIB_IPV4_MULTICAST',
+    4:'RIB_IPV6_UNICAST',
+    5:'RIB_IPV6_MULTICAST',
+    6:'RIB_GENERIC',
 }
 dl = dl + [TD_V2_ST]
 
 # BGP4MP,BGP4MP_ET subtypes
 # Defined in RFC6396
 BGP4MP_ST = {
-    0L:'BGP4MP_STATE_CHANGE',
-    1L:'BGP4MP_MESSAGE',
-    4L:'BGP4MP_MESSAGE_AS4',
-    5L:'BGP4MP_STATE_CHANGE_AS4',
-    6L:'BGP4MP_MESSAGE_LOCAL',
-    7L:'BGP4MP_MESSAGE_AS4_LOCAL',
+    0:'BGP4MP_STATE_CHANGE',
+    1:'BGP4MP_MESSAGE',
+    4:'BGP4MP_MESSAGE_AS4',
+    5:'BGP4MP_STATE_CHANGE_AS4',
+    6:'BGP4MP_MESSAGE_LOCAL',
+    7:'BGP4MP_MESSAGE_AS4_LOCAL',
 }
 dl = dl + [BGP4MP_ST]
 
 # MRT Message subtypes
 # Defined in RFC6396
 MSG_ST = {
-    9L:BGP_ST,
-    10L:BGP_ST,
-    12L:AFI_T,
-    13L:TD_V2_ST,
-    16L:BGP4MP_ST,
-    17L:BGP4MP_ST,
+    9:BGP_ST,
+    10:BGP_ST,
+    12:AFI_T,
+    13:TD_V2_ST,
+    16:BGP4MP_ST,
+    17:BGP4MP_ST,
 }
 
 # BGP FSM states
 # Defined in RFC4271
 BGP_FSM = {
-    1L:'Idle',
-    2L:'Connect',
-    3L:'Active',
-    4L:'OpenSent',
-    5L:'OpenConfirm',
-    6L:'Established',
+    1:'Idle',
+    2:'Connect',
+    3:'Active',
+    4:'OpenSent',
+    5:'OpenConfirm',
+    6:'Established',
 }
 dl = dl + [BGP_FSM]
 
 # BGP attribute types
 # Defined in RFC4271
 BGP_ATTR_T = {
-    1L:'ORIGIN',
-    2L:'AS_PATH',
-    3L:'NEXT_HOP',
-    4L:'MULTI_EXIT_DISC',
-    5L:'LOCAL_PREF',
-    6L:'ATOMIC_AGGREGATE',
-    7L:'AGGREGATOR',
-    8L:'COMMUNITIES',           # Defined in RFC1997
-    9L:'ORIGINATOR_ID',         # Defined in RFC4456
-    10L:'CLUSTER_LIST',         # Defined in RFC4456
-    11L:'DPA',                  # Deprecated in RFC6938
-    12L:'ADVERTISER',           # Deprecated in RFC6938
-    13L:'RCID_PATH/CLUSTER_ID', # Deprecated in RFC6938
-    14L:'MP_REACH_NLRI',        # Defined in RFC4760
-    15L:'MP_UNREACH_NLRI',      # Defined in RFC4760
-    16L:'EXTENDED_COMMUNITIES', # Defined in RFC4360
-    17L:'AS4_PATH',             # Defined in RFC6793
-    18L:'AS4_AGGREGATOR',       # Defined in RFC6793
+    1:'ORIGIN',
+    2:'AS_PATH',
+    3:'NEXT_HOP',
+    4:'MULTI_EXIT_DISC',
+    5:'LOCAL_PREF',
+    6:'ATOMIC_AGGREGATE',
+    7:'AGGREGATOR',
+    8:'COMMUNITIES',           # Defined in RFC1997
+    9:'ORIGINATOR_ID',         # Defined in RFC4456
+    10:'CLUSTER_LIST',         # Defined in RFC4456
+    11:'DPA',                  # Deprecated in RFC6938
+    12:'ADVERTISER',           # Deprecated in RFC6938
+    13:'RCID_PATH/CLUSTER_ID', # Deprecated in RFC6938
+    14:'MP_REACH_NLRI',        # Defined in RFC4760
+    15:'MP_UNREACH_NLRI',      # Defined in RFC4760
+    16:'EXTENDED_COMMUNITIES', # Defined in RFC4360
+    17:'AS4_PATH',             # Defined in RFC6793
+    18:'AS4_AGGREGATOR',       # Defined in RFC6793
 }
 dl = dl + [BGP_ATTR_T]
 
 # BGP ORIGIN types
 # Defined in RFC4271
 ORIGIN_T = {
-    0L:'IGP',
-    1L:'EGP',
-    2L:'INCOMPLETE',
+    0:'IGP',
+    1:'EGP',
+    2:'INCOMPLETE',
 }
 dl = dl + [ORIGIN_T]
 
 # BGP AS_PATH types
 # Defined in RFC4271
 AS_PATH_SEG_T = {
-    1L:'AS_SET',
-    2L:'AS_SEQUENCE',
+    1:'AS_SET',
+    2:'AS_SEQUENCE',
 }
 dl = dl + [AS_PATH_SEG_T]
 
 # Reserved BGP COMMUNITY types
 # Defined in RFC1997
 COMM_T = {
-    0xffffff01L:'NO_EXPORT',
-    0xffffff02L:'NO_ADVERTISE',
-    0xffffff03L:'NO_EXPORT_SCONFED',
-    0xffffff04L:'NO_PEER',           # Defined in RFC3765
+    0xffffff01:'NO_EXPORT',
+    0xffffff02:'NO_ADVERTISE',
+    0xffffff03:'NO_EXPORT_SCONFED',
+    0xffffff04:'NO_PEER',           # Defined in RFC3765
 }
 dl = dl + [COMM_T]
 
 # BGP message types
 # Defined in RFC4271
 BGP_MSG_T = {
-    1L:'OPEN',
-    2L:'UPDATE',
-    3L:'NOTIFICATION',
-    4L:'KEEPALIVE',
-    5L:'ROUTE_REFRESH',
+    1:'OPEN',
+    2:'UPDATE',
+    3:'NOTIFICATION',
+    4:'KEEPALIVE',
+    5:'ROUTE_REFRESH',
 }
 dl = dl + [BGP_MSG_T]
 
 # Reverse the keys and values of dictionaries above
 for d in dl:
-    for k in d.keys():
+    for k in list(d.keys()):
         d[d[k]] = k
 
 class Base:
@@ -269,7 +269,7 @@ class Base:
         global as_len
         asn = self.val_num(buf, as_len)
         if as_len == 4 and asn > 65535:
-            asn = str(asn >> 16) + '.' + str(asn & 0xffffL)
+            asn = str(asn >> 16) + '.' + str(asn & 0xffff)
         else:
             asn = str(asn)
         return asn
@@ -301,7 +301,7 @@ class Reader(Base):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         global as_len
         as_len = 4
         self.mrt = Mrt()
@@ -413,12 +413,12 @@ class PeerEntries(Base):
         global as_len
         self.type = self.val_num(buf, 1)
         self.bgp_id = self.val_addr(buf, AFI_T['AFI_IPv4'])
-        if self.type & 0x01L:
+        if self.type & 0x01:
             af = AFI_T['AFI_IPv6'] 
         else:
             af = AFI_T['AFI_IPv4']
         self.ip = self.val_addr(buf, af)
-        as_len = 4 if self.type & (0x01L << 1) else 2
+        as_len = 4 if self.type & (0x01 << 1) else 2
         self.asn = self.val_asn(buf)
         return self.p
 
@@ -464,7 +464,7 @@ class BgpAttr(Base):
         self.flag = self.val_num(buf, 1)
         self.type = self.val_num(buf, 1)
 
-        if self.flag & 0x01L << 4:
+        if self.flag & 0x01 << 4:
             self.len = self.val_num(buf, 2)
         else:
             self.len = self.val_num(buf, 1)
@@ -558,7 +558,7 @@ class BgpAttr(Base):
         while self.p < attr_len:
             val = self.val_num(buf, 4)
             self.comm.append('%d:%d' % 
-                ((val & 0xffff0000L) >> 16, val & 0x0000ffffL))
+                ((val & 0xffff0000) >> 16, val & 0x0000ffff))
 
     def unpack_originator_id(self, buf):
         self.org_id= self.val_addr(buf, AFI_T['AFI_IPv4'])
