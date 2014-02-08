@@ -34,7 +34,7 @@ def print_bgp4mp(m):
     print '    Peer AS Number: %s' % m.bgp.peer_as
     print '    Local AS Number: %s' % m.bgp.local_as
     print '    Interface Index: %d' % m.bgp.ifindex
-    print '    Address Family: %d(%s)' % (m.bgp.af, TD_ST[m.bgp.af])
+    print '    Address Family: %d(%s)' % (m.bgp.af, AFI_T[m.bgp.af])
     print '    Peer IP Address: %s' % m.bgp.peer_ip
     print '    Local IP Address: %s' % m.bgp.local_ip
 
@@ -60,7 +60,7 @@ def print_bgp_msg(m):
         print '    Withdrawn Routes Length: %d' % (m.bgp.msg.wd_len)
 
         for withdrawn in m.bgp.msg.withdrawn:
-            print '    Withdrawn Routes: %s/%d' % (withdrawn.prefix, withdrawn.plen)
+            print '    Withdrawn Route: %s/%d' % (withdrawn.prefix, withdrawn.plen)
         print '    Total Path Attribute Length: %d' % (m.bgp.msg.attr_len)
 
         print_bgp_attr(m.bgp.msg.attr)
@@ -105,34 +105,53 @@ def print_bgp_attr(attr_list):
         print '    %s:' % BGP_ATTR_T[attr.type],
 
         if attr.type == BGP_ATTR_T['ORIGIN']:
-            print '%d(%s)' % (attr.origin, ORIGIN_T[attr.origin]),
+            print '%d(%s)' % (attr.origin, ORIGIN_T[attr.origin])
         elif attr.type == BGP_ATTR_T['AS_PATH']:
             for seg in attr.as_path:
                 print '%s' % seg,
+            print
         elif attr.type == BGP_ATTR_T['NEXT_HOP']:
-            print '%s' % attr.next_hop,
+            print '%s' % attr.next_hop
         elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
-            print '%d' % attr.med,
+            print '%d' % attr.med
         elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
-            print '%d' % attr.local_pref,
+            print '%d' % attr.local_pref
         elif attr.type == BGP_ATTR_T['AGGREGATOR']:
-            print '%s %s' % (attr.aggr['asn'], attr.aggr['id']),
+            print '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
         elif attr.type == BGP_ATTR_T['COMMUNITIES']:
             for comm in attr.comm:
                 print '%s' % comm,
+            print
         elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
-            print '%s' % attr.org_id,
+            print '%s' % attr.org_id
         elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
-            print '%s' % attr.cl_list,
+            print '%s' % attr.cl_list
+        elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
+            print
+            print '        AFI: %d(%s), SAFI: %d(%s)' % (
+                attr.mp_reach['afi'], AFI_T[attr.mp_reach['afi']],
+                attr.mp_reach['safi'], SAFI_T[attr.mp_reach['safi']])
+            print '        Length: %d, Next-Hop: %s' % (
+                attr.mp_reach['nlen'], attr.mp_reach['next_hop'])
+            for nlri in attr.mp_reach['nlri']:
+                print '        NLRI: %s/%d' % (nlri.prefix, nlri.plen)
+        elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
+            print
+            print '        AFI: %d(%s), SAFI: %d(%s)' % (
+                attr.mp_unreach['afi'], AFI_T[attr.mp_unreach['afi']],
+                attr.mp_unreach['safi'], SAFI_T[attr.mp_unreach['safi']])
+            for withdrawn in attr.mp_unreach['withdrawn']:
+                print '        Withdrawn Route: %s/%d' % (withdrawn.prefix, withdrawn.plen)
         elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
             for ext_comm in attr.ext_comm:
                 print '0x%016x' % ext_comm,
+            print
         elif attr.type == BGP_ATTR_T['AS4_PATH']:
             for seg in attr.as_path:
                 print '%s' % seg,
+            print
         elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-            print '%s %s' % (attr.aggr['asn'], attr.aggr['id']),
-        print
+            print '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
 
 def main():
     if len(sys.argv) != 2:

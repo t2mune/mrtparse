@@ -15,7 +15,7 @@ import gzip, bz2
 
 # mrtparse information
 __pyname__  = 'mrtparse'
-__version__ =  '0.5'
+__version__ =  '0.6'
 __descr__   = 'parse a MRT-format data'
 __url__     = 'http://***'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
@@ -31,6 +31,22 @@ dl = []
 
 # AS number length(especially to use AS_PATH attribute)
 as_len = 4
+
+# AFI types
+# Assigend by IANA
+AFI_T = {
+    1L:'AFI_IPv4',
+    2L:'AFI_IPv6',
+}
+dl = dl + [AFI_T]
+
+# SAFI types
+# Assigend by IANA
+SAFI_T = {
+    1L:'SAFI_UNICAST',
+    2L:'SAFI_MULTICAST',
+}
+dl = dl + [SAFI_T]
 
 # MRT header length
 MRT_HDR_LEN = 12
@@ -81,7 +97,7 @@ TD_ST = {
     1L:'AFI_IPv4',
     2L:'AFI_IPv6',
 }
-dl = dl + [TD_ST]
+dl = dl + [AFI_T]
 
 # TD_V2 subtypes
 # Defined in RFC6396
@@ -112,7 +128,7 @@ dl = dl + [BGP4MP_ST]
 MSG_ST = {
     9L:BGP_ST,
     10L:BGP_ST,
-    12L:TD_ST,
+    12L:AFI_T,
     13L:TD_V2_ST,
     16L:BGP4MP_ST,
     17L:BGP4MP_ST,
@@ -228,10 +244,10 @@ class Base:
         return val
 
     def val_addr(self, buf, af, *args):
-        if af == TD_ST['AFI_IPv4']:
+        if af == AFI_T['AFI_IPv4']:
             _max = 4
             _af = socket.AF_INET
-        elif af == TD_ST['AFI_IPv6']:
+        elif af == AFI_T['AFI_IPv6']:
             _max = 16
             _af = socket.AF_INET6
         else:
@@ -322,11 +338,13 @@ class Reader(Base):
             elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
                 or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']):
                 self.mrt.rib = AfiSpecRib()
-                self.mrt.rib.unpack(data, TD_ST['AFI_IPv4'])
+                self.mrt.rib.unpack(data, AFI_T['AFI_IPv4'])
             elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
                 or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
                 self.mrt.rib = AfiSpecRib()
-                self.mrt.rib.unpack(data, TD_ST['AFI_IPv6'])
+                self.mrt.rib.unpack(data, AFI_T['AFI_IPv6'])
+            else:
+                self.p += self.len
         elif ( self.mrt.type == MSG_T['BGP4MP']
             or self.mrt.type == MSG_T['BGP4MP_ET']):
             self.mrt.bgp = Bgp4Mp()
@@ -376,7 +394,7 @@ class PeerIndexTable(Base):
         Base.__init__(self)
 
     def unpack(self, buf):
-        self.collector = self.val_addr(buf, TD_ST['AFI_IPv4'])
+        self.collector = self.val_addr(buf, AFI_T['AFI_IPv4'])
         self.view_len = self.val_num(buf, 2)
         self.view = self.val_str(buf, self.view_len)
         self.count = self.val_num(buf, 2)
@@ -394,11 +412,11 @@ class PeerEntries(Base):
     def unpack(self, buf):
         global as_len
         self.type = self.val_num(buf, 1)
-        self.bgp_id = self.val_addr(buf, TD_ST['AFI_IPv4'])
+        self.bgp_id = self.val_addr(buf, AFI_T['AFI_IPv4'])
         if self.type & 0x01L:
-            af = TD_ST['AFI_IPv6'] 
+            af = AFI_T['AFI_IPv6'] 
         else:
-            af = TD_ST['AFI_IPv4']
+            af = AFI_T['AFI_IPv4']
         self.ip = self.val_addr(buf, af)
         as_len = 4 if self.type & (0x01L << 1) else 2
         self.asn = self.val_asn(buf)
@@ -473,6 +491,10 @@ class BgpAttr(Base):
             self.unpack_originator_id(buf)
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
             self.unpack_cluster_list(buf)
+        elif self.type == BGP_ATTR_T['MP_REACH_NLRI']:
+            self.unpack_mp_reach_nlri(buf)
+        elif self.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
+            self.unpack_mp_unreach_nlri(buf)
         elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
             self.unpack_extended_communities(buf)
         elif self.type == BGP_ATTR_T['AS4_PATH']:
@@ -489,8 +511,8 @@ class BgpAttr(Base):
 
     def unpack_as_path(self, buf):
         global as_len
-        attr_len = self.p + self.len
         self.as_path = []
+        attr_len = self.p + self.len
         while self.p < attr_len:
             seg_val = []
             seg_type = self.val_num(buf, 1)
@@ -507,9 +529,9 @@ class BgpAttr(Base):
 
     def unpack_next_hop(self, buf):
         if self.len == 4:
-            self.next_hop = self.val_addr(buf, TD_ST['AFI_IPv4'])
+            self.next_hop = self.val_addr(buf, AFI_T['AFI_IPv4'])
         elif self.len == 16:
-            self.next_hop = self.val_addr(buf, TD_ST['AFI_IPv6'])
+            self.next_hop = self.val_addr(buf, AFI_T['AFI_IPv6'])
         else:
             self.p += self.len
             self.next_hop = None
@@ -528,28 +550,77 @@ class BgpAttr(Base):
         else:
             as_len = 4
         self.aggr['asn'] = self.val_asn(buf)
-        self.aggr['id'] = self.val_addr(buf, TD_ST['AFI_IPv4'])
+        self.aggr['id'] = self.val_addr(buf, AFI_T['AFI_IPv4'])
 
     def unpack_communities(self, buf):
-        attr_len = self.p + self.len
         self.comm = []
+        attr_len = self.p + self.len
         while self.p < attr_len:
             val = self.val_num(buf, 4)
             self.comm.append('%d:%d' % 
                 ((val & 0xffff0000L) >> 16, val & 0x0000ffffL))
 
     def unpack_originator_id(self, buf):
-        self.org_id= self.val_addr(buf, TD_ST['AFI_IPv4'])
+        self.org_id= self.val_addr(buf, AFI_T['AFI_IPv4'])
 
     def unpack_cluster_list(self, buf):
-        attr_len = self.p + self.len
         self.cl_list = []
+        attr_len = self.p + self.len
         while self.p < attr_len:
-            self.cl_list.append(self.val_addr(buf, TD_ST['AFI_IPv4']))
+            self.cl_list.append(self.val_addr(buf, AFI_T['AFI_IPv4']))
+
+    def unpack_mp_reach_nlri(self, buf):
+        attr_len = self.p + self.len
+        self.mp_reach = {}
+        self.mp_reach['afi'] = self.val_num(buf, 2)
+        self.mp_reach['safi'] = self.val_num(buf, 1)
+        self.mp_reach['nlen'] = self.val_num(buf, 1)
+
+        if (    self.mp_reach['afi'] != AFI_T['AFI_IPv4']
+            and self.mp_reach['afi'] != AFI_T['AFI_IPv6']):
+            self.p = attr_len
+            return
+
+        if (    self.mp_reach['safi'] != SAFI_T['SAFI_UNICAST']
+            and self.mp_reach['safi'] != SAFI_T['SAFI_MULTICAST']):
+            self.p = attr_len
+            return
+
+        self.mp_reach['next_hop'] = self.val_addr(
+            buf, self.mp_reach['afi'], self.mp_reach['nlen']*8)
+        self.mp_reach['rsvd'] = self.val_num(buf, 1)
+
+        self.mp_reach['nlri'] = []
+        while self.p < attr_len:
+            nlri = Nlri()
+            self.p += nlri.unpack(buf[self.p:], self.mp_reach['afi'])
+            self.mp_reach['nlri'].append(nlri)
+
+    def unpack_mp_unreach_nlri(self, buf):
+        attr_len = self.p + self.len
+        self.mp_unreach = {}
+        self.mp_unreach['afi'] = self.val_num(buf, 2)
+        self.mp_unreach['safi'] = self.val_num(buf, 1)
+
+        if (    self.mp_unreach['afi'] != AFI_T['AFI_IPv4']
+            and self.mp_unreach['afi'] != AFI_T['AFI_IPv6']):
+            self.p = attr_len
+            return
+
+        if (    self.mp_unreach['safi'] != SAFI_T['SAFI_UNICAST']
+            and self.mp_unreach['safi'] != SAFI_T['SAFI_MULTICAST']):
+            self.p = attr_len
+            return
+
+        self.mp_unreach['withdrawn'] = []
+        while self.p < attr_len:
+            withdrawn = Nlri()
+            self.p += withdrawn.unpack(buf[self.p:], self.mp_unreach['afi'])
+            self.mp_unreach['withdrawn'].append(withdrawn)
 
     def unpack_extended_communities(self, buf):
-        attr_len = self.p + self.len
         self.ext_comm = []
+        attr_len = self.p + self.len
         while self.p < attr_len:
             ext_comm = self.val_num(buf, 8)
             self.ext_comm.append(ext_comm)
@@ -591,7 +662,7 @@ class BgpMessage(Base):
 
     def unpack(self, buf, af):
         self.marker = self.val_str(buf, 16)
-        msg_len = self.len = self.val_num(buf, 2)
+        self.len = self.val_num(buf, 2)
         self.type = self.val_num(buf, 1)
         if self.type == BGP_MSG_T['UPDATE']:
             wd_len = self.wd_len = self.val_num(buf, 2)
@@ -610,13 +681,11 @@ class BgpMessage(Base):
                 self.attr.append(attr)
                 attr_len -= attr.p
 
-            nlri_len = self.len - self.p
             self.nlri = []
-            while nlri_len > 0:
+            while self.p > self.len:
                 nlri = Nlri()
                 self.p += nlri.unpack(buf[self.p:], af)
                 self.nlri.append(nlri)
-                nlri_len -= nlri.p
         else:
             self.p += self.len - 19
         return self.p

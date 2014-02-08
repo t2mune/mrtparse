@@ -1,3 +1,7 @@
+2014-02-08 Tetsumune KISO <t2mune@gmail.com>
+	* Release - mrtparse 0.6 released.
+	* Update - added a support for a "MP_REACH_NLRI", "MP_UNREACH_NLRI" attribute.
+
 2014-02-05 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.5 released.
 	* Update - added the ability to be passed a filename as an argument of class "Reader"
