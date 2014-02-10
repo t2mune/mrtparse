@@ -119,6 +119,8 @@ def print_bgp_attr(attr_list):
         elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
             print('    %s: %d' %
                 (BGP_ATTR_T[attr.type], attr.local_pref))
+        elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
+            print('    %s:' % BGP_ATTR_T[attr.type])
         elif attr.type == BGP_ATTR_T['AGGREGATOR']:
             print('    %s: %s %s' %
                 (BGP_ATTR_T[attr.type], attr.aggr['asn'], attr.aggr['id']))
