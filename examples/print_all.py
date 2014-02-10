@@ -172,7 +172,7 @@ def main():
         if (   m.type == MSG_T['BGP4MP']
             or m.type == MSG_T['BGP4MP_ET']):
             print_bgp4mp(m)
-        elif m.type == MSG_T['TD_V2']:
+        elif m.type == MSG_T['TABLE_DUMP_V2']:
             print_td_v2(m)
 
 if __name__ == '__main__':

@@ -1,3 +1,6 @@
+2014-02-10 Tetsumune KISO <t2mune@gmail.com>
+	* Bugfix - fixed a format "MSG_T".
+
 2014-02-09 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 0.7 released.
 	* Update - added a support for python3.
@@ -10,7 +13,7 @@
 	* Release - mrtparse 0.5 released.
 	* Update - added the ability to be passed a filename as an argument of class "Reader"
 	as well as file objects.
-	* BugFix - can't parse a "EXTENDED_COMMUNITES" attribute correctly.
+	* Bugfix - can't parse a "EXTENDED_COMMUNITES" attribute correctly.
 	* Update - changed a format of BGP attribute objects.
 
 2014-02-04 Tetsumune KISO <t2mune@gmail.com>
@@ -34,7 +37,7 @@
 	* Update - added methods for each data type in class Base.
 
 2014-01-23 Tetsumune KISO <t2mune@gmail.com>
-	* BugFix - IGP and EGP are in reverse.
+	* Bugfix - IGP and EGP are in reverse.
 	* Update - added methods for each adttribute in class BGPAttr.
 
 2014-01-21 Tetsumuned KISO <t2mune@gmail.com>

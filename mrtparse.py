@@ -66,8 +66,8 @@ MSG_T = {
     9:'BGP4PLUS',       # Deprecated in RFC6396
     10:'BGP4PLUS_01',   # Deprecated in RFC6396
     11:'OSPFv2',
-    12:'TD',
-    13:'TD_V2',
+    12:'TABLE_DUMP',
+    13:'TABLE_DUMP_V2',
     16:'BGP4MP',
     17:'BGP4MP_ET',
     32:'ISIS',
@@ -334,11 +334,11 @@ class Reader(Base):
             or self.mrt.type == MSG_T['OSPFv3_ET']):
             self.mrt.micro_ts = self.val_num(data, 4)
 
-        if self.mrt.type == MSG_T['TD']:
+        if self.mrt.type == MSG_T['TABLE_DUMP']:
             as_len = 2
             self.mrt.table_dump = TableDump()
             self.mrt.table_dump.unpack(data, self.mrt.subtype)
-        elif self.mrt.type == MSG_T['TD_V2']:
+        elif self.mrt.type == MSG_T['TABLE_DUMP_V2']:
             if self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
                 self.mrt.peer = PeerIndexTable()
                 self.mrt.peer.unpack(data)
