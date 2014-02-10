@@ -40,7 +40,7 @@ AFI_T = {
 }
 dl = dl + [AFI_T]
 
-# SAFI types
+# SAFI types TEST2
 # Assigend by IANA
 SAFI_T = {
     1:'SAFI_UNICAST',
