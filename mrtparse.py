@@ -23,6 +23,7 @@ __email__   = 't2mune@gmail.com, y.44snow@gmail.com, js333123@gmail.com'
 __license__ = '***'
 
 # TEST
+# Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC  = b'\x42\x5a\x68'
 
