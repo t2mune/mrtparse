@@ -22,7 +22,7 @@ __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__   = 't2mune@gmail.com, y.44snow@gmail.com, js333123@gmail.com'
 __license__ = '***'
 
-# Magic Number
+# TEST
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC  = b'\x42\x5a\x68'
 
@@ -40,7 +40,7 @@ AFI_T = {
 }
 dl = dl + [AFI_T]
 
-# SAFI types TEST2
+# SAFI types
 # Assigend by IANA
 SAFI_T = {
     1:'SAFI_UNICAST',
