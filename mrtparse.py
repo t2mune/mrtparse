@@ -144,6 +144,8 @@ BGP_FSM = {
     4:'OpenSent',
     5:'OpenConfirm',
     6:'Established',
+    7:'Clearing',    # Used only in quagga?
+    8:'Deleted',     # Used only in quagga?
 }
 dl = dl + [BGP_FSM]
 

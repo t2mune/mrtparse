@@ -1,3 +1,6 @@
+2014-02-11 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added "Clearing" and "Deleted" states in "BGP_FSM".
+
 2014-02-10 Tetsumune KISO <t2mune@gmail.com>
 	* Bugfix - fixed a format "MSG_T".
 
