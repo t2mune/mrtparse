@@ -674,7 +674,13 @@ class BgpMessage(Base):
         self.marker = self.val_str(buf, 16)
         self.len = self.val_num(buf, 2)
         self.type = self.val_num(buf, 1)
-        if self.type == BGP_MSG_T['UPDATE']:
+        if self.type == BGP_MSG_T['OPEN']:
+            version = self.version = self.val_num(buf, 1)
+            my_as = self.my_as = self.val_num(buf, 2)
+            holdtime = self.holdtime = self.val_num(buf, 2)
+            bgp_identifier = self.bgp_identifier = self.val_addr(buf, af)
+            option_params_len = self.option_params_len = self.val_num(buf, 1)
+        elif self.type == BGP_MSG_T['UPDATE']:
             wd_len = self.wd_len = self.val_num(buf, 2)
             self.withdrawn = []
             while wd_len > 0:
