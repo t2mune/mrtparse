@@ -23,7 +23,7 @@ __email__   = 't2mune@gmail.com, y.44snow@gmail.com, js333123@gmail.com'
 __license__ = '***'
 
 # TEST
-# Magic Number zipかtar.gzをはじめのヘッダーで判別する
+# Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC  = b'\x42\x5a\x68'
 
@@ -33,21 +33,21 @@ dl = []
 # AS number length(especially to use AS_PATH attribute)
 as_len = 4
 
-# AFI types (Address Family Indentifier:伝達するプロトコルのアドレスを識別する情報)
+# AFI types
 # Assigend by IANA (http://www.iana.org/assignments/address-family-numbers/address-family-numbers.xhtml)
 AFI_T = {
     1:'AFI_IPv4',
     2:'AFI_IPv6',
 }
-dl = dl + [AFI_T]　# dl += [AFI_T]にしますか？
+dl += [AFI_T]
 
-# SAFI types (Subsequent Address Family Identifiers:AFIで識別されたプロトコルの詳細識別)
+# SAFI types (Subsequent Address Family Identifiers)
 # Assigend by IANA (http://www.iana.org/assignments/safi-namespace/safi-namespace.xhtml)
 SAFI_T = {
     1:'SAFI_UNICAST',
     2:'SAFI_MULTICAST',
 }
-dl = dl + [SAFI_T] # dl += [SAFI_T]にしますか？
+dl += [SAFI_T]
 
 # MRT header length
 MRT_HDR_LEN = 12
@@ -76,7 +76,7 @@ MSG_T = {
     48:'OSPFv3',
     49:'OSPFv3_ET', 
 }
-dl = dl + [MSG_T]
+dl += [MSG_T]
 
 # BGP,BGP4PLUS,BGP4PLUS_01 subtypes
 # Deprecated in RFC6396
@@ -90,7 +90,7 @@ BGP_ST = {
     6:'BGP_NOTIFY',
     7:'BGP_KEEPALIVE',
 }
-dl = dl + [BGP_ST]
+dl += [BGP_ST]
 
 # TD subtypes (tremor-dominant)
 # Defined in RFC6396
@@ -98,7 +98,7 @@ TD_ST = {
     1:'AFI_IPv4',
     2:'AFI_IPv6',
 }
-dl = dl + [AFI_T]
+dl += [AFI_T]
 
 # TD_V2 subtypes
 # Defined in RFC6396
@@ -110,7 +110,7 @@ TD_V2_ST = {
     5:'RIB_IPV6_MULTICAST',
     6:'RIB_GENERIC',
 }
-dl = dl + [TD_V2_ST]
+dl += [TD_V2_ST]
 
 # BGP4MP,BGP4MP_ET subtypes
 # Defined in RFC6396
@@ -122,7 +122,7 @@ BGP4MP_ST = {
     6:'BGP4MP_MESSAGE_LOCAL',
     7:'BGP4MP_MESSAGE_AS4_LOCAL',
 }
-dl = dl + [BGP4MP_ST]
+dl += [BGP4MP_ST]
 
 # MRT Message subtypes
 # Defined in RFC6396
@@ -135,7 +135,7 @@ MSG_ST = {
     17:BGP4MP_ST,
 }
 
-# BGP FSM states (finite state machine:BGPのピアが他のBGPのピアとの動作の決定に使用するシンプルな有限状態機械で下記の６つの状態がある)
+# BGP FSM states (finite state machine)
 # Defined in RFC4271
 BGP_FSM = {
     1:'Idle',
@@ -144,8 +144,10 @@ BGP_FSM = {
     4:'OpenSent',
     5:'OpenConfirm',
     6:'Established',
+    7:'Clearing',    # Used only in quagga?
+    8:'Deleted',     # Used only in quagga?
 }
-dl = dl + [BGP_FSM]
+dl += [BGP_FSM]
 
 # BGP attribute types
 # Defined in RFC4271
@@ -169,7 +171,7 @@ BGP_ATTR_T = {
     17:'AS4_PATH',             # Defined in RFC6793
     18:'AS4_AGGREGATOR',       # Defined in RFC6793
 }
-dl = dl + [BGP_ATTR_T]
+dl += [BGP_ATTR_T]
 
 # BGP ORIGIN types
 # Defined in RFC4271
@@ -178,7 +180,7 @@ ORIGIN_T = {
     1:'EGP',
     2:'INCOMPLETE',
 }
-dl = dl + [ORIGIN_T]
+dl += [ORIGIN_T]
 
 # BGP AS_PATH types
 # Defined in RFC4271
@@ -186,7 +188,7 @@ AS_PATH_SEG_T = {
     1:'AS_SET',
     2:'AS_SEQUENCE',
 }
-dl = dl + [AS_PATH_SEG_T]
+dl += [AS_PATH_SEG_T]
 
 # Reserved BGP COMMUNITY types
 # Defined in RFC1997
@@ -196,7 +198,7 @@ COMM_T = {
     0xffffff03:'NO_EXPORT_SCONFED',
     0xffffff04:'NO_PEER',           # Defined in RFC3765
 }
-dl = dl + [COMM_T]
+dl += [COMM_T]
 
 # BGP message types
 # Defined in RFC4271
@@ -207,7 +209,7 @@ BGP_MSG_T = {
     4:'KEEPALIVE',
     5:'ROUTE_REFRESH',
 }
-dl = dl + [BGP_MSG_T]
+dl += [BGP_MSG_T]
 
 # Reverse the keys and values of dictionaries above
 for d in dl:
@@ -694,8 +696,11 @@ class BgpMessage(Base):
                 nlri = Nlri()
                 self.p += nlri.unpack(buf[self.p:], af)
                 self.nlri.append(nlri)
+        elif self.type == BGP_MSG_T['NOTIFICATION']:
+            major_error_code = self.major_error_code = self.val_num(buf, 1)
+            minor_error_code = self.minor_error_code = self.val_num(buf, 1)
         elif self.type == BGP_MSG_T['KEEPALIVE']:
-            pass:
+            pass
         else:
             self.p += self.len - 19
         return self.p
