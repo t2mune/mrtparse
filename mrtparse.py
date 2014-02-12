@@ -680,11 +680,14 @@ class BgpMessage(Base):
             holdtime = self.holdtime = self.val_num(buf, 2)
             bgp_identifier = self.bgp_identifier = self.val_addr(buf, af)
             option_params_len = self.option_params_len = self.val_num(buf, 1)
+            self.optional_params = []
+            while option_params_len > 0:
+
         elif self.type == BGP_MSG_T['UPDATE']:
             wd_len = self.wd_len = self.val_num(buf, 2)
             self.withdrawn = []
             while wd_len > 0:
-                withdrawn = Nlri()
+                withdrawn    = Nlri()
                 self.p += withdrawn.unpack(buf[self.p:], af)
                 self.withdrawn.append(withdrawn)
                 wd_len -= withdrawn.p
@@ -703,8 +706,8 @@ class BgpMessage(Base):
                 self.p += nlri.unpack(buf[self.p:], af)
                 self.nlri.append(nlri)
         elif self.type == BGP_MSG_T['NOTIFICATION']:
-            major_error_code = self.major_error_code = self.val_num(buf, 1)
-            minor_error_code = self.minor_error_code = self.val_num(buf, 1)
+            error_code = self.error_code = self.val_num(buf, 1)
+            error_subcode = self.error_subcode = self.val_num(buf, 1)
         elif self.type == BGP_MSG_T['KEEPALIVE']:
             pass
         else:
