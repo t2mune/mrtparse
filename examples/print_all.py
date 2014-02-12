@@ -75,8 +75,8 @@ def print_bgp_msg(m):
         for nlri in m.bgp.msg.nlri:
             print('    NLRI: %s/%d' % (nlri.prefix, nlri.plen))
     elif m.bgp.msg.type == BGP_MSG_T['NOTIFICATION']:
-        print('     Major error Code: %d' % (m.bgp.msg.minor_error_code))
-        print('     Minor error Code: %d' % (m.bgp.msg.major_error_code))
+        print('     Major error Code: %d' % (m.bgp.msg.major_error_code))
+        print('     Minor error Code: %d' % (m.bgp.msg.minor_error_code))
 
 def print_td_v2(m):
     print('%s' % TD_V2_ST[m.subtype])
