@@ -694,6 +694,8 @@ class BgpMessage(Base):
                 nlri = Nlri()
                 self.p += nlri.unpack(buf[self.p:], af)
                 self.nlri.append(nlri)
+        elif self.type == BGP_MSG_T['KEEPALIVE']:
+            pass:
         else:
             self.p += self.len - 19
         return self.p
