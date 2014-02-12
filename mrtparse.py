@@ -23,7 +23,7 @@ __email__   = 't2mune@gmail.com, y.44snow@gmail.com, js333123@gmail.com'
 __license__ = '***'
 
 # TEST
-# Magic Number
+# Magic Number zipかtar.gzをはじめのヘッダーで判別する
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC  = b'\x42\x5a\x68'
 
@@ -33,21 +33,21 @@ dl = []
 # AS number length(especially to use AS_PATH attribute)
 as_len = 4
 
-# AFI types
-# Assigend by IANA
+# AFI types (Address Family Indentifier:伝達するプロトコルのアドレスを識別する情報)
+# Assigend by IANA (http://www.iana.org/assignments/address-family-numbers/address-family-numbers.xhtml)
 AFI_T = {
     1:'AFI_IPv4',
     2:'AFI_IPv6',
 }
-dl = dl + [AFI_T]
+dl = dl + [AFI_T]　# dl += [AFI_T]にしますか？
 
-# SAFI types
-# Assigend by IANA
+# SAFI types (Subsequent Address Family Identifiers:AFIで識別されたプロトコルの詳細識別)
+# Assigend by IANA (http://www.iana.org/assignments/safi-namespace/safi-namespace.xhtml)
 SAFI_T = {
     1:'SAFI_UNICAST',
     2:'SAFI_MULTICAST',
 }
-dl = dl + [SAFI_T]
+dl = dl + [SAFI_T] # dl += [SAFI_T]にしますか？
 
 # MRT header length
 MRT_HDR_LEN = 12
@@ -92,7 +92,7 @@ BGP_ST = {
 }
 dl = dl + [BGP_ST]
 
-# TD subtypes
+# TD subtypes (tremor-dominant)
 # Defined in RFC6396
 TD_ST = {
     1:'AFI_IPv4',
@@ -135,7 +135,7 @@ MSG_ST = {
     17:BGP4MP_ST,
 }
 
-# BGP FSM states
+# BGP FSM states (finite state machine:BGPのピアが他のBGPのピアとの動作の決定に使用するシンプルな有限状態機械で下記の６つの状態がある)
 # Defined in RFC4271
 BGP_FSM = {
     1:'Idle',
@@ -144,8 +144,6 @@ BGP_FSM = {
     4:'OpenSent',
     5:'OpenConfirm',
     6:'Established',
-    7:'Clearing',    # Used only in quagga?
-    8:'Deleted',     # Used only in quagga?
 }
 dl = dl + [BGP_FSM]
 
