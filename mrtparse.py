@@ -211,6 +211,63 @@ BGP_MSG_T = {
 }
 dl += [BGP_MSG_T]
 
+# NOTIFICATION Error Code
+NOTIFICATION_ERR_CODES_T = {
+    1:'Message Header Error',
+    2:'OPEN Message Error',
+    3:'UPDATE Message Error',
+    4:'Hold Timer Expired',
+    5:'Finite State Machine Error',
+    6:'Cease',
+}
+
+MSG_HDR_ERR_SUBCODES_T = {
+    1:'Connection Not Synchronized',
+    2:'Bad Message Length',
+    3:'Bad Message Type',
+}
+
+OPEN_MSG_ERR_SUBCODES_T = {
+    1:'Unsupported Version Number',
+    2:'Bad Peer AS',
+    3:'Bad BGP Identifier',
+    4:'Unsupported Optional Parameter',
+    5:'Deprecated',                     #[Deprecated - see Appendix A]
+    6:'Unacceptable Hold Time',
+}
+
+UPDATE_MSG_ERR_SUBCODES_T = {
+    1:'Malformed Attribute List',
+    2:'Unrecognized Well-known Attribute',
+    3:'Missing Well-known Attribute',
+    4:'Attribute Flags Error',
+    5:'Attribute Length Error',
+    6:'Invalid ORIGIN Attribute',
+    7:'Deprecated',                 #[Deprecated - see Appendix A]
+    8:'Invalid NEXT_HOP Attribute',
+    9:'Optional Attribute Error',
+    10:'Invalid Network Field',
+    11:'Malformed AS_PATH',
+}
+
+# Capability Codes
+CAP_CODE_T = {
+    0:'Reserved',
+    1:'Multiprotocol Extensions for BGP-4',
+    2:'Route Refresh Capability for BGP-4',
+    3:'Outbound Route Filtering Capability',
+    4:'Multiple routes to a destination capability',
+    5:'Extended Next Hop Encoding',
+    64:'Graceful Restart Capability',
+    65:'Support for 4-octet AS number capability',
+    66:'Deprecated (2003-03-06)',
+    67:'Support for Dynamic Capability (capability specific)',
+    68:'Multisession BGP Capability',
+    69:'ADD-PATH Capability',
+    70:'Enhanced Route Refresh Capability',
+    71:'Long-Lived Graceful Restart (LLGR) Capability',
+}
+
 # Reverse the keys and values of dictionaries above
 for d in dl:
     for k in list(d.keys()):
