@@ -220,12 +220,14 @@ NOTIFICATION_ERR_CODES_T = {
     5:'Finite State Machine Error',
     6:'Cease',
 }
+dl += [NOTIFICATION_ERR_CODES_T]
 
 MSG_HDR_ERR_SUBCODES_T = {
     1:'Connection Not Synchronized',
     2:'Bad Message Length',
     3:'Bad Message Type',
 }
+dl += [MSG_HDR_ERR_SUBCODES_T]
 
 OPEN_MSG_ERR_SUBCODES_T = {
     1:'Unsupported Version Number',
@@ -235,6 +237,7 @@ OPEN_MSG_ERR_SUBCODES_T = {
     5:'Deprecated',                     #[Deprecated - see Appendix A]
     6:'Unacceptable Hold Time',
 }
+dl += [OPEN_MSG_ERR_SUBCODES_T]
 
 UPDATE_MSG_ERR_SUBCODES_T = {
     1:'Malformed Attribute List',
@@ -249,6 +252,7 @@ UPDATE_MSG_ERR_SUBCODES_T = {
     10:'Invalid Network Field',
     11:'Malformed AS_PATH',
 }
+dl += [UPDATE_MSG_ERR_SUBCODES_T]
 
 # Capability Codes
 CAP_CODE_T = {
@@ -267,6 +271,7 @@ CAP_CODE_T = {
     70:'Enhanced Route Refresh Capability',
     71:'Long-Lived Graceful Restart (LLGR) Capability',
 }
+dl += [CAP_CODE_T]
 
 # Reverse the keys and values of dictionaries above
 for d in dl:
@@ -738,7 +743,7 @@ class BgpMessage(Base):
             bgp_identifier = self.bgp_identifier = self.val_addr(buf, af)
             option_params_len = self.option_params_len = self.val_num(buf, 1)
             self.optional_params = []
-            while option_params_len > 0:
+            # while option_params_len > 0:
 
         elif self.type == BGP_MSG_T['UPDATE']:
             wd_len = self.wd_len = self.val_num(buf, 2)
@@ -765,6 +770,8 @@ class BgpMessage(Base):
         elif self.type == BGP_MSG_T['NOTIFICATION']:
             error_code = self.error_code = self.val_num(buf, 1)
             error_subcode = self.error_subcode = self.val_num(buf, 1)
+            if self.len > 21:
+                data_field = self.data_field = self.val_num(buf, (self.len - 21))                
         elif self.type == BGP_MSG_T['KEEPALIVE']:
             pass
         else:
