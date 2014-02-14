@@ -257,19 +257,19 @@ dl += [UPDATE_MSG_ERR_SUBCODES_T]
 # Capability Codes
 CAP_CODE_T = {
     0:'Reserved',
-    1:'Multiprotocol Extensions for BGP-4',
-    2:'Route Refresh Capability for BGP-4',
-    3:'Outbound Route Filtering Capability',
-    4:'Multiple routes to a destination capability',
-    5:'Extended Next Hop Encoding',
-    64:'Graceful Restart Capability',
-    65:'Support for 4-octet AS number capability',
-    66:'Deprecated (2003-03-06)',
-    67:'Support for Dynamic Capability (capability specific)',
-    68:'Multisession BGP Capability',
-    69:'ADD-PATH Capability',
-    70:'Enhanced Route Refresh Capability',
-    71:'Long-Lived Graceful Restart (LLGR) Capability',
+    1:'Multiprotocol Extensions for BGP-4',                     # Defined in RFC2858
+    2:'Route Refresh Capability for BGP-4',                     # Defined in RFC2918
+    3:'Outbound Route Filtering Capability',                    # Defined in RFC5291
+    4:'Multiple routes to a destination capability',            # Defined in RFC3107
+    5:'Extended Next Hop Encoding',                             # Defined in RFC5549
+    64:'Graceful Restart Capability',                           # Defined in RFC4724
+    65:'Support for 4-octet AS number capability',              # Defined in RFC6793
+    66:'Deprecated (2003-03-06)',                               # Deprecated
+    67:'Support for Dynamic Capability (capability specific)',  # draft-ietf-idr-dynamic-cap
+    68:'Multisession BGP Capability',                           # draft-ietf-idr-bgp-multisession
+    69:'ADD-PATH Capability',                                   # draft-ietf-idr-add-paths
+    70:'Enhanced Route Refresh Capability',                     # draft-keyur-bgp-enhanced-route-refresh
+    71:'Long-Lived Graceful Restart (LLGR) Capability',         # draft-uttaro-idr-bgp-persistence
 }
 
 dl += [CAP_CODE_T]
