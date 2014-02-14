@@ -271,7 +271,66 @@ CAP_CODE_T = {
     70:'Enhanced Route Refresh Capability',
     71:'Long-Lived Graceful Restart (LLGR) Capability',
 }
+
 dl += [CAP_CODE_T]
+
+MLTI_EXT_T = {
+    1:'AFI',
+    2:'Reserved',
+    3:'SAFI',
+}
+
+dl += [MLTI_EXT_T]
+
+ROUTE_RE_CAP_T = {
+    1:'AFI',
+    2:'Reserved',
+    3:'SAFI',
+}
+
+dl += [ROUTE_RE_CAP_T]
+
+OUT_ROUTE_FILTER_CAP_T = {
+    1:'AFI',
+    2:'Reserved',
+    3:'SAFI',
+    4:'Number of ORFs',
+    5:'ORF Type',
+    6:'Send/Receive',
+}
+
+dl += [OUT_ROUTE_FILTER_CAP_T]
+
+MLTI_ROUTES_DEST_T = {
+    1:'Label',
+    2:'Prefix variable',
+}
+
+dl += [MLTI_ROUTES_DEST_T]
+
+EXT_NEXT_HOP_ENC = {
+    1:'NLRI AFI',
+    2:'NLRI SAFI',
+    3:'Nexthop AFI',
+}
+
+dl += [EXT_NEXT_HOP_ENC]
+
+GRACEFUL_RESTART_T = {
+    1:'Restart Flags',
+    2:'Restart Time in seconds',
+    3:'AFI',
+    4:'SAFI',
+    5:'Flags for Address Family',
+}
+
+dl += [GRACEFUL_RESTART_T]
+
+SUPPORT_FOR_AS = {
+    1:'AS Number',
+}
+
+dl += [SUPPORT_FOR_AS]
 
 # Reverse the keys and values of dictionaries above
 for d in dl:
