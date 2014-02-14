@@ -274,21 +274,21 @@ CAP_CODE_T = {
 
 dl += [CAP_CODE_T]
 
-MLTI_EXT_T = {
+MULTI_EXT_T = {
     1:'AFI',
     2:'Reserved',
     3:'SAFI',
 }
 
-dl += [MLTI_EXT_T]
+dl += [MULTI_EXT_T]
 
-ROUTE_RE_CAP_T = {
+ROUTE_REFRESH_CAP_T = {
     1:'AFI',
     2:'Reserved',
     3:'SAFI',
 }
 
-dl += [ROUTE_RE_CAP_T]
+dl += [ROUTE_REFRESH_CAP_T]
 
 OUT_ROUTE_FILTER_CAP_T = {
     1:'AFI',
@@ -301,12 +301,12 @@ OUT_ROUTE_FILTER_CAP_T = {
 
 dl += [OUT_ROUTE_FILTER_CAP_T]
 
-MLTI_ROUTES_DEST_T = {
+MULTI_ROUTES_DEST_T = {
     1:'Label',
     2:'Prefix variable',
 }
 
-dl += [MLTI_ROUTES_DEST_T]
+dl += [MULTI_ROUTES_DEST_T]
 
 EXT_NEXT_HOP_ENC = {
     1:'NLRI AFI',
@@ -585,6 +585,26 @@ class RibEntries(Base):
             self.attr.append(attr)
             attr_len -= attr.p
         return self.p
+
+class Capability(Base):
+    def __init__(self):
+        Base.__init__(self)
+
+    def unpack_reserved(self, buf):
+
+    def unpack_multi_ext(self, buf):
+
+    def unpack_route_refresh(self, buf):
+
+    def unpack_out_route_filter(self, buf):
+
+    def unpack_multi_routes_dest(self, buf):
+
+    def unpack_ext_next_hop(self, buf):
+
+    def unpack_graceful_restart(self, buf):
+
+    def unpack_support_for_as(self, buf):
 
 class BgpAttr(Base):
     def __init__(self):
