@@ -62,10 +62,10 @@ def print_bgp_msg(m):
         print('     Hold Time: %d' % (m.bgp.msg.holdtime))
         print('     BGP Identifier: %s' % (m.bgp.msg.bgp_identifier))
         print('     Optional Parameter Length: %d' % (m.bgp.msg.capability_len))
-        for capability in m.bgp.msg.capability:
-            print('     Parameter Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
-            print('     Parameter Length: %d') % (capability.len)
-            # print_bgp_capability(m.bgp.msg.capability)
+        # for capability in m.bgp.msg.capability:
+        #     print('     Parameter Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
+        #     print('     Parameter Length: %d') % (capability.len)
+        print_bgp_capability(m.bgp.msg.capability)
     elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
         print('    Withdrawn Routes Length: %d' % (m.bgp.msg.wd_len))
 
@@ -125,10 +125,26 @@ def print_td_v2(m):
 
 def print_bgp_capability(capability_list):
     for capability in capability_list:
-        if capability.type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
-            print('     Type: %s' % (CAP_CODE_T[capability.type]))
-            print('     Length: %d' % capability.len)
-            print('     AFI: %s' % capability.multi_ext['afi'])
+        print('     Parameter Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
+        print('     Parameter Length: %d') % (capability.len)
+        if capability.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+            print('         Type: %s' % (CAP_CODE_T[capability.cap_type]))
+            print('         Length: %d' % capability.multi_ext['len'])
+            print('         AFI: %d(%s)' % (capability.multi_ext['afi'], AFI_T[capability.multi_ext['afi']]))
+            print('         Reserved: %d' % capability.multi_ext['reserved'])
+            print('         SAFI: %d(%s)' % (capability.multi_ext['safi'], SAFI_T[capability.multi_ext['safi']]))
+        elif capability.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
+            print('         Type: %s' % (CAP_CODE_T[capability.cap_type]))
+            print('         Length: %d' % capability.out_route_filter['len'])
+            print('         AFI: %d(%s)' % (capability.out_route_filter['afi'], AFI_T[capability.out_route_filter['afi']]))
+            print('         Reserved: %d' % capability.out_route_filter['reserved'])
+            print('         SAFI: %d(%s)' % (capability.out_route_filter['safi'], SAFI_T[capability.out_route_filter['safi']]))
+            print('         Number: %d' % capability.out_route_filter['number_of_orfs'])
+            print('         Type: %d' % capability.out_route_filter['orf_type'])
+            print('         Send Receive: %d' % capability.out_route_filter['send_receive'])
+
+
+
 
 def print_bgp_attr(attr_list):
     for attr in attr_list:

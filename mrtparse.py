@@ -591,12 +591,12 @@ class Capability(Base):
         self.type = self.val_num(buf, 1)
         self.len = self.val_num(buf, 1)
         self.cap_type = self.val_num(buf, 1)
-        # if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
-        #     self.unpack_multi_ext(buf)
+        if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+            self.unpack_multi_ext(buf)
         # elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
         #     self.unpack_route_refresh(buf)
-        # elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
-        #     self.unpack_out_route_filter(buf)
+        elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
+            self.unpack_out_route_filter(buf)
         # elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
         #     self.unpack_multi_routes_dest(buf)
         # elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
@@ -605,9 +605,9 @@ class Capability(Base):
         #     self.unpack_graceful_restart(buf)
         # elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
         #     self.unpack_support_for_as(buf)
-        # else:
-        #     self.p += self.len - 1
-        self.p += self.len - 1
+        else:
+            self.p += self.len - 1
+        # self.p += self.len - 1
         return self.p
 
     def unpack_multi_ext(self, buf):
@@ -625,6 +625,7 @@ class Capability(Base):
 
     def unpack_out_route_filter(self, buf):
         self.out_route_filter = {}
+        self.out_route_filter['len'] = self.val_num(buf, 1)
         self.out_route_filter['afi'] = self.val_num(buf, 2)
         self.out_route_filter['reserved'] = self.val_num(buf, 1)
         self.out_route_filter['safi'] = self.val_num(buf, 1)
