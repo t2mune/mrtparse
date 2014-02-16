@@ -64,6 +64,8 @@ def print_bgp_msg(m):
         print('     Optional Parameter Length: %d' % (m.bgp.msg.capability_len))
         for capability in m.bgp.msg.capability:
             print('     Parameter Type: %d(%s)' % (capability.type, CAP_CODE_T[capability.type]))
+            print('     Parameter Length: %d') % (capability.len)
+            print_bgp_capability(m.bgp.msg.capability)
     elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
         print('    Withdrawn Routes Length: %d' % (m.bgp.msg.wd_len))
 
@@ -120,6 +122,13 @@ def print_td_v2(m):
                 (entry.org_time, datetime.fromtimestamp(entry.org_time)))
             print('    Attribute Length: %d' % entry.attr_len)
             print_bgp_attr(entry.attr)
+
+def print_bgp_capability(capability_list):
+    for capability in capability_list:
+        if capability.type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+            print('     Type: %s' % (CAP_CODE_T[capability.type]))
+            print('     Length: %d' % capability.len)
+            print('     AFI: %s' % capability.multi_ext['afi'])
 
 def print_bgp_attr(attr_list):
     for attr in attr_list:
