@@ -590,21 +590,70 @@ class Capability(Base):
     def __init__(self):
         Base.__init__(self)
 
-    def unpack_reserved(self, buf):
+    def unpack(self, buf):
+        self.type = self.val_num(buf, 1)
+
+        if self.type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+            self.unpack_multi_ext(buf)
+        elif self.type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
+            self.unpack_route_refresh(buf)
+        elif self.type == CAP_CODE_T['Outbound Route Filtering Capability']:
+            self.unpack_out_route_filter(buf)
+        elif self.type == CAP_CODE_T['Multiple routes to a destination capability']:
+            self.unpack_multi_routes_dest(buf)
+        elif self.type == CAP_CODE_T['Extended Next Hop Encoding']:
+            self.unpack_ext_next_hop(buf)
+        elif self.type == CAP_CODE_T['Graceful Restart Capability']:
+            self.unpack_graceful_restart(buf)
+        elif self.type == CAP_CODE_T['Support for 4-octet AS number capability']:
+            self.unpack_support_for_as(buf)
 
     def unpack_multi_ext(self, buf):
-
+        self.multi_ext = {}
+        self.multi_ext['afi'] = self.val_num(buf, 2)
+        self.multi_ext['safi'] = self.val_num(buf, 1)
+        #なんか違うきがする
+   
     def unpack_route_refresh(self, buf):
+        self.route_refresh = {}
+        self.route_refresh['afi'] = self.val_num(buf, 2)
+        self.route_refresh['reserved'] = self.val_num(buf, 1)
+        self.route_refresh['safi'] = self.val_num(buf, 1)
 
     def unpack_out_route_filter(self, buf):
+        self.out_route_filter = {}
+        self.out_route_filter['afi'] = self.val_num(buf, 2)
+        self.out_route_filter['reserved'] = self.val_num(buf, 1)
+        self.out_route_filter['safi'] = self.val_num(buf, 1)
+        self.out_route_filter['number_of_orfs'] = self.val_num(buf, 1)
+        self.out_route_filter['orf_type'] = self.val_num(buf, 1)
+        self.out_route_filter['send_receive'] = self.val_num(buf, 1)
 
     def unpack_multi_routes_dest(self, buf):
+        self.len = self.val_num(buf, 1)
+        self.multi_routes_dest = self.val_num(buf, 3)
+        while self.len - self.multi_routes_dest > 0:
+            self.multi_routes_dest = self.val_addr(buf, af)
 
     def unpack_ext_next_hop(self, buf):
+        self.ext_next_hop = {}
+        while self.len > 0:
+            self.ext_next_hop['nlri_afi'] = self.val_num(buf, 2)
+            self.ext_next_hop['nlri_safi'] = self.val_num(buf, 2)
+            self.ext_next_hop['nexthop_afi'] = self.val_num(buf, 2)
 
     def unpack_graceful_restart(self, buf):
+        self.graceful_restart = {}
+        # 検討
+        # self.graceful_restart['restart_flags'] = self.val_num(buf, 1)
+        # self.graceful_restart['restart_time_in_seconds'] = self.val_num(buf, 1)
+        while self.len - 2 > 0:
+            self.graceful_restart['afi'] = self.val_num(buf, 2)
+            self.graceful_restart['safi'] = self.val_num(buf, 1)
+            self.graceful_restart['flags_for_afi'] = self.val_num(buf, 1)
 
     def unpack_support_for_as(self, buf):
+        self.support_for_as = self.val_num(buf, 2)
 
 class BgpAttr(Base):
     def __init__(self):
@@ -822,7 +871,9 @@ class BgpMessage(Base):
             bgp_identifier = self.bgp_identifier = self.val_addr(buf, af)
             option_params_len = self.option_params_len = self.val_num(buf, 1)
             self.optional_params = []
-            # while option_params_len > 0:
+            while option_params_len > 0:
+                capability = Capability()
+                self.p
 
         elif self.type == BGP_MSG_T['UPDATE']:
             wd_len = self.wd_len = self.val_num(buf, 2)
