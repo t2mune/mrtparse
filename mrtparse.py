@@ -273,6 +273,7 @@ CAP_CODE_T = {
     70:'Enhanced Route Refresh Capability',                     # draft-keyur-bgp-enhanced-route-refresh
     71:'Long-Lived Graceful Restart (LLGR) Capability',         # draft-uttaro-idr-bgp-persistence
     120:'Unassigned',
+    128:'Unassigned',
 }
 dl += [CAP_CODE_T]
 
