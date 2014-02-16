@@ -2,10 +2,10 @@
 mrtparse is a module to parse a MRT format data.
 
 See https://github.com/YoshiyukiYamauchi/mrtparse for more informations.
-This module is published under a *** license.
+This module is published under a Apache License, Version 2.0.
 Created by
     Tetsumune KISO <t2mune@gmail.com>,
-    Yoshiyuki YAMAUCHI <y.44snow@gmail.com>,
+    Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>,
     Nobuhiro ITOU <js333123@gmail.com>.
 Copyright (C) greenHippo, LLC. All rights reserved.
 '''
@@ -19,7 +19,7 @@ __version__ =  '0.7'
 __descr__   = 'parse a MRT-format data'
 __url__     = 'http://***'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
-__email__   = 't2mune@gmail.com, y.44snow@gmail.com, js333123@gmail.com'
+__email__   = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
 __license__ = '***'
 
 # TEST
