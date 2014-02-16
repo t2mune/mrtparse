@@ -274,6 +274,7 @@ CAP_CODE_T = {
     71:'Long-Lived Graceful Restart (LLGR) Capability',         # draft-uttaro-idr-bgp-persistence
     120:'Unassigned',
     128:'Unassigned',
+    130:'Unassigned',
 }
 dl += [CAP_CODE_T]
 
@@ -590,22 +591,23 @@ class Capability(Base):
         self.type = self.val_num(buf, 1)
         self.len = self.val_num(buf, 1)
         self.cap_type = self.val_num(buf, 1)
-        if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
-            self.unpack_multi_ext(buf)
-        elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
-            self.unpack_route_refresh(buf)
-        elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
-            self.unpack_out_route_filter(buf)
-        elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
-            self.unpack_multi_routes_dest(buf)
-        elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
-            self.unpack_ext_next_hop(buf)
-        elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
-            self.unpack_graceful_restart(buf)
-        elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
-            self.unpack_support_for_as(buf)
-        else:
-            self.p += self.len
+        # if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+        #     self.unpack_multi_ext(buf)
+        # elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
+        #     self.unpack_route_refresh(buf)
+        # elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
+        #     self.unpack_out_route_filter(buf)
+        # elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
+        #     self.unpack_multi_routes_dest(buf)
+        # elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
+        #     self.unpack_ext_next_hop(buf)
+        # elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
+        #     self.unpack_graceful_restart(buf)
+        # elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
+        #     self.unpack_support_for_as(buf)
+        # else:
+        #     self.p += self.len - 1
+        self.p += self.len - 1
         return self.p
 
     def unpack_multi_ext(self, buf):
