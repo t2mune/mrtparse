@@ -601,8 +601,8 @@ class Capability(Base):
         #     self.unpack_multi_routes_dest(buf)
         # elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
         #     self.unpack_ext_next_hop(buf)
-        # elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
-        #     self.unpack_graceful_restart(buf)
+        elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
+            self.unpack_graceful_restart(buf)
         elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
             self.unpack_support_for_as(buf)
         else:
@@ -650,13 +650,18 @@ class Capability(Base):
 
     def unpack_graceful_restart(self, buf):
         self.graceful_restart = {}
-
+        graceful_restart_len = self.graceful_restart['len'] = self.val_num(buf, 1)
+        self.graceful_restart['timer'] = self.val_num(buf, 2)
+        if graceful_restart_len > 2:
         # self.graceful_restart['restart_flags'] = self.val_num(buf, 1)
         # self.graceful_restart['restart_time_in_seconds'] = self.val_num(buf, 1)
-        while self.len - 2 > 0:
-            self.graceful_restart['afi'] = self.val_num(buf, 2)
-            self.graceful_restart['safi'] = self.val_num(buf, 1)
-            self.graceful_restart['flags_for_afi'] = self.val_num(buf, 1)
+            while graceful_restart_len > 2:
+                self.graceful_restart['afi'] = self.val_num(buf, 2)
+                graceful_restart_len -= 2
+                self.graceful_restart['safi'] = self.val_num(buf, 1)
+                graceful_restart_len -= 1
+                self.graceful_restart['flags_for_afi'] = self.val_num(buf, 1)
+                graceful_restart_len -= 1
 
     def unpack_support_for_as(self, buf):
         # self.support_for_as = self.val_num(buf, 2)

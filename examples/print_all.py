@@ -149,6 +149,14 @@ def print_bgp_capability(capability_list):
         elif capability.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
             print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
             print('         Length: %d' % capability.route_refresh['len'])
+        elif capability.cap_type == CAP_CODE_T['Graceful Restart Capability']:
+            print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
+            print('         Length: %d' % capability.graceful_restart['len'])
+            print('         Restart Timers: %d' % capability.graceful_restart['timer'])
+            if capability.graceful_restart['len'] > 2:
+                print('         AFI: %d(%s)' % (capability.graceful_restart['afi'], AFI_T[capability.graceful_restart['afi']]))
+                print('         SAFI: %d(%s)' % (capability.graceful_restart['safi'], SAFI_T[capability.graceful_restart['safi']]))
+                print('         Flag: %d' % (capability.graceful_restart['flags_for_afi']))
 
 
 
