@@ -61,7 +61,7 @@ def print_bgp_msg(m):
         print('     My AS: %d' % (m.bgp.msg.my_as))
         print('     Hold Time: %d' % (m.bgp.msg.holdtime))
         print('     BGP Identifier: %s' % (m.bgp.msg.bgp_identifier))
-        print('     Optional Parameter Length: %d' % (m.bgp.msg.option_params_len))
+        print('     Optional Parameter Length: %d' % (m.bgp.msg.capability_len))
     elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
         print('    Withdrawn Routes Length: %d' % (m.bgp.msg.wd_len))
 

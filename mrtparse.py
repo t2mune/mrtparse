@@ -607,6 +607,9 @@ class Capability(Base):
             self.unpack_graceful_restart(buf)
         elif self.type == CAP_CODE_T['Support for 4-octet AS number capability']:
             self.unpack_support_for_as(buf)
+        else:
+            self.p += self.len
+        return self.p
 
     def unpack_multi_ext(self, buf):
         self.multi_ext = {}
@@ -872,9 +875,9 @@ class BgpMessage(Base):
             self.capability = []
             while capability_len > 0:
                 capability = Capability()
-                self.p += capability.unpack(buf[self.p:], af)
+                self.p += capability.unpack(buf[self.p:])
                 self.capability.append(capability)
-                option_params_len -= capability.p
+                capability_len -= capability.p
 
         elif self.type == BGP_MSG_T['UPDATE']:
             wd_len = self.wd_len = self.val_num(buf, 2)
