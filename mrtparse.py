@@ -592,6 +592,7 @@ class Capability(Base):
 
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
+        self.len = self.val_num(buf, 1)
 
         if self.type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext(buf)
