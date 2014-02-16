@@ -128,13 +128,13 @@ def print_bgp_capability(capability_list):
         print('     Parameter Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
         print('     Parameter Length: %d') % (capability.len)
         if capability.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
-            print('         Type: %s' % (CAP_CODE_T[capability.cap_type]))
+            print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
             print('         Length: %d' % capability.multi_ext['len'])
             print('         AFI: %d(%s)' % (capability.multi_ext['afi'], AFI_T[capability.multi_ext['afi']]))
             print('         Reserved: %d' % capability.multi_ext['reserved'])
             print('         SAFI: %d(%s)' % (capability.multi_ext['safi'], SAFI_T[capability.multi_ext['safi']]))
         elif capability.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
-            print('         Type: %s' % (CAP_CODE_T[capability.cap_type]))
+            print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
             print('         Length: %d' % capability.out_route_filter['len'])
             print('         AFI: %d(%s)' % (capability.out_route_filter['afi'], AFI_T[capability.out_route_filter['afi']]))
             print('         Reserved: %d' % capability.out_route_filter['reserved'])
@@ -142,6 +142,10 @@ def print_bgp_capability(capability_list):
             print('         Number: %d' % capability.out_route_filter['number_of_orfs'])
             print('         Type: %d' % capability.out_route_filter['orf_type'])
             print('         Send Receive: %d' % capability.out_route_filter['send_receive'])
+        elif capability.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
+            print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
+            print('         Length: %d' % capability.support_for_as['len'])
+            print('         AS Number: %d' % capability.support_for_as['as_number'])
 
 
 

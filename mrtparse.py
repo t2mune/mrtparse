@@ -603,8 +603,8 @@ class Capability(Base):
         #     self.unpack_ext_next_hop(buf)
         # elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
         #     self.unpack_graceful_restart(buf)
-        # elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
-        #     self.unpack_support_for_as(buf)
+        elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
+            self.unpack_support_for_as(buf)
         else:
             self.p += self.len - 1
         # self.p += self.len - 1
@@ -658,7 +658,10 @@ class Capability(Base):
             self.graceful_restart['flags_for_afi'] = self.val_num(buf, 1)
 
     def unpack_support_for_as(self, buf):
-        self.support_for_as = self.val_num(buf, 2)
+        # self.support_for_as = self.val_num(buf, 2)
+        self.support_for_as = {}
+        self.support_for_as['len'] = self.val_num(buf, 1)
+        self.support_for_as['as_number'] = self.val_num(buf, 4)
 
 class BgpAttr(Base):
     def __init__(self):
