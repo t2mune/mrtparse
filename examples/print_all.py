@@ -62,6 +62,8 @@ def print_bgp_msg(m):
         print('     Hold Time: %d' % (m.bgp.msg.holdtime))
         print('     BGP Identifier: %s' % (m.bgp.msg.bgp_identifier))
         print('     Optional Parameter Length: %d' % (m.bgp.msg.capability_len))
+        for capability in m.bgp.msg.capability:
+            print('     Parameter Type: %d(%s)' % (capability.type, CAP_CODE_T[capability.type]))
     elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
         print('    Withdrawn Routes Length: %d' % (m.bgp.msg.wd_len))
 
@@ -75,13 +77,17 @@ def print_bgp_msg(m):
         for nlri in m.bgp.msg.nlri:
             print('    NLRI: %s/%d' % (nlri.prefix, nlri.plen))
     elif m.bgp.msg.type == BGP_MSG_T['NOTIFICATION']:
-        print('     Error Code: %d(%s)' % (m.bgp.msg.error_code, NOTIFICATION_ERR_CODES_T[m.bgp.msg.error_code]))
+        print('     Error Code: %d(%s)' % 
+            (m.bgp.msg.error_code, NOTIFICATION_ERR_CODES_T[m.bgp.msg.error_code]))
         if m.bgp.msg.error_code == 1:
-            print('     Error Subcode: %d(%s)' % (m.bgp.msg.error_subcode, MSG_HDR_ERR_SUBCODES_T[m.bgp.msg.error_subcode]))
+            print('     Error Subcode: %d(%s)' % 
+                (m.bgp.msg.error_subcode, MSG_HDR_ERR_SUBCODES_T[m.bgp.msg.error_subcode]))
         elif m.bgp.msg.error_code == 2:
-            print('     Error Subcode: %d(%s)' % (m.bgp.msg.error_subcode, OPEN_MSG_ERR_SUBCODES_T[m.bgp.msg.error_subcode]))
+            print('     Error Subcode: %d(%s)' % 
+                (m.bgp.msg.error_subcode, OPEN_MSG_ERR_SUBCODES_T[m.bgp.msg.error_subcode]))
         elif m.bgp.msg.error_code == 3:
-            print('     Error Subcode: %d(%s)' % (m.bgp.msg.error_subcode, UPDATE_MSG_ERR_SUBCODES_T[m.bgp.msg.error_subcode]))
+            print('     Error Subcode: %d(%s)' % 
+                (m.bgp.msg.error_subcode, UPDATE_MSG_ERR_SUBCODES_T[m.bgp.msg.error_subcode]))
         else:
             print('     Error Subcode: %d' % (m.bgp.msg.error_subcode))
 

@@ -1,13 +1,13 @@
 '''
 mrtparse is a module to parse a MRT format data.
 
-See http://*** for more informations.
+See https://github.com/YoshiyukiYamauchi/mrtparse for more informations.
 This module is published under a *** license.
 Created by
     Tetsumune KISO <t2mune@gmail.com>,
     Yoshiyuki YAMAUCHI <y.44snow@gmail.com>,
     Nobuhiro ITOU <js333123@gmail.com>.
-Copyright (C) GREEN HIPPO. All rights reserved.
+Copyright (C) greenHippo, LLC. All rights reserved.
 '''
 
 import sys, struct, socket
@@ -234,7 +234,7 @@ OPEN_MSG_ERR_SUBCODES_T = {
     2:'Bad Peer AS',
     3:'Bad BGP Identifier',
     4:'Unsupported Optional Parameter',
-    5:'Deprecated',                     #[Deprecated - see Appendix A]
+    5:'Deprecated',                     #[Deprecated]
     6:'Unacceptable Hold Time',
 }
 dl += [OPEN_MSG_ERR_SUBCODES_T]
@@ -246,7 +246,7 @@ UPDATE_MSG_ERR_SUBCODES_T = {
     4:'Attribute Flags Error',
     5:'Attribute Length Error',
     6:'Invalid ORIGIN Attribute',
-    7:'Deprecated',                 #[Deprecated - see Appendix A]
+    7:'Deprecated',                 #[Deprecated]
     8:'Invalid NEXT_HOP Attribute',
     9:'Optional Attribute Error',
     10:'Invalid Network Field',
@@ -262,6 +262,8 @@ CAP_CODE_T = {
     3:'Outbound Route Filtering Capability',                    # Defined in RFC5291
     4:'Multiple routes to a destination capability',            # Defined in RFC3107
     5:'Extended Next Hop Encoding',                             # Defined in RFC5549
+    6:'Unassigned',
+    7:'Unassigned',
     64:'Graceful Restart Capability',                           # Defined in RFC4724
     65:'Support for 4-octet AS number capability',              # Defined in RFC6793
     66:'Deprecated (2003-03-06)',                               # Deprecated
@@ -270,8 +272,8 @@ CAP_CODE_T = {
     69:'ADD-PATH Capability',                                   # draft-ietf-idr-add-paths
     70:'Enhanced Route Refresh Capability',                     # draft-keyur-bgp-enhanced-route-refresh
     71:'Long-Lived Graceful Restart (LLGR) Capability',         # draft-uttaro-idr-bgp-persistence
+    120:'Unassigned',
 }
-
 dl += [CAP_CODE_T]
 
 MULTI_EXT_T = {
@@ -279,7 +281,6 @@ MULTI_EXT_T = {
     2:'Reserved',
     3:'SAFI',
 }
-
 dl += [MULTI_EXT_T]
 
 ROUTE_REFRESH_CAP_T = {
@@ -287,7 +288,6 @@ ROUTE_REFRESH_CAP_T = {
     2:'Reserved',
     3:'SAFI',
 }
-
 dl += [ROUTE_REFRESH_CAP_T]
 
 OUT_ROUTE_FILTER_CAP_T = {
@@ -298,14 +298,12 @@ OUT_ROUTE_FILTER_CAP_T = {
     5:'ORF Type',
     6:'Send/Receive',
 }
-
 dl += [OUT_ROUTE_FILTER_CAP_T]
 
 MULTI_ROUTES_DEST_T = {
     1:'Label',
     2:'Prefix variable',
 }
-
 dl += [MULTI_ROUTES_DEST_T]
 
 EXT_NEXT_HOP_ENC = {
@@ -313,7 +311,6 @@ EXT_NEXT_HOP_ENC = {
     2:'NLRI SAFI',
     3:'Nexthop AFI',
 }
-
 dl += [EXT_NEXT_HOP_ENC]
 
 GRACEFUL_RESTART_T = {
@@ -323,13 +320,11 @@ GRACEFUL_RESTART_T = {
     4:'SAFI',
     5:'Flags for Address Family',
 }
-
 dl += [GRACEFUL_RESTART_T]
 
 SUPPORT_FOR_AS = {
     1:'AS Number',
 }
-
 dl += [SUPPORT_FOR_AS]
 
 # Reverse the keys and values of dictionaries above
@@ -868,10 +863,10 @@ class BgpMessage(Base):
         self.len = self.val_num(buf, 2)
         self.type = self.val_num(buf, 1)
         if self.type == BGP_MSG_T['OPEN']:
-            version = self.version = self.val_num(buf, 1)
-            my_as = self.my_as = self.val_num(buf, 2)
-            holdtime = self.holdtime = self.val_num(buf, 2)
-            bgp_identifier = self.bgp_identifier = self.val_addr(buf, af)
+            self.version = self.val_num(buf, 1)
+            self.my_as = self.val_num(buf, 2)
+            self.holdtime = self.val_num(buf, 2)
+            self.bgp_identifier = self.val_addr(buf, af)
             capability_len = self.capability_len = self.val_num(buf, 1)
             self.capability = []
             while capability_len > 0:
@@ -905,12 +900,12 @@ class BgpMessage(Base):
         elif self.type == BGP_MSG_T['NOTIFICATION']:
             error_code = self.error_code = self.val_num(buf, 1)
             error_subcode = self.error_subcode = self.val_num(buf, 1)
-            if self.len > 21:
-                data_field = self.data_field = self.val_num(buf, (self.len - 21))                
+            if self.len > self.p:
+                data_field = self.data_field = self.val_num(buf, (self.len - self.p))                
         elif self.type == BGP_MSG_T['KEEPALIVE']:
             pass
         else:
-            self.p += self.len - 19
+            self.p += self.len - self.p
         return self.p
 
 class Nlri(Base):
