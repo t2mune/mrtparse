@@ -63,9 +63,9 @@ def print_bgp_msg(m):
         print('     BGP Identifier: %s' % (m.bgp.msg.bgp_identifier))
         print('     Optional Parameter Length: %d' % (m.bgp.msg.capability_len))
         for capability in m.bgp.msg.capability:
-            print('     Parameter Type: %d(%s)' % (capability.type, CAP_CODE_T[capability.type]))
+            print('     Parameter Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
             print('     Parameter Length: %d') % (capability.len)
-            print_bgp_capability(m.bgp.msg.capability)
+            # print_bgp_capability(m.bgp.msg.capability)
     elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
         print('    Withdrawn Routes Length: %d' % (m.bgp.msg.wd_len))
 

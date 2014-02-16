@@ -588,20 +588,20 @@ class Capability(Base):
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
         self.len = self.val_num(buf, 1)
-
-        if self.type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+        cap_type = self.cap_type = self.val_num(buf, 1)
+        if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext(buf)
-        elif self.type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
+        elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
             self.unpack_route_refresh(buf)
-        elif self.type == CAP_CODE_T['Outbound Route Filtering Capability']:
+        elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
             self.unpack_out_route_filter(buf)
-        elif self.type == CAP_CODE_T['Multiple routes to a destination capability']:
+        elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
             self.unpack_multi_routes_dest(buf)
-        elif self.type == CAP_CODE_T['Extended Next Hop Encoding']:
+        elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
             self.unpack_ext_next_hop(buf)
-        elif self.type == CAP_CODE_T['Graceful Restart Capability']:
+        elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
             self.unpack_graceful_restart(buf)
-        elif self.type == CAP_CODE_T['Support for 4-octet AS number capability']:
+        elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
             self.unpack_support_for_as(buf)
         else:
             self.p += self.len
@@ -609,6 +609,7 @@ class Capability(Base):
 
     def unpack_multi_ext(self, buf):
         self.multi_ext = {}
+        self.multi_ext['len'] = self.val_num(buf, 1)
         self.multi_ext['afi'] = self.val_num(buf, 2)
         self.multi_ext['safi'] = self.val_num(buf, 1)
    
@@ -639,6 +640,7 @@ class Capability(Base):
             self.ext_next_hop['nlri_afi'] = self.val_num(buf, 2)
             self.ext_next_hop['nlri_safi'] = self.val_num(buf, 2)
             self.ext_next_hop['nexthop_afi'] = self.val_num(buf, 2)
+
 
     def unpack_graceful_restart(self, buf):
         self.graceful_restart = {}
