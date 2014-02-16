@@ -870,10 +870,12 @@ class BgpMessage(Base):
             holdtime = self.holdtime = self.val_num(buf, 2)
             bgp_identifier = self.bgp_identifier = self.val_addr(buf, af)
             option_params_len = self.option_params_len = self.val_num(buf, 1)
-            self.optional_params = []
-            while option_params_len > 0:
+            self.capability = []
+            while capability_len > 0:
                 capability = Capability()
-                self.p
+                self.p += capability.unpack(buf[self.p:])
+                self.capability.append(capability)
+                option_params_len -= capability.p
 
         elif self.type == BGP_MSG_T['UPDATE']:
             wd_len = self.wd_len = self.val_num(buf, 2)
