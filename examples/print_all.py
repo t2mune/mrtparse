@@ -146,6 +146,9 @@ def print_bgp_capability(capability_list):
             print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
             print('         Length: %d' % capability.support_for_as['len'])
             print('         AS Number: %d' % capability.support_for_as['as_number'])
+        elif capability.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
+            print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
+            print('         Length: %d' % capability.route_refresh['len'])
 
 
 
