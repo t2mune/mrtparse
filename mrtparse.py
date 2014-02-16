@@ -588,7 +588,7 @@ class Capability(Base):
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
         self.len = self.val_num(buf, 1)
-        cap_type = self.cap_type = self.val_num(buf, 1)
+        self.cap_type = self.val_num(buf, 1)
         if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext(buf)
         elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
@@ -611,6 +611,7 @@ class Capability(Base):
         self.multi_ext = {}
         self.multi_ext['len'] = self.val_num(buf, 1)
         self.multi_ext['afi'] = self.val_num(buf, 2)
+        self.multi_ext['reserved'] = self.val_num(buf, 1)
         self.multi_ext['safi'] = self.val_num(buf, 1)
    
     def unpack_route_refresh(self, buf):
