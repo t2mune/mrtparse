@@ -17,10 +17,10 @@ import gzip, bz2
 __pyname__  = 'mrtparse'
 __version__ =  '0.7'
 __descr__   = 'parse a MRT-format data'
-__url__     = 'http://***'
+__url__     = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__   = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
-__license__ = '***'
+__license__ = 'Apache License, Version 2.0'
 
 # TEST
 # Magic Number
