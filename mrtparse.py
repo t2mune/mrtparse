@@ -612,7 +612,6 @@ class Capability(Base):
         self.multi_ext = {}
         self.multi_ext['afi'] = self.val_num(buf, 2)
         self.multi_ext['safi'] = self.val_num(buf, 1)
-        #なんか違うきがする
    
     def unpack_route_refresh(self, buf):
         self.route_refresh = {}
@@ -644,7 +643,7 @@ class Capability(Base):
 
     def unpack_graceful_restart(self, buf):
         self.graceful_restart = {}
-        # 検討
+
         # self.graceful_restart['restart_flags'] = self.val_num(buf, 1)
         # self.graceful_restart['restart_time_in_seconds'] = self.val_num(buf, 1)
         while self.len - 2 > 0:
@@ -869,11 +868,11 @@ class BgpMessage(Base):
             my_as = self.my_as = self.val_num(buf, 2)
             holdtime = self.holdtime = self.val_num(buf, 2)
             bgp_identifier = self.bgp_identifier = self.val_addr(buf, af)
-            option_params_len = self.option_params_len = self.val_num(buf, 1)
+            capability_len = self.capability_len = self.val_num(buf, 1)
             self.capability = []
             while capability_len > 0:
                 capability = Capability()
-                self.p += capability.unpack(buf[self.p:])
+                self.p += capability.unpack(buf[self.p:], af)
                 self.capability.append(capability)
                 option_params_len -= capability.p
 
