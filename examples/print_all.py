@@ -157,6 +157,12 @@ def print_bgp_capability(capability_list):
                 print('         AFI: %d(%s)' % (capability.graceful_restart['afi'], AFI_T[capability.graceful_restart['afi']]))
                 print('         SAFI: %d(%s)' % (capability.graceful_restart['safi'], SAFI_T[capability.graceful_restart['safi']]))
                 print('         Flag: %d' % (capability.graceful_restart['flags_for_afi']))
+        elif capability.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
+            print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
+            print('         Length: %d' % capability.multi_routes_dest_len)
+            while capability.multi_routes_dest_len > 3:
+                print('         Prefix: %d' % (self.multi_routes_dest['prefix'] ))
+                capability.multi_routes_dest_len -= 1
 
 
 

@@ -597,8 +597,8 @@ class Capability(Base):
             self.unpack_route_refresh(buf)
         elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
             self.unpack_out_route_filter(buf)
-        # elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
-        #     self.unpack_multi_routes_dest(buf)
+        elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
+            self.unpack_multi_routes_dest(buf)
         # elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
         #     self.unpack_ext_next_hop(buf)
         elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
@@ -635,10 +635,12 @@ class Capability(Base):
         self.out_route_filter['send_receive'] = self.val_num(buf, 1)
 
     def unpack_multi_routes_dest(self, buf):
-        self.len = self.val_num(buf, 1)
-        self.multi_routes_dest = self.val_num(buf, 3)
-        while self.len - self.multi_routes_dest > 0:
-            self.multi_routes_dest = self.val_addr(buf, af)
+        self.multi_routes_dest = {}
+        multi_routes_dest_len = self.multi_routes_dest['len'] = self.val_num(buf, 1)
+        self.multi_routes_dest['label'] = self.val_num(buf, 3)
+        while multi_routes_dest_len  > 3:
+            self.multi_routes_dest['prefix'] = self.val_num(buf, 1)
+            multi_routes_dest_len -= 1
 
     def unpack_ext_next_hop(self, buf):
         self.ext_next_hop = {}
