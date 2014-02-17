@@ -776,7 +776,6 @@ class OptParams(Base):
             self.unpack_support_for_as(buf)
         else:
             self.p += self.len - 2
-        return self.p
 
     def unpack_multi_ext(self, buf):
         self.multi_ext = {}

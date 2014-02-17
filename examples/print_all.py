@@ -182,14 +182,11 @@ def print_bgp_attr(attr_list):
             ext_comm_list = []
             for ext_comm in attr.ext_comm:
                 ext_comm_list.append('0x%016x' % ext_comm)
-            print('    %s: %s' %
-                (BGP_ATTR_T[attr.type], ' '.join(ext_comm_list)))
+            line += '%s' % ' '.join(ext_comm_list)
         elif attr.type == BGP_ATTR_T['AS4_PATH']:
-            print('    %s: %s' %
-                (BGP_ATTR_T[attr.type], ' '.join(attr.as_path)))
+            line += '%s' % ' '.join(attr.as_path)
         elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-            print('    %s: %s %s' %
-                (BGP_ATTR_T[attr.type], attr.aggr['asn'], attr.aggr['id']))
+            line += '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
         print(line)
 
         if attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
