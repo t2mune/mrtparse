@@ -51,7 +51,7 @@ def make_exabgp_conf(d):
                         if m is not None:
                             asn = int(m.group(1)) * 65536 + int(m.group(2))
                         line += ' aggregator (%s:%s)' % (str(asn), attr.aggr['id'])
-                    elif attr.type == BGP_ATTR_T['COMMUNITIES'] and attr.len != 0:
+                    elif attr.type == BGP_ATTR_T['COMMUNITY'] and attr.len != 0:
                         comm = ' '.join(attr.comm)
                         line += ' community [%s]' % comm
                     elif attr.type == BGP_ATTR_T['ORIGINATOR_ID'] and attr.len != 0:

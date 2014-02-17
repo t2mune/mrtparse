@@ -15,44 +15,43 @@ import gzip, bz2
 
 # mrtparse information
 __pyname__  = 'mrtparse'
-__version__ =  '0.7'
+__version__ =  '0.8'
 __descr__   = 'parse a MRT-format data'
 __url__     = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__   = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
 __license__ = 'Apache License, Version 2.0'
 
-# TEST
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC  = b'\x42\x5a\x68'
 
-# a variable to reverse the keys and values of dictionaries below
-dl = []
+# MRT header length
+MRT_HDR_LEN = 12
 
 # AS number length(especially to use AS_PATH attribute)
 as_len = 4
 
-# AFI types
-# Assigend by IANA (http://www.iana.org/assignments/address-family-numbers/address-family-numbers.xhtml)
+# a variable to reverse the keys and values of dictionaries below
+dl = []
+
+# AFI Types
+# Assigend by IANA
 AFI_T = {
     1:'AFI_IPv4',
     2:'AFI_IPv6',
 }
 dl += [AFI_T]
 
-# SAFI types (Subsequent Address Family Identifiers)
-# Assigend by IANA (http://www.iana.org/assignments/safi-namespace/safi-namespace.xhtml)
+# SAFI Types
+# Assigend by IANA
 SAFI_T = {
     1:'SAFI_UNICAST',
     2:'SAFI_MULTICAST',
 }
 dl += [SAFI_T]
 
-# MRT header length
-MRT_HDR_LEN = 12
-
-# Message types
+# MRT Message Types
 # Defined in RFC6396
 MSG_T = {
     0:'NULL',           # Deprecated in RFC6396
@@ -78,7 +77,7 @@ MSG_T = {
 }
 dl += [MSG_T]
 
-# BGP,BGP4PLUS,BGP4PLUS_01 subtypes
+# BGP,BGP4PLUS,BGP4PLUS_01 Subtypes
 # Deprecated in RFC6396
 BGP_ST = {
     0:'BGP_NULL',
@@ -92,7 +91,7 @@ BGP_ST = {
 }
 dl += [BGP_ST]
 
-# TD subtypes (tremor-dominant)
+# TABLE_DUMP Subtypes
 # Defined in RFC6396
 TD_ST = {
     1:'AFI_IPv4',
@@ -100,7 +99,7 @@ TD_ST = {
 }
 dl += [AFI_T]
 
-# TD_V2 subtypes
+# TABLE_DUMP_V2 Subtypes
 # Defined in RFC6396
 TD_V2_ST = {
     1:'PEER_INDEX_TABLE',
@@ -112,11 +111,13 @@ TD_V2_ST = {
 }
 dl += [TD_V2_ST]
 
-# BGP4MP,BGP4MP_ET subtypes
+# BGP4MP,BGP4MP_ET Subtypes
 # Defined in RFC6396
 BGP4MP_ST = {
     0:'BGP4MP_STATE_CHANGE',
     1:'BGP4MP_MESSAGE',
+    2:'BGP4MP_ENTRY',             # Deprecated in RFC6396
+    3:'BGP4MP_SNAPSHOT',          # Deprecated in RFC6396
     4:'BGP4MP_MESSAGE_AS4',
     5:'BGP4MP_STATE_CHANGE_AS4',
     6:'BGP4MP_MESSAGE_LOCAL',
@@ -124,7 +125,7 @@ BGP4MP_ST = {
 }
 dl += [BGP4MP_ST]
 
-# MRT Message subtypes
+# MRT Message Subtypes
 # Defined in RFC6396
 MSG_ST = {
     9:BGP_ST,
@@ -135,7 +136,7 @@ MSG_ST = {
     17:BGP4MP_ST,
 }
 
-# BGP FSM states (finite state machine)
+# BGP FSM States
 # Defined in RFC4271
 BGP_FSM = {
     1:'Idle',
@@ -149,9 +150,10 @@ BGP_FSM = {
 }
 dl += [BGP_FSM]
 
-# BGP attribute types
+# BGP Attribute Types
 # Defined in RFC4271
 BGP_ATTR_T = {
+    0:'Reserved',
     1:'ORIGIN',
     2:'AS_PATH',
     3:'NEXT_HOP',
@@ -159,7 +161,7 @@ BGP_ATTR_T = {
     5:'LOCAL_PREF',
     6:'ATOMIC_AGGREGATE',
     7:'AGGREGATOR',
-    8:'COMMUNITIES',           # Defined in RFC1997
+    8:'COMMUNITY',             # Defined in RFC1997
     9:'ORIGINATOR_ID',         # Defined in RFC4456
     10:'CLUSTER_LIST',         # Defined in RFC4456
     11:'DPA',                  # Deprecated in RFC6938
@@ -173,7 +175,7 @@ BGP_ATTR_T = {
 }
 dl += [BGP_ATTR_T]
 
-# BGP ORIGIN types
+# BGP ORIGIN Types
 # Defined in RFC4271
 ORIGIN_T = {
     0:'IGP',
@@ -182,7 +184,7 @@ ORIGIN_T = {
 }
 dl += [ORIGIN_T]
 
-# BGP AS_PATH types
+# BGP AS_PATH Types
 # Defined in RFC4271
 AS_PATH_SEG_T = {
     1:'AS_SET',
@@ -190,7 +192,7 @@ AS_PATH_SEG_T = {
 }
 dl += [AS_PATH_SEG_T]
 
-# Reserved BGP COMMUNITY types
+# Reserved BGP COMMUNITY Types
 # Defined in RFC1997
 COMM_T = {
     0xffffff01:'NO_EXPORT',
@@ -200,19 +202,22 @@ COMM_T = {
 }
 dl += [COMM_T]
 
-# BGP message types
+# BGP Message Types
 # Defined in RFC4271
 BGP_MSG_T = {
+    0:'Reserved',
     1:'OPEN',
     2:'UPDATE',
     3:'NOTIFICATION',
     4:'KEEPALIVE',
-    5:'ROUTE_REFRESH',
+    5:'ROUTE-REFRESH', # Defined in RFC2918
 }
 dl += [BGP_MSG_T]
 
-# NOTIFICATION Error Code
-NOTIFICATION_ERR_CODES_T = {
+# BGP Error Codes
+# Defined in RFC4271
+BGP_ERR_C = {
+    0:'Reserved',
     1:'Message Header Error',
     2:'OPEN Message Error',
     3:'UPDATE Message Error',
@@ -220,41 +225,96 @@ NOTIFICATION_ERR_CODES_T = {
     5:'Finite State Machine Error',
     6:'Cease',
 }
-dl += [NOTIFICATION_ERR_CODES_T]
+dl += [BGP_ERR_C]
 
-MSG_HDR_ERR_SUBCODES_T = {
+# BGP Message Header Error Subcodes
+# Defined in RFC4271
+BGP_HDR_ERR_SC = {
+    0:'Reserved',
     1:'Connection Not Synchronized',
     2:'Bad Message Length',
     3:'Bad Message Type',
 }
-dl += [MSG_HDR_ERR_SUBCODES_T]
+dl += [BGP_HDR_ERR_SC]
 
-OPEN_MSG_ERR_SUBCODES_T = {
+# OPEN Message Error Subcodes
+# Defined in RFC4271
+BGP_OPEN_ERR_SC = {
+    0:'Reserved',
     1:'Unsupported Version Number',
     2:'Bad Peer AS',
     3:'Bad BGP Identifier',
     4:'Unsupported Optional Parameter',
-    5:'Deprecated',                     #[Deprecated]
+    5:'[Deprecated]',
     6:'Unacceptable Hold Time',
+    7:'Unsupported Capability',         # Defined in RFC5492
 }
-dl += [OPEN_MSG_ERR_SUBCODES_T]
+dl += [BGP_OPEN_ERR_SC]
 
-UPDATE_MSG_ERR_SUBCODES_T = {
+# UPDATE Message Error Subcodes
+# Defined in RFC4271
+BGP_UPDATE_ERR_SC = {
+    0:'Reserved',
     1:'Malformed Attribute List',
     2:'Unrecognized Well-known Attribute',
     3:'Missing Well-known Attribute',
     4:'Attribute Flags Error',
     5:'Attribute Length Error',
     6:'Invalid ORIGIN Attribute',
-    7:'Deprecated',                 #[Deprecated]
+    7:'[Deprecated]',
     8:'Invalid NEXT_HOP Attribute',
     9:'Optional Attribute Error',
     10:'Invalid Network Field',
     11:'Malformed AS_PATH',
 }
-dl += [UPDATE_MSG_ERR_SUBCODES_T]
+dl += [BGP_UPDATE_ERR_SC]
+
+# BGP Finite State Machine Error Subcodes
+# Defined in RFC6608
+BGP_FSM_ERR_SC = {
+    0:'Unspecified Error',
+    1:'Receive Unexpected Message in OpenSent State',
+    2:'Receive Unexpected Message in OpenConfirm State',
+    3:'Receive Unexpected Message in Established State',
+}
+dl += [BGP_FSM_ERR_SC]
+
+# BGP Cease NOTIFICATION Message Subcodes
+# Defined in RFC4486
+BGP_CEASE_ERR_SC = {
+    0:'Reserved',
+    1:'Maximum Number of Prefixes Reached',
+    2:'Administrative Shutdown',
+    3:'Peer De-configured',
+    4:'Administrative Reset',
+    5:'Connection Rejected',
+    6:'Other Configuration Change',
+    7:'Connection Collision Resolution',
+    8:'Out of Resources',
+}
+dl += [BGP_CEASE_ERR_SC]
+
+# BGP Error Subcodes
+BGP_MSG_ERR_SC = {
+    1:BGP_HDR_ERR_SC,
+    2:BGP_UPDATE_ERR_SC,
+    3:BGP_OPEN_ERR_SC,
+    4:BGP_UPDATE_ERR_SC,
+    5:BGP_FSM_ERR_SC,
+    6:BGP_CEASE_ERR_SC,
+}
+
+# BGP OPEN Optional Parameter Types
+# Defined in RFC5492
+BGP_OPT_PARAMS_T = {
+    0:'Reserved',
+    1:'Authentication', # Deprecated
+    2:'Capabilities',
+}
+dl += [BGP_OPT_PARAMS_T]
 
 # Capability Codes
+# Defined in RFC5492
 CAP_CODE_T = {
     0:'Reserved',
     1:'Multiprotocol Extensions for BGP-4',                     # Defined in RFC2858
@@ -262,19 +322,14 @@ CAP_CODE_T = {
     3:'Outbound Route Filtering Capability',                    # Defined in RFC5291
     4:'Multiple routes to a destination capability',            # Defined in RFC3107
     5:'Extended Next Hop Encoding',                             # Defined in RFC5549
-    6:'Unassigned',
-    7:'Unassigned',
     64:'Graceful Restart Capability',                           # Defined in RFC4724
     65:'Support for 4-octet AS number capability',              # Defined in RFC6793
-    66:'Deprecated (2003-03-06)',                               # Deprecated
+    66:'[Deprecated]',
     67:'Support for Dynamic Capability (capability specific)',  # draft-ietf-idr-dynamic-cap
     68:'Multisession BGP Capability',                           # draft-ietf-idr-bgp-multisession
     69:'ADD-PATH Capability',                                   # draft-ietf-idr-add-paths
     70:'Enhanced Route Refresh Capability',                     # draft-keyur-bgp-enhanced-route-refresh
     71:'Long-Lived Graceful Restart (LLGR) Capability',         # draft-uttaro-idr-bgp-persistence
-    120:'Unassigned',
-    128:'Unassigned',
-    130:'Unassigned',
 }
 dl += [CAP_CODE_T]
 
@@ -334,6 +389,16 @@ for d in dl:
     for k in list(d.keys()):
         d[d[k]] = k
 
+# Function to get a value by specified keys from dictionaries above
+def val_dict(d, *args):
+    k = args[0]
+    if k in d:
+        if isinstance(d[k], dict) and len(args) > 1:
+            return val_dict(d[k], *args[1:])
+        return d[k]
+    return 'Unassigned'
+
+# Super class for all other classes
 class Base:
     def __init__(self):
         self.p = 0
@@ -460,19 +525,7 @@ class Reader(Base):
             self.mrt.table_dump = TableDump()
             self.mrt.table_dump.unpack(data, self.mrt.subtype)
         elif self.mrt.type == MSG_T['TABLE_DUMP_V2']:
-            if self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
-                self.mrt.peer = PeerIndexTable()
-                self.mrt.peer.unpack(data)
-            elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-                or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']):
-                self.mrt.rib = AfiSpecRib()
-                self.mrt.rib.unpack(data, AFI_T['AFI_IPv4'])
-            elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
-                or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
-                self.mrt.rib = AfiSpecRib()
-                self.mrt.rib.unpack(data, AFI_T['AFI_IPv6'])
-            else:
-                self.p += self.len
+            self.unpack_td_v2(data)
         elif ( self.mrt.type == MSG_T['BGP4MP']
             or self.mrt.type == MSG_T['BGP4MP_ET']):
             self.mrt.bgp = Bgp4Mp()
@@ -483,6 +536,21 @@ class Reader(Base):
         else:
             self.p += self.len
         return self.p
+
+    def unpack_td_v2(self, data):
+        if self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
+            self.mrt.peer = PeerIndexTable()
+            self.mrt.peer.unpack(data)
+        elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']):
+            self.mrt.rib = AfiSpecRib()
+            self.mrt.rib.unpack(data, AFI_T['AFI_IPv4'])
+        elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
+            self.mrt.rib = AfiSpecRib()
+            self.mrt.rib.unpack(data, AFI_T['AFI_IPv6'])
+        else:
+            self.p += self.len
 
 class Mrt(Base):
     def __init__(self):
@@ -583,14 +651,103 @@ class RibEntries(Base):
             attr_len -= attr.p
         return self.p
 
-class Capability(Base):
+class Bgp4Mp(Base):
+    def __init__(self):
+        Base.__init__(self)
+
+    def unpack(self, buf, subtype):
+        global as_len
+        if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE']
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']):
+            as_len = 2
+        elif ( subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
+            or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
+            as_len = 4
+
+        self.peer_as = self.val_asn(buf)
+        self.local_as = self.val_asn(buf)
+        self.ifindex = self.val_num(buf, 2)
+        self.af = self.val_num(buf, 2)
+        self.peer_ip = self.val_addr(buf, self.af)
+        self.local_ip = self.val_addr(buf, self.af)
+
+        if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
+            or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
+            self.old_state = self.val_num(buf, 2)
+            self.new_state = self.val_num(buf, 2)
+        else:
+            self.msg = BgpMessage()
+            self.p += self.msg.unpack(buf[self.p:], self.af)
+        return self.p
+
+class BgpMessage(Base):
+    def __init__(self):
+        Base.__init__(self)
+
+    def unpack(self, buf, af):
+        self.marker = self.val_str(buf, 16)
+        self.len = self.val_num(buf, 2)
+        self.type = self.val_num(buf, 1)
+        if self.type == BGP_MSG_T['OPEN']:
+            self.ver = self.val_num(buf, 1)
+            self.my_as = self.val_num(buf, 2)
+            self.holdtime = self.val_num(buf, 2)
+            self.bgp_id = self.val_addr(buf, af)
+            opt_len = self.opt_len = self.val_num(buf, 1)
+            self.opt_params = []
+            while opt_len > 0:
+                opt_params = OptParams()
+                self.p += opt_params.unpack(buf[self.p:])
+                self.opt_params.append(opt_params)
+                opt_len -= opt_params.p
+        elif self.type == BGP_MSG_T['UPDATE']:
+            wd_len = self.wd_len = self.val_num(buf, 2)
+            self.withdrawn = []
+            while wd_len > 0:
+                withdrawn    = Nlri()
+                self.p += withdrawn.unpack(buf[self.p:], af)
+                self.withdrawn.append(withdrawn)
+                wd_len -= withdrawn.p
+
+            attr_len = self.attr_len = self.val_num(buf, 2)
+            self.attr = []
+            while attr_len > 0:
+                attr = BgpAttr()
+                self.p += attr.unpack(buf[self.p:])
+                self.attr.append(attr)
+                attr_len -= attr.p
+
+            self.nlri = []
+            while self.p > self.len:
+                nlri = Nlri()
+                self.p += nlri.unpack(buf[self.p:], af)
+                self.nlri.append(nlri)
+        elif self.type == BGP_MSG_T['NOTIFICATION']:
+            self.err_code = self.val_num(buf, 1)
+            self.err_subcode = self.val_num(buf, 1)
+            self.data = self.val_num(buf, self.len - self.p)                
+        elif self.type == BGP_MSG_T['KEEPALIVE']:
+            pass
+        else:
+            self.p += self.len - self.p
+        return self.p
+
+class OptParams(Base):
     def __init__(self):
         Base.__init__(self)
 
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
         self.len = self.val_num(buf, 1)
+
+        if self.type != BGP_OPT_PARAMS_T['Capabilities']:
+            self.p += self.len
+            return self.p
+
         self.cap_type = self.val_num(buf, 1)
+        self.cap_len = self.val_num(buf, 1)
         if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext(buf)
         elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
@@ -606,71 +763,65 @@ class Capability(Base):
         elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
             self.unpack_support_for_as(buf)
         else:
-            self.p += self.len - 1
-        # self.p += self.len - 1
+            self.p += self.len - 2
         return self.p
 
     def unpack_multi_ext(self, buf):
         self.multi_ext = {}
-        self.multi_ext['len'] = self.val_num(buf, 1)
         self.multi_ext['afi'] = self.val_num(buf, 2)
         self.multi_ext['reserved'] = self.val_num(buf, 1)
         self.multi_ext['safi'] = self.val_num(buf, 1)
    
     def unpack_route_refresh(self, buf):
         self.route_refresh = {}
-        self.route_refresh['len'] = self.val_num(buf, 1)
         # self.route_refresh['afi'] = self.val_num(buf, 2)
         # self.route_refresh['reserved'] = self.val_num(buf, 1)
         # self.route_refresh['safi'] = self.val_num(buf, 1)
 
     def unpack_out_route_filter(self, buf):
-        self.out_route_filter = {}
-        self.out_route_filter['len'] = self.val_num(buf, 1)
-        self.out_route_filter['afi'] = self.val_num(buf, 2)
-        self.out_route_filter['reserved'] = self.val_num(buf, 1)
-        self.out_route_filter['safi'] = self.val_num(buf, 1)
-        self.out_route_filter['number_of_orfs'] = self.val_num(buf, 1)
-        self.out_route_filter['orf_type'] = self.val_num(buf, 1)
-        self.out_route_filter['send_receive'] = self.val_num(buf, 1)
+        self.orf = {}
+        self.orf['afi'] = self.val_num(buf, 2)
+        self.orf['reserved'] = self.val_num(buf, 1)
+        self.orf['safi'] = self.val_num(buf, 1)
+        self.orf['number_of_orfs'] = self.val_num(buf, 1)
+        self.orf['orf_type'] = self.val_num(buf, 1)
+        self.orf['send_receive'] = self.val_num(buf, 1)
 
     def unpack_multi_routes_dest(self, buf):
         self.multi_routes_dest = {}
-        multi_routes_dest_len = self.multi_routes_dest['len'] = self.val_num(buf, 1)
+        cap_len = self.cap_len
         self.multi_routes_dest['label'] = self.val_num(buf, 3)
-        while multi_routes_dest_len  > 3:
+        while cap_len  > 3:
             self.multi_routes_dest['prefix'] = self.val_num(buf, 1)
-            multi_routes_dest_len -= 1
+            cap_len -= 1
 
     def unpack_ext_next_hop(self, buf):
         self.ext_next_hop = {}
-        self.ext_next_hop['len'] = self.val_num(buf, 1)
-        while self.ext_next_hop['len'] > 5:
+        cap_len = self.cap_len
+        while cap_len > 5:
             self.ext_next_hop['nlri_afi'] = self.val_num(buf, 2)
             self.ext_next_hop['nlri_safi'] = self.val_num(buf, 2)
             self.ext_next_hop['nexthop_afi'] = self.val_num(buf, 2)
-            self.ext_next_hop['len'] -= 6
-
+            cap_len -= 6
 
     def unpack_graceful_restart(self, buf):
         self.graceful_restart = {}
-        graceful_restart_len = self.graceful_restart['len'] = self.val_num(buf, 1)
         self.graceful_restart['timer'] = self.val_num(buf, 2)
-        if graceful_restart_len > 2:
+        cap_len = self.cap_len
+        if cap_len > 2:
         # self.graceful_restart['restart_flags'] = self.val_num(buf, 1)
         # self.graceful_restart['restart_time_in_seconds'] = self.val_num(buf, 1)
-            while graceful_restart_len > 2:
+            while cap_len > 2:
                 self.graceful_restart['afi'] = self.val_num(buf, 2)
-                graceful_restart_len -= 2
+                cap_len -= 2
                 self.graceful_restart['safi'] = self.val_num(buf, 1)
-                graceful_restart_len -= 1
+                cap_len -= 1
                 self.graceful_restart['flags_for_afi'] = self.val_num(buf, 1)
-                graceful_restart_len -= 1
+                cap_len -= 1
 
     def unpack_support_for_as(self, buf):
         # self.support_for_as = self.val_num(buf, 2)
         self.support_for_as = {}
-        self.support_for_as['len'] = self.val_num(buf, 1)
         self.support_for_as['as_number'] = self.val_num(buf, 4)
 
 class BgpAttr(Base):
@@ -703,8 +854,8 @@ class BgpAttr(Base):
             pass
         elif self.type == BGP_ATTR_T['AGGREGATOR']:
             self.unpack_aggregator(buf)
-        elif self.type == BGP_ATTR_T['COMMUNITIES']:
-            self.unpack_communities(buf)
+        elif self.type == BGP_ATTR_T['COMMUNITY']:
+            self.unpack_community(buf)
         elif self.type == BGP_ATTR_T['ORIGINATOR_ID']:
             self.unpack_originator_id(buf)
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
@@ -770,7 +921,7 @@ class BgpAttr(Base):
         self.aggr['asn'] = self.val_asn(buf)
         self.aggr['id'] = self.val_addr(buf, AFI_T['AFI_IPv4'])
 
-    def unpack_communities(self, buf):
+    def unpack_community(self, buf):
         self.comm = []
         attr_len = self.p + self.len
         while self.p < attr_len:
@@ -843,91 +994,6 @@ class BgpAttr(Base):
             ext_comm = self.val_num(buf, 8)
             self.ext_comm.append(ext_comm)
 
-class Bgp4Mp(Base):
-    def __init__(self):
-        Base.__init__(self)
-
-    def unpack(self, buf, subtype):
-        global as_len
-        if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
-            or subtype == BGP4MP_ST['BGP4MP_MESSAGE']
-            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']):
-            as_len = 2
-        elif ( subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
-            or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']
-            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
-            as_len = 4
-
-        self.peer_as = self.val_asn(buf)
-        self.local_as = self.val_asn(buf)
-        self.ifindex = self.val_num(buf, 2)
-        self.af = self.val_num(buf, 2)
-        self.peer_ip = self.val_addr(buf, self.af)
-        self.local_ip = self.val_addr(buf, self.af)
-
-        if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
-            or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
-            self.old_state = self.val_num(buf, 2)
-            self.new_state = self.val_num(buf, 2)
-        else:
-            self.msg = BgpMessage()
-            self.p += self.msg.unpack(buf[self.p:], self.af)
-        return self.p
-
-class BgpMessage(Base):
-    def __init__(self):
-        Base.__init__(self)
-
-    def unpack(self, buf, af):
-        self.marker = self.val_str(buf, 16)
-        self.len = self.val_num(buf, 2)
-        self.type = self.val_num(buf, 1)
-        if self.type == BGP_MSG_T['OPEN']:
-            self.version = self.val_num(buf, 1)
-            self.my_as = self.val_num(buf, 2)
-            self.holdtime = self.val_num(buf, 2)
-            self.bgp_identifier = self.val_addr(buf, af)
-            capability_len = self.capability_len = self.val_num(buf, 1)
-            self.capability = []
-            while capability_len > 0:
-                capability = Capability()
-                self.p += capability.unpack(buf[self.p:])
-                self.capability.append(capability)
-                capability_len -= capability.p
-
-        elif self.type == BGP_MSG_T['UPDATE']:
-            wd_len = self.wd_len = self.val_num(buf, 2)
-            self.withdrawn = []
-            while wd_len > 0:
-                withdrawn    = Nlri()
-                self.p += withdrawn.unpack(buf[self.p:], af)
-                self.withdrawn.append(withdrawn)
-                wd_len -= withdrawn.p
-
-            attr_len = self.attr_len = self.val_num(buf, 2)
-            self.attr = []
-            while attr_len > 0:
-                attr = BgpAttr()
-                self.p += attr.unpack(buf[self.p:])
-                self.attr.append(attr)
-                attr_len -= attr.p
-
-            self.nlri = []
-            while self.p > self.len:
-                nlri = Nlri()
-                self.p += nlri.unpack(buf[self.p:], af)
-                self.nlri.append(nlri)
-        elif self.type == BGP_MSG_T['NOTIFICATION']:
-            error_code = self.error_code = self.val_num(buf, 1)
-            error_subcode = self.error_subcode = self.val_num(buf, 1)
-            if self.len > self.p:
-                data_field = self.data_field = self.val_num(buf, (self.len - self.p))                
-        elif self.type == BGP_MSG_T['KEEPALIVE']:
-            pass
-        else:
-            self.p += self.len - self.p
-        return self.p
-
 class Nlri(Base):
     def __init__(self):
         Base.__init__(self)
@@ -936,3 +1002,4 @@ class Nlri(Base):
         self.plen = self.val_num(buf, 1)
         self.prefix = self.val_addr(buf, af, self.plen)
         return self.p
+
