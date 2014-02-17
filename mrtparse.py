@@ -690,49 +690,59 @@ class BgpMessage(Base):
         self.marker = self.val_str(buf, 16)
         self.len = self.val_num(buf, 2)
         self.type = self.val_num(buf, 1)
+
         if self.type == BGP_MSG_T['OPEN']:
-            self.ver = self.val_num(buf, 1)
-            self.my_as = self.val_num(buf, 2)
-            self.holdtime = self.val_num(buf, 2)
-            self.bgp_id = self.val_addr(buf, af)
-            opt_len = self.opt_len = self.val_num(buf, 1)
-            self.opt_params = []
-            while opt_len > 0:
-                opt_params = OptParams()
-                self.p += opt_params.unpack(buf[self.p:])
-                self.opt_params.append(opt_params)
-                opt_len -= opt_params.p
+            self.unpack_open(buf, af)
         elif self.type == BGP_MSG_T['UPDATE']:
-            wd_len = self.wd_len = self.val_num(buf, 2)
-            self.withdrawn = []
-            while wd_len > 0:
-                withdrawn    = Nlri()
-                self.p += withdrawn.unpack(buf[self.p:], af)
-                self.withdrawn.append(withdrawn)
-                wd_len -= withdrawn.p
-
-            attr_len = self.attr_len = self.val_num(buf, 2)
-            self.attr = []
-            while attr_len > 0:
-                attr = BgpAttr()
-                self.p += attr.unpack(buf[self.p:])
-                self.attr.append(attr)
-                attr_len -= attr.p
-
-            self.nlri = []
-            while self.p > self.len:
-                nlri = Nlri()
-                self.p += nlri.unpack(buf[self.p:], af)
-                self.nlri.append(nlri)
+            self.unpack_update(buf, af)
         elif self.type == BGP_MSG_T['NOTIFICATION']:
-            self.err_code = self.val_num(buf, 1)
-            self.err_subcode = self.val_num(buf, 1)
-            self.data = self.val_num(buf, self.len - self.p)                
+            self.unpack_notification(buf)
         elif self.type == BGP_MSG_T['KEEPALIVE']:
-            pass
+            self.p += self.len - self.p
         else:
             self.p += self.len - self.p
         return self.p
+
+    def unpack_open(self, buf, af):
+        self.ver = self.val_num(buf, 1)
+        self.my_as = self.val_num(buf, 2)
+        self.holdtime = self.val_num(buf, 2)
+        self.bgp_id = self.val_addr(buf, af)
+        opt_len = self.opt_len = self.val_num(buf, 1)
+        self.opt_params = []
+        while opt_len > 0:
+            opt_params = OptParams()
+            self.p += opt_params.unpack(buf[self.p:])
+            self.opt_params.append(opt_params)
+            opt_len -= opt_params.p
+
+    def unpack_update(self, buf, af):
+        wd_len = self.wd_len = self.val_num(buf, 2)
+        self.withdrawn = []
+        while wd_len > 0:
+            withdrawn    = Nlri()
+            self.p += withdrawn.unpack(buf[self.p:], af)
+            self.withdrawn.append(withdrawn)
+            wd_len -= withdrawn.p
+
+        attr_len = self.attr_len = self.val_num(buf, 2)
+        self.attr = []
+        while attr_len > 0:
+            attr = BgpAttr()
+            self.p += attr.unpack(buf[self.p:])
+            self.attr.append(attr)
+            attr_len -= attr.p
+
+        self.nlri = []
+        while self.p > self.len:
+            nlri = Nlri()
+            self.p += nlri.unpack(buf[self.p:], af)
+            self.nlri.append(nlri)
+
+    def unpack_notification(self, buf):
+        self.err_code = self.val_num(buf, 1)
+        self.err_subcode = self.val_num(buf, 1)
+        self.data = self.val_num(buf, self.len - self.p)                
 
 class OptParams(Base):
     def __init__(self):
@@ -741,11 +751,13 @@ class OptParams(Base):
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
         self.len = self.val_num(buf, 1)
-
         if self.type != BGP_OPT_PARAMS_T['Capabilities']:
+            self.unpack_capabilities(buf)
+        else:
             self.p += self.len
-            return self.p
+        return self.p
 
+    def unpack_capabilities(self, buf):
         self.cap_type = self.val_num(buf, 1)
         self.cap_len = self.val_num(buf, 1)
         if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
