@@ -163,6 +163,14 @@ def print_bgp_capability(capability_list):
             while capability.multi_routes_dest_len > 3:
                 print('         Prefix: %d' % (self.multi_routes_dest['prefix'] ))
                 capability.multi_routes_dest_len -= 1
+        elif capability.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
+            print('         Type: %d(%s)' % (capability.cap_type, CAP_CODE_T[capability.cap_type]))
+            print('         Length: %d' % capability.self.ext_next_hop['len'])
+            while capability.self.ext_next_hop['len'] > 5:
+                print('         NLRI AFI: %d' % (self.self.ext_next_hop['nlri_afi'] ))
+                print('         NLRI SAFI: %d' % (self.self.ext_next_hop['nlri_safi'] ))
+                print('         Nexthop AFI: %d' % (self.self.ext_next_hop['nexthop_afi'] ))
+                capability.self.ext_next_hop['len'] -= 6
 
 
 

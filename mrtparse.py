@@ -599,8 +599,8 @@ class Capability(Base):
             self.unpack_out_route_filter(buf)
         elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
             self.unpack_multi_routes_dest(buf)
-        # elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
-        #     self.unpack_ext_next_hop(buf)
+        elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
+            self.unpack_ext_next_hop(buf)
         elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
             self.unpack_graceful_restart(buf)
         elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
@@ -644,10 +644,12 @@ class Capability(Base):
 
     def unpack_ext_next_hop(self, buf):
         self.ext_next_hop = {}
-        while self.len > 0:
+        self.ext_next_hop['len'] = self.val_num(buf, 1)
+        while self.ext_next_hop['len'] > 5:
             self.ext_next_hop['nlri_afi'] = self.val_num(buf, 2)
             self.ext_next_hop['nlri_safi'] = self.val_num(buf, 2)
             self.ext_next_hop['nexthop_afi'] = self.val_num(buf, 2)
+            self.ext_next_hop['len'] -= 6
 
 
     def unpack_graceful_restart(self, buf):
