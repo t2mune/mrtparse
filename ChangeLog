@@ -1,3 +1,7 @@
+2014-02-17 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
+	* Release - mrtparse 0.8 released.
+	* Update - added a support for BGP Message "OPEN", "NOTIFICATION" and "KEEPALIVE".
+
 2014-02-11 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added "Clearing" and "Deleted" states in "BGP_FSM".
 
