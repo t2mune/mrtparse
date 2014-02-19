@@ -10,6 +10,8 @@ Created by
 Copyright (C) greenHippo, LLC. All rights reserved.
 '''
 
+# branch t2mune
+
 import sys, struct, socket
 import gzip, bz2
 
@@ -384,12 +386,12 @@ SUPPORT_FOR_AS = {
 }
 dl += [SUPPORT_FOR_AS]
 
-# Reverse the keys and values of dictionaries above
+# reverse the keys and values of dictionaries above
 for d in dl:
     for k in list(d.keys()):
         d[d[k]] = k
 
-# Function to get a value by specified keys from dictionaries above
+# a function to get a value by specified keys from dictionaries above
 def val_dict(d, *args):
     k = args[0]
     if k in d:
@@ -398,7 +400,7 @@ def val_dict(d, *args):
         return d[k]
     return 'Unassigned'
 
-# Super class for all other classes
+# super class for all other classes
 class Base:
     def __init__(self):
         self.p = 0
@@ -414,6 +416,7 @@ class Base:
             fmt = '>Q'
         else:
             return None
+
         if _len > 0 and len(buf) - self.p >= _len:
             val = struct.unpack(fmt, buf[self.p:self.p+_len])[0]
         else:
@@ -438,11 +441,13 @@ class Base:
             _af = socket.AF_INET6
         else:
             _len = -1
+
         if len(args) != 0:
             _len = int(args[0] / 8)
             if args[0] % 8: _len += 1
         else:
             _len = _max
+
         if _len >= 0 and len(buf) - self.p >= _len:
             addr = socket.inet_ntop(
                 _af, buf[self.p:self.p+_len] + b'\x00'*(_max - _len))
@@ -454,6 +459,7 @@ class Base:
     def val_asn(self, buf):
         global as_len
         asn = self.val_num(buf, as_len)
+
         if as_len == 4 and asn > 65535:
             asn = str(asn >> 16) + '.' + str(asn & 0xffff)
         else:
@@ -697,8 +703,6 @@ class BgpMessage(Base):
             self.unpack_update(buf, af)
         elif self.type == BGP_MSG_T['NOTIFICATION']:
             self.unpack_notification(buf)
-        elif self.type == BGP_MSG_T['KEEPALIVE']:
-            self.p += self.len - self.p
         else:
             self.p += self.len - self.p
         return self.p
@@ -751,7 +755,7 @@ class OptParams(Base):
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
         self.len = self.val_num(buf, 1)
-        if self.type != BGP_OPT_PARAMS_T['Capabilities']:
+        if self.type == BGP_OPT_PARAMS_T['Capabilities']:
             self.unpack_capabilities(buf)
         else:
             self.p += self.len
@@ -760,6 +764,7 @@ class OptParams(Base):
     def unpack_capabilities(self, buf):
         self.cap_type = self.val_num(buf, 1)
         self.cap_len = self.val_num(buf, 1)
+
         if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext(buf)
         elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
@@ -861,8 +866,6 @@ class BgpAttr(Base):
             self.unpack_multi_exit_disc(buf)
         elif self.type == BGP_ATTR_T['LOCAL_PREF']:
             self.unpack_local_pref(buf)
-        elif self.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
-            pass
         elif self.type == BGP_ATTR_T['AGGREGATOR']:
             self.unpack_aggregator(buf)
         elif self.type == BGP_ATTR_T['COMMUNITY']:
@@ -1013,4 +1016,3 @@ class Nlri(Base):
         self.plen = self.val_num(buf, 1)
         self.prefix = self.val_addr(buf, af, self.plen)
         return self.p
-
