@@ -19,6 +19,34 @@ def print_mrt(m):
         or m.type == MSG_T['OSPFv3_ET']):
         print('    Microsecond Timestamp: %d' % m.micro_ts)
 
+def print_td_v2(m):
+    print('%s' % TD_V2_ST[m.subtype])
+
+    if m.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
+        print('    Collector: %s' % m.peer.collector)
+        print('    View Name Length: %d' % m.peer.view_len)
+        print('    View Name: %s' % m.peer.view)
+        print('    Peer Count: %d' % m.peer.count)
+        for entry in m.peer.entry:
+            print('    Peer Type: 0x%02x' % entry.type)
+            print('    Peer BGP ID: %s' % entry.bgp_id)
+            print('    Peer IP Address: %s' % entry.ip)
+            print('    Peer AS: %s' % entry.asn)
+    elif ( m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+        or m.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']
+        or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+        or m.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
+        print('    Sequence Number: %d' % m.rib.seq)
+        print('    Prefix Length: %d' % m.rib.plen)
+        print('    Prefix: %s' % m.rib.prefix)
+        print('    Entry Count: %d' % m.rib.count)
+        for entry in m.rib.entry:
+            print('    Peer Index: %d' % entry.peer_index)
+            print('    Originated Time: %d(%s)' %
+                (entry.org_time, datetime.fromtimestamp(entry.org_time)))
+            print('    Attribute Length: %d' % entry.attr_len)
+            print_bgp_attr(entry.attr)
+
 def print_bgp4mp(m):
     print('%s' % BGP4MP_ST[m.subtype])
     print('    Peer AS Number: %s' % m.bgp.peer_as)
@@ -73,34 +101,6 @@ def print_bgp_msg(m):
         print('     Error Subcode: %d(%s)' % 
             (m.bgp.msg.err_subcode,
             val_dict(BGP_ERR_SC, m.bgp.msg.err_code, m.bgp.msg.err_subcode)))
-
-def print_td_v2(m):
-    print('%s' % TD_V2_ST[m.subtype])
-
-    if m.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
-        print('    Collector: %s' % m.peer.collector)
-        print('    View Name Length: %d' % m.peer.view_len)
-        print('    View Name: %s' % m.peer.view)
-        print('    Peer Count: %d' % m.peer.count)
-        for entry in m.peer.entry:
-            print('    Peer Type: 0x%02x' % entry.type)
-            print('    Peer BGP ID: %s' % entry.bgp_id)
-            print('    Peer IP Address: %s' % entry.ip)
-            print('    Peer AS: %s' % entry.asn)
-    elif ( m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-        or m.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']
-        or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
-        or m.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
-        print('    Sequence Number: %d' % m.rib.seq)
-        print('    Prefix Length: %d' % m.rib.plen)
-        print('    Prefix: %s' % m.rib.prefix)
-        print('    Entry Count: %d' % m.rib.count)
-        for entry in m.rib.entry:
-            print('    Peer Index: %d' % entry.peer_index)
-            print('    Originated Time: %d(%s)' %
-                (entry.org_time, datetime.fromtimestamp(entry.org_time)))
-            print('    Attribute Length: %d' % entry.attr_len)
-            print_bgp_attr(entry.attr)
 
 def print_bgp_opt_params(opt_params):
     for opt in opt_params:
