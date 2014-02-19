@@ -10,8 +10,6 @@ Created by
 Copyright (C) greenHippo, LLC. All rights reserved.
 '''
 
-# branch t2mune
-
 import sys, struct, socket
 import gzip, bz2
 
@@ -297,7 +295,7 @@ BGP_CEASE_ERR_SC = {
 dl += [BGP_CEASE_ERR_SC]
 
 # BGP Error Subcodes
-BGP_MSG_ERR_SC = {
+BGP_ERR_SC = {
     1:BGP_HDR_ERR_SC,
     2:BGP_UPDATE_ERR_SC,
     3:BGP_OPEN_ERR_SC,
@@ -853,8 +851,6 @@ class BgpAttr(Base):
             self.len = self.val_num(buf, 2)
         else:
             self.len = self.val_num(buf, 1)
-
-        if self.len == 0: return self.p
 
         if self.type == BGP_ATTR_T['ORIGIN']:
             self.unpack_origin(buf)

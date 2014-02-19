@@ -8,7 +8,7 @@ from mrtparse import *
 def print_mrt(m):
     print('---------------------------------------------------------------')
     print('MRT Header')
-    print('    Timestamp: %d(%s)' % (m.ts, datetime.fromtimestamp(m.ts)))
+    print('Timestamp: %d(%s)' % (m.ts, datetime.fromtimestamp(m.ts)))
     print('    Type: %d(%s)' % (m.type, val_dict(MSG_T, m.type)))
     print('    Subtype: %d(%s)' %
         (m.subtype, val_dict(MSG_ST, m.type, m.subtype)))
@@ -105,51 +105,51 @@ def print_td_v2(m):
 def print_bgp_opt_params(opt_params):
     for opt in opt_params:
         print('    Parameter Type/Length: %d/%d' % (opt.type, opt.len))
-        print('    %s' % val_dict(BGP_OPT_PARAMS_T, opt.type))
+        print('        %s' % val_dict(BGP_OPT_PARAMS_T, opt.type))
 
         if opt.type != BGP_OPT_PARAMS_T['Capabilities']:
             return
 
-        print('        Capability Code: %d(%s)' %
+        print('            Capability Code: %d(%s)' %
             (opt.cap_type, val_dict(CAP_CODE_T, opt.cap_type)))
-        print('        Capability Length: %d' % opt.cap_len)
+        print('            Capability Length: %d' % opt.cap_len)
 
         if opt.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
-            print('        AFI: %d(%s)' %
+            print('            AFI: %d(%s)' %
                 (opt.multi_ext['afi'], val_dict(AFI_T, opt.multi_ext['afi'])))
-            print('        Reserved: %d' % opt.multi_ext['reserved'])
-            print('        SAFI: %d(%s)' %
+            print('            Reserved: %d' % opt.multi_ext['reserved'])
+            print('            SAFI: %d(%s)' %
                 (opt.multi_ext['safi'], val_dict(SAFI_T, opt.multi_ext['safi'])))
         elif opt.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
-            print('        AFI: %d(%s)' %
+            print('            AFI: %d(%s)' %
                 (opt.orf['afi'], val_dict(AFI_T, opt.orf['afi'])))
-            print('        Reserved: %d' % opt.orf['reserved'])
-            print('        SAFI: %d(%s)' %
+            print('            Reserved: %d' % opt.orf['reserved'])
+            print('            SAFI: %d(%s)' %
                 (opt.orf['safi'], val_dict(SAFI_T, opt.orf['safi'])))
-            print('        Number: %d' % opt.orf['number_of_orfs'])
-            print('        Type: %d' % opt.orf['orf_type'])
-            print('        Send Receive: %d' % opt.orf['send_receive'])
+            print('            Number: %d' % opt.orf['number_of_orfs'])
+            print('            Type: %d' % opt.orf['orf_type'])
+            print('            Send Receive: %d' % opt.orf['send_receive'])
         elif opt.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
-            print('        AS Number: %d' % opt.support_for_as['as_number'])
+            print('            AS Number: %d' % opt.support_for_as['as_number'])
         elif opt.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
             pass
         elif opt.cap_type == CAP_CODE_T['Graceful Restart Capability']:
-            print('        Restart Timers: %d' % opt.graceful_restart['timer'])
+            print('            Restart Timers: %d' % opt.graceful_restart['timer'])
             if opt.cap_len > 2:
-                print('        AFI: %d(%s)' %
+                print('            AFI: %d(%s)' %
                     (opt.graceful_restart['afi'], val_dict(AFI_T, opt.graceful_restart['afi'])))
-                print('        SAFI: %d(%s)' %
+                print('            SAFI: %d(%s)' %
                     (opt.graceful_restart['safi'], val_dict(SAFI_T, opt.graceful_restart['safi'])))
-                print('        Flag: %d' % opt.graceful_restart['flags_for_afi'])
+                print('            Flag: %d' % opt.graceful_restart['flags_for_afi'])
         elif opt.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
             while opt.cap_len > 3:
-                print('        Prefix: %d' % self.multi_routes_dest['prefix'])
+                print('            Prefix: %d' % self.multi_routes_dest['prefix'])
                 opt.cap_len -= 1
         elif opt.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
             while opt.cap_len > 5:
-                print('        NLRI AFI: %d' % (self.self.ext_next_hop['nlri_afi'] ))
-                print('        NLRI SAFI: %d' % (self.self.ext_next_hop['nlri_safi'] ))
-                print('        Nexthop AFI: %d' % (self.self.ext_next_hop['nexthop_afi'] ))
+                print('            NLRI AFI: %d' % (self.self.ext_next_hop['nlri_afi'] ))
+                print('            NLRI SAFI: %d' % (self.self.ext_next_hop['nlri_safi'] ))
+                print('            Nexthop AFI: %d' % (self.self.ext_next_hop['nexthop_afi'] ))
                 opt.cap_len -= 6
 
 def print_bgp_attr(attr_list):
@@ -157,7 +157,7 @@ def print_bgp_attr(attr_list):
         print('    Path Attribute Flag/Type/Length: 0x%02x/%d/%d' %
             (attr.flag, attr.type, attr.len))
 
-        line = '    %s: ' % val_dict(BGP_ATTR_T, attr.type)
+        line = '        %s: ' % val_dict(BGP_ATTR_T, attr.type)
         if attr.type == BGP_ATTR_T['ORIGIN']:
             line += '%d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin))
         elif attr.type == BGP_ATTR_T['AS_PATH']:
