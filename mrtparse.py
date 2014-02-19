@@ -333,8 +333,6 @@ CAP_CODE_T = {
 }
 dl += [CAP_CODE_T]
 
-# Multiprotocol Extensions for BGP-4
-# Defined in RFC2858
 MULTI_EXT_T = {
     1:'AFI',
     2:'Reserved',

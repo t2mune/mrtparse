@@ -131,8 +131,8 @@ def print_bgp_opt_params(opt_params):
             print('            Send Receive: %d' % opt.orf['send_receive'])
         elif opt.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
             print('            AS Number: %d' % opt.support_for_as['as_number'])
-        elif opt.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
-            pass
+        #elif opt.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
+        #    pass
         elif opt.cap_type == CAP_CODE_T['Graceful Restart Capability']:
             print('            Restart Timers: %d' % opt.graceful_restart['timer'])
             if opt.cap_len > 2:
