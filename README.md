@@ -3,7 +3,7 @@ mrtparse
 
 The mrtparse, is a module to parse the file format of the MRT.
 
-##What we can do with mrtparse
+##What you can do with mrtparse
 You can parse the route information of MRT format that has been acquired in such [RIPE][ripe].
 Of course, You can also parse the full route.
 [ripe]: http://data.ris.ripe.net/rrc00/
