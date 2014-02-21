@@ -797,11 +797,14 @@ class OptParams(Base):
     def unpack_out_route_filter(self, buf):
         self.orf = {}
         self.orf['afi'] = self.val_num(buf, 2)
-        self.orf['reserved'] = self.val_num(buf, 1)
+        self.orf['rsvd'] = self.val_num(buf, 1)
         self.orf['safi'] = self.val_num(buf, 1)
-        self.orf['number_of_orfs'] = self.val_num(buf, 1)
-        self.orf['orf_type'] = self.val_num(buf, 1)
-        self.orf['send_receive'] = self.val_num(buf, 1)
+        self.orf['number'] = self.val_num(buf, 1)
+        for i in range(self.orf['number']):
+            orf = {}
+            orf['type'] = self.val_num(buf, 1)
+            orf['send_recv'] = self.val_num(buf, 1)
+            self.orf['orf'].append(orf)
 
     def unpack_multi_routes_dest(self, buf):
         self.multi_routes_dest = {}
@@ -895,11 +898,9 @@ class BgpAttr(Base):
         attr_len = self.p + self.len
         while self.p < attr_len:
             l = []
-            path_seg = {
-                'type':self.val_num(buf, 1),
-                'len':self.val_num(buf, 1),
-                'val':'',
-            }
+            path_seg = {}
+            path_seg['type'] = self.val_num(buf, 1)
+            path_seg['len'] = self.val_num(buf, 1)
             if path_seg['len'] == 0:
                 next
             for i in range(path_seg['len']):

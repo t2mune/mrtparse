@@ -23,62 +23,74 @@ def make_exabgp_conf(d):
         static {'''
     % (neighbor, router_id, local_addr, local_as, peer_as))
     
-    r = re.compile("([0-9]+)\.([0-9]+)")
-    
     for m in d:
         if m.type == MSG_T['TABLE_DUMP_V2']:
             if m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']:
                 line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
                 for attr in m.rib.entry[0].attr:
-                    if attr.type == BGP_ATTR_T['ORIGIN'] and attr.len != 0:
-                        line += ' origin %s' % ORIGIN_T[attr.origin]
-                    elif attr.type == BGP_ATTR_T['AS_PATH'] and attr.len != 0: 
-                        as_path = ' '.join(attr.as_path)
-                        as_path = as_path.replace('{', '(')
-                        as_path = as_path.replace('}', ')')
-                        line += ' as-path [%s]' % as_path
-                    elif attr.type == BGP_ATTR_T['NEXT_HOP'] and attr.len != 0:
-                        pass
-                    elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC'] and attr.len != 0:
-                        line += ' med %d' % attr.med
-                    elif attr.type == BGP_ATTR_T['LOCAL_PREF'] and attr.len != 0:
-                        line += ' local-preference %d' % attr.local_pref
-                    elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
-                        line += ' atomic-aggregate'
-                    elif attr.type == BGP_ATTR_T['AGGREGATOR']  and attr.len != 0:
-                        asn = attr.aggr['asn']
-                        m = r.search(asn)
-                        if m is not None:
-                            asn = int(m.group(1)) * 65536 + int(m.group(2))
-                        line += ' aggregator (%s:%s)' % (str(asn), attr.aggr['id'])
-                    elif attr.type == BGP_ATTR_T['COMMUNITY'] and attr.len != 0:
-                        comm = ' '.join(attr.comm)
-                        line += ' community [%s]' % comm
-                    elif attr.type == BGP_ATTR_T['ORIGINATOR_ID'] and attr.len != 0:
-                        line += ' originator-id %s' % attr.org_id
-                    elif attr.type == BGP_ATTR_T['CLUSTER_LIST'] and attr.len != 0:
-                        line += ' cluster-list [%s]' % ' '.join(attr.cl_list)
-                    elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES'] and attr.len != 0:
-                        ext_comm_list = []
-                        for ext_comm in attr.ext_comm:
-                            ext_comm_list.append('0x%016x' % ext_comm)
-                        line += ' extended-community [%s]' % ' '.join(ext_comm_list)
-                    elif attr.type == BGP_ATTR_T['AS4_PATH'] and attr.len != 0:
-                        as_path = ' '.join(attr.as_path)
-                        as_path = as_path.replace('{', '(')
-                        as_path = as_path.replace('}', ')')
-                        line += ' as-path [%s]' % as_path
-                    elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']  and attr.len != 0:
-                        asn = attr.aggr['asn']
-                        m = r.search(asn)
-                        if m is not None:
-                            asn = int(m.group(1)) * 65536 + int(m.group(2))
-                        line += ' aggregator (%s:%s)' % (str(asn), attr.aggr['id'])
-                print('%s next-hop %s;' % (line, nexthop))
+                    line += get_bgp_attr(attr)
+    print('%s next-hop %s;' % (line, nexthop))
     print('''
         }
     }
     ''')
+
+def get_bgp_attr(attr):
+    line = ''
+    r = re.compile("([0-9]+)\.([0-9]+)")
+
+    if attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
+        line += ' atomic-aggregate'
+
+    if attr.len == 0:
+        return line
+
+    if attr.type == BGP_ATTR_T['ORIGIN']:
+        line += ' origin %s' % ORIGIN_T[attr.origin]
+    elif attr.type == BGP_ATTR_T['AS_PATH']: 
+        as_path = ''
+        for path_seg in attr.as_path:
+            if path_seg['type'] == AS_PATH_SEG_T['AS_SET']:
+                as_path += '(%s) ' % path_seg['val']
+            else:
+                as_path += '%s ' % path_seg['val']
+        line += ' as-path [%s]' % as_path
+    elif attr.type == BGP_ATTR_T['NEXT_HOP']:
+        pass
+    elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
+        line += ' med %d' % attr.med
+    elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
+        line += ' local-preference %d' % attr.local_pref
+    elif attr.type == BGP_ATTR_T['AGGREGATOR']:
+        asn = attr.aggr['asn']
+        m = r.search(asn)
+        if m is not None:
+            asn = int(m.group(1)) * 65536 + int(m.group(2))
+        line += ' aggregator (%s:%s)' % (str(asn), attr.aggr['id'])
+    elif attr.type == BGP_ATTR_T['COMMUNITY']:
+        comm = ' '.join(attr.comm)
+        line += ' community [%s]' % comm
+    elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
+        line += ' originator-id %s' % attr.org_id
+    elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
+        line += ' cluster-list [%s]' % ' '.join(attr.cl_list)
+    elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+        ext_comm_list = []
+        for ext_comm in attr.ext_comm:
+            ext_comm_list.append('0x%016x' % ext_comm)
+        line += ' extended-community [%s]' % ' '.join(ext_comm_list)
+    elif attr.type == BGP_ATTR_T['AS4_PATH']:
+        as_path = ' '.join(attr.as_path)
+        as_path = as_path.replace('{', '(')
+        as_path = as_path.replace('}', ')')
+        line += ' as-path [%s]' % as_path
+    elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
+        asn = attr.aggr['asn']
+        m = r.search(asn)
+        if m is not None:
+            asn = int(m.group(1)) * 65536 + int(m.group(2))
+        line += ' aggregator (%s:%s)' % (str(asn), attr.aggr['id'])
+    return line
 
 def main():
     if len(sys.argv) != 2:
