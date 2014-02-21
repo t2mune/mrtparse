@@ -35,3 +35,10 @@ view pdf
     $ cd example
     $ ./print_all.py MRT形式のファイル名
 ###exabgp_conf.py
+
+ライセンス
+----------
+Copyright &copy; 2014 [greenHippo, LLC.][greenHippo]  
+Licensed under the [Apache License, Version 2.0][Apache]
+[Apache]: http://www.apache.org/licenses/LICENSE-2.0
+[greenHippo]: http://greenhippo.co.jp
