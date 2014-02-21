@@ -29,6 +29,8 @@ def make_exabgp_conf(d):
                 line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
                 for attr in m.rib.entry[0].attr:
                     line += get_bgp_attr(attr)
+            #if m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
+            #    pass
     print('%s next-hop %s;' % (line, nexthop))
     print('''
         }
@@ -47,6 +49,7 @@ def get_bgp_attr(attr):
 
     if attr.type == BGP_ATTR_T['ORIGIN']:
         line += ' origin %s' % ORIGIN_T[attr.origin]
+
     elif attr.type == BGP_ATTR_T['AS_PATH']: 
         as_path = ''
         for path_seg in attr.as_path:
@@ -55,35 +58,45 @@ def get_bgp_attr(attr):
             else:
                 as_path += '%s ' % path_seg['val']
         line += ' as-path [%s]' % as_path
+
     elif attr.type == BGP_ATTR_T['NEXT_HOP']:
         pass
+
     elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
         line += ' med %d' % attr.med
+
     elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
         line += ' local-preference %d' % attr.local_pref
+
     elif attr.type == BGP_ATTR_T['AGGREGATOR']:
         asn = attr.aggr['asn']
         m = r.search(asn)
         if m is not None:
             asn = int(m.group(1)) * 65536 + int(m.group(2))
         line += ' aggregator (%s:%s)' % (str(asn), attr.aggr['id'])
+
     elif attr.type == BGP_ATTR_T['COMMUNITY']:
         comm = ' '.join(attr.comm)
         line += ' community [%s]' % comm
+
     elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
         line += ' originator-id %s' % attr.org_id
+
     elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
         line += ' cluster-list [%s]' % ' '.join(attr.cl_list)
+
     elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
         ext_comm_list = []
         for ext_comm in attr.ext_comm:
             ext_comm_list.append('0x%016x' % ext_comm)
         line += ' extended-community [%s]' % ' '.join(ext_comm_list)
+
     elif attr.type == BGP_ATTR_T['AS4_PATH']:
         as_path = ' '.join(attr.as_path)
         as_path = as_path.replace('{', '(')
         as_path = as_path.replace('}', ')')
         line += ' as-path [%s]' % as_path
+
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
         asn = attr.aggr['asn']
         m = r.search(asn)
