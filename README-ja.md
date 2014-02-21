@@ -1,8 +1,7 @@
 mrtparse
 ========
 
-##mrtparseとは
-MRT形式のファイルをパースするモジュール
+mrtparseとは、MRT形式のファイルをパースするモジュールです。
 
 ##何ができる？
 [RIPE][ripe]などで取得したMRT形式のルート情報をパースすることができます。
@@ -19,7 +18,7 @@ TableDump, TableDumpV2, BGP4MP, BGP4MP_ET
 view pdf
 
 ##インストール方法
-    $ cd mrtparse
+    $ cd mrtparse-master
     $ python setup.py install
     running install
     running build
@@ -33,12 +32,19 @@ view pdf
 
 
 ##使い方
+mrtparse内の定義をすべて現時点の名前空間に上書きします。 
+    
     from mrtparse import *
+    
 
-##exampleのスクリプトの説明
-###print_all.py ※MRT形式のファイルを解析して出力するスクリプトの出力例
+##Example
+###print_all.py
+####内容
+MRT形式のファイルをパースして出力するスクリプト
+####実行例
     $ cd example
     $ ./print_all.py MRT形式のファイル名
+####出力例
     ---------------------------------------------------------------
     MRT Header
     Timestamp: 1392552061(2014-02-16 21:01:01)
@@ -105,7 +111,11 @@ view pdf
                 AS Number: 100
     ---------------------------------------------------------------
 ###exabgp_conf.py
+####内容
+MRT形式のファイルをパースしてコンフィグ形式に出力するスクリプト
+####実行例
     $ ./exabgp_conf.py MRT形式のファイル名
+####出力例
      neighbor 192.168.1.100 {
             router-id 192.168.0.20;
             local-address 192.168.1.20;
@@ -120,7 +130,7 @@ view pdf
 
 ライセンス
 ----------
+Licensed under the [Apache License, Version 2.0][Apache]  
 Copyright &copy; 2014 [greenHippo, LLC.][greenHippo]  
-Licensed under the [Apache License, Version 2.0][Apache]
 [Apache]: http://www.apache.org/licenses/LICENSE-2.0
 [greenHippo]: http://greenhippo.co.jp
