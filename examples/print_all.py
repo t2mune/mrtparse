@@ -109,7 +109,7 @@ def print_bgp_msg(m):
         prline('BGP Identifier: %s' % (m.bgp.msg.bgp_id))
         prline('Optional Parameter Length: %d' % (m.bgp.msg.opt_len))
 
-        for opt in m.bgp.opt_params:
+        for opt in m.bgp.msg.opt_params:
             print_bgp_opt_params(opt)
 
     elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
@@ -132,7 +132,7 @@ def print_bgp_msg(m):
             (m.bgp.msg.err_subcode,
             val_dict(BGP_ERR_SC, m.bgp.msg.err_code, m.bgp.msg.err_subcode)))
 
-def print_bgp_opt_params(opt_params):
+def print_bgp_opt_params(opt):
     global indt
     indt = 1
     prline('Parameter Type/Length: %d/%d' % (opt.type, opt.len))
@@ -145,10 +145,10 @@ def print_bgp_opt_params(opt_params):
 
     indt += 1
     prline('Capability Code: %d(%s)' %
-        (opt.cap_type, val_dict(CAP_CODE_T, opt.cap_type)))
+        (opt.cap_type, val_dict(BGP_CAP_C, opt.cap_type)))
     prline('Capability Length: %d' % opt.cap_len)
 
-    if opt.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+    if opt.cap_type == BGP_CAP_C['Multiprotocol Extensions for BGP-4']:
         prline('AFI: %d(%s)' %
             (opt.multi_ext['afi'],
              val_dict(AFI_T, opt.multi_ext['afi'])))
@@ -157,7 +157,10 @@ def print_bgp_opt_params(opt_params):
             (opt.multi_ext['safi'],
              val_dict(SAFI_T, opt.multi_ext['safi'])))
 
-    elif opt.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
+    elif opt.cap_type == BGP_CAP_C['Route Refresh Capability for BGP-4']:
+        pass
+
+    elif opt.cap_type == BGP_CAP_C['Outbound Route Filtering Capability']:
         prline('AFI: %d(%s)' %
             (opt.orf['afi'], val_dict(AFI_T, opt.orf['afi'])))
         prline('Reserved: %d' % opt.orf['rsvd'])
@@ -167,41 +170,31 @@ def print_bgp_opt_params(opt_params):
 
         for entry in opt.orf['entry']:
             prline('Type: %d' % entry['type'])
-            prline('Send Receive: %d' % entry['send_recv'])
+            prline('Send Receive: %d(%s)' %
+                (entry['send_recv'],
+                 val_dict(ORF_SEND_RECV, entry['send_recv'])))
 
-    elif opt.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
-        prline('AS Number: %d' % opt.support_for_as['as_number'])
-
-    elif opt.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
-        pass
-
-    elif opt.cap_type == CAP_CODE_T['Graceful Restart Capability']:
-        prline('Restart Timers: %d' % opt.graceful_restart['timer'])
-        if opt.cap_len > 2:
+    elif opt.cap_type == BGP_CAP_C['Graceful Restart Capability']:
+        prline('Restart Flags: 0x%x' % opt.graceful_restart['flag'])
+        prline('Restart Time in Seconds: %d' % opt.graceful_restart['sec'])
+        cap_len = opt.cap_len
+        while cap_len > 2:
             prline('AFI: %d(%s)' %
                 (opt.graceful_restart['afi'],
                  val_dict(AFI_T, opt.graceful_restart['afi'])))
             prline('SAFI: %d(%s)' %
                 (opt.graceful_restart['safi'],
                  val_dict(SAFI_T, opt.graceful_restart['safi'])))
-            prline('Flag: %d' % opt.graceful_restart['flags_for_afi'])
+            prline('Flag: 0x%02x' % opt.graceful_restart['flag'])
+            cap_len -= 4
 
-    elif opt.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
-        while opt.cap_len > 3:
-            prline('Prefix: %d' % self.multi_routes_dest['prefix'])
-            opt.cap_len -= 1
-
-    elif opt.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
-        while opt.cap_len > 5:
-            prline('NLRI AFI: %d' % (self.self.ext_next_hop['nlri_afi'] ))
-            prline('NLRI SAFI: %d' % (self.self.ext_next_hop['nlri_safi'] ))
-            prline('Nexthop AFI: %d' % (self.self.ext_next_hop['nexthop_afi'] ))
-            opt.cap_len -= 6
+    elif opt.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
+        prline('AS Number: %s' % opt.support_as4)
 
 def print_bgp_attr(attr):
     global indt
     indt = 1
-    prline('Path Attribute Flag/Type/Length: 0x%02x/%d/%d' %
+    prline('Path Attribute Flags/Type/Length: 0x%02x/%d/%d' %
         (attr.flag, attr.type, attr.len))
 
     indt += 1

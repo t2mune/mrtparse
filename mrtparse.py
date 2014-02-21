@@ -189,6 +189,8 @@ dl += [ORIGIN_T]
 AS_PATH_SEG_T = {
     1:'AS_SET',
     2:'AS_SEQUENCE',
+    3:'AS_CONFED_SEQUENCE', # Defined in RFC5065
+    4:'AS_CONFED_SET',      # Defined in RFC5065
 }
 dl += [AS_PATH_SEG_T]
 
@@ -315,7 +317,7 @@ dl += [BGP_OPT_PARAMS_T]
 
 # Capability Codes
 # Defined in RFC5492
-CAP_CODE_T = {
+BGP_CAP_C = {
     0:'Reserved',
     1:'Multiprotocol Extensions for BGP-4',                     # Defined in RFC2858
     2:'Route Refresh Capability for BGP-4',                     # Defined in RFC2918
@@ -331,60 +333,21 @@ CAP_CODE_T = {
     70:'Enhanced Route Refresh Capability',                     # draft-keyur-bgp-enhanced-route-refresh
     71:'Long-Lived Graceful Restart (LLGR) Capability',         # draft-uttaro-idr-bgp-persistence
 }
-dl += [CAP_CODE_T]
+dl += [BGP_CAP_C]
 
-# Multiprotocol Extensions for BGP-4
-# Defined in RFC2858
-MULTI_EXT_T = {
-    1:'AFI',
-    2:'Reserved',
-    3:'SAFI',
+# Outbound Route Filtering Capability
+# Defined in RFC5291
+ORF_T = {
+    64:'Address Prefix ORF', # Defined in RFC5292
 }
-dl += [MULTI_EXT_T]
+dl += [ORF_T]
 
-ROUTE_REFRESH_CAP_T = {
-    1:'AFI',
-    2:'Reserved',
-    3:'SAFI',
+ORF_SEND_RECV = {
+    1:'Receive',
+    2:'Send',
+    3:'Both',
 }
-dl += [ROUTE_REFRESH_CAP_T]
-
-OUT_ROUTE_FILTER_CAP_T = {
-    1:'AFI',
-    2:'Reserved',
-    3:'SAFI',
-    4:'Number of ORFs',
-    5:'ORF Type',
-    6:'Send/Receive',
-}
-dl += [OUT_ROUTE_FILTER_CAP_T]
-
-MULTI_ROUTES_DEST_T = {
-    1:'Label',
-    2:'Prefix variable',
-}
-dl += [MULTI_ROUTES_DEST_T]
-
-EXT_NEXT_HOP_ENC = {
-    1:'NLRI AFI',
-    2:'NLRI SAFI',
-    3:'Nexthop AFI',
-}
-dl += [EXT_NEXT_HOP_ENC]
-
-GRACEFUL_RESTART_T = {
-    1:'Restart Flags',
-    2:'Restart Time in seconds',
-    3:'AFI',
-    4:'SAFI',
-    5:'Flags for Address Family',
-}
-dl += [GRACEFUL_RESTART_T]
-
-SUPPORT_FOR_AS = {
-    1:'AS Number',
-}
-dl += [SUPPORT_FOR_AS]
+dl += [ORF_SEND_RECV]
 
 # reverse the keys and values of dictionaries above
 for d in dl:
@@ -765,20 +728,16 @@ class OptParams(Base):
         self.cap_type = self.val_num(buf, 1)
         self.cap_len = self.val_num(buf, 1)
 
-        if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
+        if self.cap_type == BGP_CAP_C['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext(buf)
-        elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
+        elif self.cap_type == BGP_CAP_C['Route Refresh Capability for BGP-4']:
             self.p += self.len - 2
-        elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
-            self.unpack_out_route_filter(buf)
-        elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
-            self.unpack_multi_routes_dest(buf)
-        elif self.cap_type == CAP_CODE_T['Extended Next Hop Encoding']:
-            self.unpack_ext_next_hop(buf)
-        elif self.cap_type == CAP_CODE_T['Graceful Restart Capability']:
+        elif self.cap_type == BGP_CAP_C['Outbound Route Filtering Capability']:
+            self.unpack_orf(buf)
+        elif self.cap_type == BGP_CAP_C['Graceful Restart Capability']:
             self.unpack_graceful_restart(buf)
-        elif self.cap_type == CAP_CODE_T['Support for 4-octet AS number capability']:
-            self.unpack_support_for_as(buf)
+        elif self.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
+            self.unpack_support_as4(buf)
         else:
             self.p += self.len - 2
 
@@ -788,7 +747,7 @@ class OptParams(Base):
         self.multi_ext['reserved'] = self.val_num(buf, 1)
         self.multi_ext['safi'] = self.val_num(buf, 1)
    
-    def unpack_out_route_filter(self, buf):
+    def unpack_orf(self, buf):
         self.orf = {}
         self.orf['afi'] = self.val_num(buf, 2)
         self.orf['rsvd'] = self.val_num(buf, 1)
@@ -801,42 +760,22 @@ class OptParams(Base):
             entry['send_recv'] = self.val_num(buf, 1)
             self.orf['entry'].append(entry)
 
-    def unpack_multi_routes_dest(self, buf):
-        self.multi_routes_dest = {}
-        cap_len = self.cap_len
-        self.multi_routes_dest['label'] = self.val_num(buf, 3)
-        while cap_len  > 3:
-            self.multi_routes_dest['prefix'] = self.val_num(buf, 1)
-            cap_len -= 1
-
-    def unpack_ext_next_hop(self, buf):
-        self.ext_next_hop = {}
-        cap_len = self.cap_len
-        while cap_len > 5:
-            self.ext_next_hop['nlri_afi'] = self.val_num(buf, 2)
-            self.ext_next_hop['nlri_safi'] = self.val_num(buf, 2)
-            self.ext_next_hop['nexthop_afi'] = self.val_num(buf, 2)
-            cap_len -= 6
-
     def unpack_graceful_restart(self, buf):
         self.graceful_restart = {}
-        self.graceful_restart['timer'] = self.val_num(buf, 2)
+        n = self.val_num(buf, 2)
+        self.graceful_restart['flag'] = n & 0xf000
+        self.graceful_restart['sec'] = n & 0x0fff
         cap_len = self.cap_len
-        if cap_len > 2:
-        # self.graceful_restart['restart_flags'] = self.val_num(buf, 1)
-        # self.graceful_restart['restart_time_in_seconds'] = self.val_num(buf, 1)
-            while cap_len > 2:
-                self.graceful_restart['afi'] = self.val_num(buf, 2)
-                cap_len -= 2
-                self.graceful_restart['safi'] = self.val_num(buf, 1)
-                cap_len -= 1
-                self.graceful_restart['flags_for_afi'] = self.val_num(buf, 1)
-                cap_len -= 1
+        while cap_len > 2:
+            self.graceful_restart['afi'] = self.val_num(buf, 2)
+            self.graceful_restart['safi'] = self.val_num(buf, 1)
+            self.graceful_restart['flag'] = self.val_num(buf, 1)
+            cap_len -= 4
 
-    def unpack_support_for_as(self, buf):
-        # self.support_for_as = self.val_num(buf, 2)
-        self.support_for_as = {}
-        self.support_for_as['as_number'] = self.val_num(buf, 4)
+    def unpack_support_as4(self, buf):
+        global as_len
+        as_len = 4
+        self.support_as4 = self.val_asn(buf)
 
 class BgpAttr(Base):
     def __init__(self):
