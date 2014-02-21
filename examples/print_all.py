@@ -45,7 +45,8 @@ def print_td_v2(m):
             print('    Originated Time: %d(%s)' %
                 (entry.org_time, datetime.fromtimestamp(entry.org_time)))
             print('    Attribute Length: %d' % entry.attr_len)
-            print_bgp_attr(entry.attr)
+            for attr in entry.attr:
+                print_bgp_attr(attr)
 
 def print_bgp4mp(m):
     print('%s' % BGP4MP_ST[m.subtype])
@@ -91,7 +92,8 @@ def print_bgp_msg(m):
                 (withdrawn.prefix, withdrawn.plen))
         print('    Total Path Attribute Length: %d' % (m.bgp.msg.attr_len))
 
-        print_bgp_attr(m.bgp.msg.attr)
+        for attr in m.bgp.msg.attr:
+            print_bgp_attr(attr)
 
         for nlri in m.bgp.msg.nlri:
             print('    NLRI: %s/%d' % (nlri.prefix, nlri.plen))
@@ -152,58 +154,59 @@ def print_bgp_opt_params(opt_params):
                 print('            Nexthop AFI: %d' % (self.self.ext_next_hop['nexthop_afi'] ))
                 opt.cap_len -= 6
 
-def print_bgp_attr(attr_list):
-    for attr in attr_list:
-        print('    Path Attribute Flag/Type/Length: 0x%02x/%d/%d' %
-            (attr.flag, attr.type, attr.len))
+def print_bgp_attr(attr):
+    print('    Path Attribute Flag/Type/Length: 0x%02x/%d/%d' %
+        (attr.flag, attr.type, attr.len))
 
-        line = '        %s: ' % val_dict(BGP_ATTR_T, attr.type)
-        if attr.type == BGP_ATTR_T['ORIGIN']:
-            line += '%d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin))
-        elif attr.type == BGP_ATTR_T['AS_PATH']:
-            line += '%s' % ' '.join(attr.as_path)
-        elif attr.type == BGP_ATTR_T['NEXT_HOP']:
-            line += '%s' % attr.next_hop
-        elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
-            line += '%d' % attr.med
-        elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
-            line += '%d' % attr.local_pref
-        elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
-            pass
-        elif attr.type == BGP_ATTR_T['AGGREGATOR']:
-            line += '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
-        elif attr.type == BGP_ATTR_T['COMMUNITY']:
-            line += '%s' % ' '.join(attr.comm)
-        elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
-            line += '%s' % attr.org_id
-        elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
-            line += '%s' % attr.cl_list
-        elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
-            ext_comm_list = []
-            for ext_comm in attr.ext_comm:
-                ext_comm_list.append('0x%016x' % ext_comm)
-            line += '%s' % ' '.join(ext_comm_list)
-        elif attr.type == BGP_ATTR_T['AS4_PATH']:
-            line += '%s' % ' '.join(attr.as_path)
-        elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-            line += '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
-        print(line)
+    line = '        %s: ' % val_dict(BGP_ATTR_T, attr.type)
+    if attr.type == BGP_ATTR_T['ORIGIN']:
+        line += '%d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin))
+    elif attr.type == BGP_ATTR_T['NEXT_HOP']:
+        line += '%s' % attr.next_hop
+    elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
+        line += '%d' % attr.med
+    elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
+        line += '%d' % attr.local_pref
+    elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
+        pass
+    elif attr.type == BGP_ATTR_T['AGGREGATOR']:
+        line += '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
+    elif attr.type == BGP_ATTR_T['COMMUNITY']:
+        line += '%s' % ' '.join(attr.comm)
+    elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
+        line += '%s' % attr.org_id
+    elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
+        line += '%s' % attr.cl_list
+    elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+        ext_comm_list = []
+        for ext_comm in attr.ext_comm:
+            ext_comm_list.append('0x%016x' % ext_comm)
+        line += '%s' % ' '.join(ext_comm_list)
+    elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
+        line += '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
+    print(line)
 
-        if attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
-            print('        AFI: %d(%s), SAFI: %d(%s)' %
-                (attr.mp_reach['afi'], val_dict(AFI_T, attr.mp_reach['afi']),
-                 attr.mp_reach['safi'], val_dict(SAFI_T, attr.mp_reach['safi'])))
-            print('        Length: %d, Next-Hop: %s' %
-                (attr.mp_reach['nlen'], attr.mp_reach['next_hop']))
-            for nlri in attr.mp_reach['nlri']:
-                print('        NLRI: %s/%d' % (nlri.prefix, nlri.plen))
-        elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
-            print('        AFI: %d(%s), SAFI: %d(%s)' %
-                (attr.mp_unreach['afi'], val_dict(AFI_T, attr.mp_unreach['afi']),
-                 attr.mp_unreach['safi'], val_dict(SAFI_T, attr.mp_unreach['safi'])))
-            for withdrawn in attr.mp_unreach['withdrawn']:
-                print('        Withdrawn Route: %s/%d' %
-                    (withdrawn.prefix, withdrawn.plen))
+    if attr.type == BGP_ATTR_T['AS_PATH'] or attr.type == BGP_ATTR_T['AS4_PATH']:
+        for path_seg in attr.as_path:
+            print('        Path Segment Type: %d(%s)' %
+                (path_seg['type'], val_dict(AS_PATH_SEG_T, path_seg['type'])))
+            print('        Path Segment Length: %d' % path_seg['len'])
+            print('        Path Segment Value: %s' % path_seg['val'])
+    elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
+        print('        AFI: %d(%s), SAFI: %d(%s)' %
+            (attr.mp_reach['afi'], val_dict(AFI_T, attr.mp_reach['afi']),
+             attr.mp_reach['safi'], val_dict(SAFI_T, attr.mp_reach['safi'])))
+        print('        Length: %d, Next-Hop: %s' %
+            (attr.mp_reach['nlen'], attr.mp_reach['next_hop']))
+        for nlri in attr.mp_reach['nlri']:
+            print('        NLRI: %s/%d' % (nlri.prefix, nlri.plen))
+    elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
+        print('        AFI: %d(%s), SAFI: %d(%s)' %
+            (attr.mp_unreach['afi'], val_dict(AFI_T, attr.mp_unreach['afi']),
+             attr.mp_unreach['safi'], val_dict(SAFI_T, attr.mp_unreach['safi'])))
+        for withdrawn in attr.mp_unreach['withdrawn']:
+            print('        Withdrawn Route: %s/%d' %
+                (withdrawn.prefix, withdrawn.plen))
 
 def main():
     if len(sys.argv) != 2:

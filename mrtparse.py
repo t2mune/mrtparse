@@ -333,6 +333,8 @@ CAP_CODE_T = {
 }
 dl += [CAP_CODE_T]
 
+# Multiprotocol Extensions for BGP-4
+# Defined in RFC2858
 MULTI_EXT_T = {
     1:'AFI',
     2:'Reserved',
@@ -889,22 +891,21 @@ class BgpAttr(Base):
         self.origin = self.val_num(buf, 1)
 
     def unpack_as_path(self, buf):
-        global as_len
         self.as_path = []
         attr_len = self.p + self.len
         while self.p < attr_len:
-            seg_val = []
-            seg_type = self.val_num(buf, 1)
-            seg_len = self.val_num(buf, 1)
-            if seg_len == 0: next
-
-            for i in range(seg_len):
-                seg_val.append(self.val_asn(buf))
-
-            if seg_type == 1:
-                self.as_path.append('{%s}' % ' '.join(seg_val))
-            else:
-                self.as_path.append(' '.join(seg_val))
+            l = []
+            path_seg = {
+                'type':self.val_num(buf, 1),
+                'len':self.val_num(buf, 1),
+                'val':'',
+            }
+            if path_seg['len'] == 0:
+                next
+            for i in range(path_seg['len']):
+                l.append(self.val_asn(buf))
+            path_seg['val'] = ' '.join(l)
+            self.as_path.append(path_seg)
 
     def unpack_next_hop(self, buf):
         if self.len == 4:
