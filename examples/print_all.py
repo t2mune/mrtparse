@@ -103,22 +103,22 @@ def print_bgp_msg(m):
         (m.bgp.msg.type, val_dict(BGP_MSG_T, m.bgp.msg.type)))
 
     if m.bgp.msg.type == BGP_MSG_T['OPEN']:
-        prline('Version: %d' % (m.bgp.msg.ver))
-        prline('My AS: %d' % (m.bgp.msg.my_as))
-        prline('Hold Time: %d' % (m.bgp.msg.holdtime))
-        prline('BGP Identifier: %s' % (m.bgp.msg.bgp_id))
-        prline('Optional Parameter Length: %d' % (m.bgp.msg.opt_len))
+        prline('Version: %d' % m.bgp.msg.ver)
+        prline('My AS: %d' % m.bgp.msg.my_as)
+        prline('Hold Time: %d' % m.bgp.msg.holdtime)
+        prline('BGP Identifier: %s' % m.bgp.msg.bgp_id)
+        prline('Optional Parameter Length: %d' % m.bgp.msg.opt_len)
 
         for opt in m.bgp.msg.opt_params:
             print_bgp_opt_params(opt)
 
     elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
-        prline('Withdrawn Routes Length: %d' % (m.bgp.msg.wd_len))
+        prline('Withdrawn Routes Length: %d' % m.bgp.msg.wd_len)
         for withdrawn in m.bgp.msg.withdrawn:
             prline('Withdrawn Route: %s/%d' %
                 (withdrawn.prefix, withdrawn.plen))
 
-        prline('Total Path Attribute Length: %d' % (m.bgp.msg.attr_len))
+        prline('Total Path Attribute Length: %d' % m.bgp.msg.attr_len)
         for attr in m.bgp.msg.attr:
             print_bgp_attr(attr)
 
@@ -127,7 +127,8 @@ def print_bgp_msg(m):
 
     elif m.bgp.msg.type == BGP_MSG_T['NOTIFICATION']:
         prline('Error Code: %d(%s)' % 
-            (m.bgp.msg.err_code, val_dict(BGP_ERR_C, m.bgp.msg.err_code)))
+            (m.bgp.msg.err_code,
+             val_dict(BGP_ERR_C, m.bgp.msg.err_code)))
         prline('Error Subcode: %d(%s)' % 
             (m.bgp.msg.err_subcode,
             val_dict(BGP_ERR_SC, m.bgp.msg.err_code, m.bgp.msg.err_subcode)))
