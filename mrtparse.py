@@ -768,7 +768,7 @@ class OptParams(Base):
         if self.cap_type == CAP_CODE_T['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext(buf)
         elif self.cap_type == CAP_CODE_T['Route Refresh Capability for BGP-4']:
-            self.unpack_route_refresh(buf)
+            self.p += self.len - 2
         elif self.cap_type == CAP_CODE_T['Outbound Route Filtering Capability']:
             self.unpack_out_route_filter(buf)
         elif self.cap_type == CAP_CODE_T['Multiple routes to a destination capability']:
@@ -788,23 +788,18 @@ class OptParams(Base):
         self.multi_ext['reserved'] = self.val_num(buf, 1)
         self.multi_ext['safi'] = self.val_num(buf, 1)
    
-    def unpack_route_refresh(self, buf):
-        self.route_refresh = {}
-        # self.route_refresh['afi'] = self.val_num(buf, 2)
-        # self.route_refresh['reserved'] = self.val_num(buf, 1)
-        # self.route_refresh['safi'] = self.val_num(buf, 1)
-
     def unpack_out_route_filter(self, buf):
         self.orf = {}
         self.orf['afi'] = self.val_num(buf, 2)
         self.orf['rsvd'] = self.val_num(buf, 1)
         self.orf['safi'] = self.val_num(buf, 1)
         self.orf['number'] = self.val_num(buf, 1)
+        self.orf['entry'] = []
         for i in range(self.orf['number']):
-            orf = {}
-            orf['type'] = self.val_num(buf, 1)
-            orf['send_recv'] = self.val_num(buf, 1)
-            self.orf['orf'].append(orf)
+            entry = {}
+            entry['type'] = self.val_num(buf, 1)
+            entry['send_recv'] = self.val_num(buf, 1)
+            self.orf['entry'].append(entry)
 
     def unpack_multi_routes_dest(self, buf):
         self.multi_routes_dest = {}
@@ -901,8 +896,6 @@ class BgpAttr(Base):
             path_seg = {}
             path_seg['type'] = self.val_num(buf, 1)
             path_seg['len'] = self.val_num(buf, 1)
-            if path_seg['len'] == 0:
-                next
             for i in range(path_seg['len']):
                 l.append(self.val_asn(buf))
             path_seg['val'] = ' '.join(l)
