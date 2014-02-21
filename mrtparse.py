@@ -29,7 +29,7 @@ BZ2_MAGIC  = b'\x42\x5a\x68'
 # MRT header length
 MRT_HDR_LEN = 12
 
-# AS number length(especially to use AS_PATH attribute)
+# AS number length(especially to parse AS_PATH attribute)
 as_len = 4
 
 # a variable to reverse the keys and values of dictionaries below

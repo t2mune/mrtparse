@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+'''
+exabgp_conf.py is a script to create a configuration file for exabgp using mrtparse.
+
+See https://github.com/YoshiyukiYamauchi/mrtparse for more informations.
+This script is published under a Apache License, Version 2.0.
+Created by
+    Tetsumune KISO <t2mune@gmail.com>,
+    Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>,
+    Nobuhiro ITOU <js333123@gmail.com>.
+Copyright (C) greenHippo, LLC. All rights reserved.
+'''
 
 from mrtparse import *
 import sys, re

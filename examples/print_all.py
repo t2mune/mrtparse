@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+'''
+print_all.py is a script to print a MRT format data using mrtparse.
+
+See https://github.com/YoshiyukiYamauchi/mrtparse for more informations.
+This script is published under a Apache License, Version 2.0.
+Created by
+    Tetsumune KISO <t2mune@gmail.com>,
+    Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>,
+    Nobuhiro ITOU <js333123@gmail.com>.
+Copyright (C) greenHippo, LLC. All rights reserved.
+'''
 
 import sys
 from optparse import OptionParser
@@ -18,7 +29,8 @@ def print_mrt(m):
     prline('MRT Header')
 
     indt += 1
-    prline('Timestamp: %d(%s)' % (m.ts, datetime.fromtimestamp(m.ts)))
+    prline('Timestamp: %d(%s)' %
+        (m.ts, datetime.fromtimestamp(m.ts)))
     prline('Type: %d(%s)' % (m.type, val_dict(MSG_T, m.type)))
     prline('Subtype: %d(%s)' %
         (m.subtype, val_dict(MSG_ST, m.type, m.subtype)))
@@ -59,7 +71,8 @@ def print_td_v2(m):
         for entry in m.rib.entry:
             prline('Peer Index: %d' % entry.peer_index)
             prline('Originated Time: %d(%s)' %
-                (entry.org_time, datetime.fromtimestamp(entry.org_time)))
+                (entry.org_time,
+                 datetime.fromtimestamp(entry.org_time)))
             prline('Attribute Length: %d' % entry.attr_len)
             for attr in entry.attr:
                 print_bgp_attr(attr)
@@ -89,49 +102,49 @@ def print_bgp4mp(m):
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
-        print_bgp_msg(m)
+        print_bgp_msg(m.bgp.msg)
 
-def print_bgp_msg(m):
+def print_bgp_msg(msg):
     global indt
     indt = 0
     prline('BGP Message')
 
     indt += 1
     prline('Marker: -- ignored --')
-    prline('Length: %d' % m.bgp.msg.len)
+    prline('Length: %d' % msg.len)
     prline('Type: %d(%s)' %
-        (m.bgp.msg.type, val_dict(BGP_MSG_T, m.bgp.msg.type)))
+        (msg.type, val_dict(BGP_MSG_T, msg.type)))
 
-    if m.bgp.msg.type == BGP_MSG_T['OPEN']:
-        prline('Version: %d' % m.bgp.msg.ver)
-        prline('My AS: %d' % m.bgp.msg.my_as)
-        prline('Hold Time: %d' % m.bgp.msg.holdtime)
-        prline('BGP Identifier: %s' % m.bgp.msg.bgp_id)
-        prline('Optional Parameter Length: %d' % m.bgp.msg.opt_len)
+    if msg.type == BGP_MSG_T['OPEN']:
+        prline('Version: %d' % msg.ver)
+        prline('My AS: %d' % msg.my_as)
+        prline('Hold Time: %d' % msg.holdtime)
+        prline('BGP Identifier: %s' % msg.bgp_id)
+        prline('Optional Parameter Length: %d' % msg.opt_len)
 
-        for opt in m.bgp.msg.opt_params:
+        for opt in msg.opt_params:
             print_bgp_opt_params(opt)
 
-    elif m.bgp.msg.type == BGP_MSG_T['UPDATE']:
-        prline('Withdrawn Routes Length: %d' % m.bgp.msg.wd_len)
-        for withdrawn in m.bgp.msg.withdrawn:
+    elif msg.type == BGP_MSG_T['UPDATE']:
+        prline('Withdrawn Routes Length: %d' % msg.wd_len)
+        for withdrawn in msg.withdrawn:
             prline('Withdrawn Route: %s/%d' %
                 (withdrawn.prefix, withdrawn.plen))
 
-        prline('Total Path Attribute Length: %d' % m.bgp.msg.attr_len)
-        for attr in m.bgp.msg.attr:
+        prline('Total Path Attribute Length: %d' % msg.attr_len)
+        for attr in msg.attr:
             print_bgp_attr(attr)
 
-        for nlri in m.bgp.msg.nlri:
+        for nlri in msg.nlri:
             prline('NLRI: %s/%d' % (nlri.prefix, nlri.plen))
 
-    elif m.bgp.msg.type == BGP_MSG_T['NOTIFICATION']:
+    elif msg.type == BGP_MSG_T['NOTIFICATION']:
         prline('Error Code: %d(%s)' % 
-            (m.bgp.msg.err_code,
-             val_dict(BGP_ERR_C, m.bgp.msg.err_code)))
+            (msg.err_code,
+             val_dict(BGP_ERR_C, msg.err_code)))
         prline('Error Subcode: %d(%s)' % 
-            (m.bgp.msg.err_subcode,
-            val_dict(BGP_ERR_SC, m.bgp.msg.err_code, m.bgp.msg.err_subcode)))
+            (msg.err_subcode,
+            val_dict(BGP_ERR_SC, msg.err_code, msg.err_subcode)))
 
 def print_bgp_opt_params(opt):
     global indt
@@ -163,10 +176,12 @@ def print_bgp_opt_params(opt):
 
     elif opt.cap_type == BGP_CAP_C['Outbound Route Filtering Capability']:
         prline('AFI: %d(%s)' %
-            (opt.orf['afi'], val_dict(AFI_T, opt.orf['afi'])))
+            (opt.orf['afi'],
+             val_dict(AFI_T, opt.orf['afi'])))
         prline('Reserved: %d' % opt.orf['rsvd'])
         prline('SAFI: %d(%s)' %
-            (opt.orf['safi'], val_dict(SAFI_T, opt.orf['safi'])))
+            (opt.orf['safi'],
+             val_dict(SAFI_T, opt.orf['safi'])))
         prline('Number: %d' % opt.orf['number'])
 
         for entry in opt.orf['entry']:
@@ -176,8 +191,11 @@ def print_bgp_opt_params(opt):
                  val_dict(ORF_SEND_RECV, entry['send_recv'])))
 
     elif opt.cap_type == BGP_CAP_C['Graceful Restart Capability']:
-        prline('Restart Flags: 0x%x' % opt.graceful_restart['flag'])
-        prline('Restart Time in Seconds: %d' % opt.graceful_restart['sec'])
+        prline('Restart Flags: 0x%x' %
+            opt.graceful_restart['flag'])
+        prline('Restart Time in Seconds: %d' %
+            opt.graceful_restart['sec'])
+
         cap_len = opt.cap_len
         while cap_len > 2:
             prline('AFI: %d(%s)' %
