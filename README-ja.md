@@ -1,23 +1,23 @@
 mrtparse
 ========
 
-The mrtparse, is a module to parse the file format of the MRT.
+mrtparseとは、MRT形式のファイルをパースするモジュールです。
 
-##What you can do with mrtparse
-You can parse the route information of MRT format that has been acquired in such [RIPE][ripe].
-Of course, You can also parse the full route.
+##何ができる？
+[RIPE][ripe]などで取得したMRT形式のルート情報をパースすることができます。
+フルルートのパースもできます。
 [ripe]: http://data.ris.ripe.net/rrc00/
 
-##Requirements
+##動作環境
 Python2、Python3
 
-##Corresponding type
+##対応タイプ
 TableDump, TableDumpV2, BGP4MP, BGP4MP_ET
 
-##Object tree diagram
+##オブジェクト樹形図
 view pdf
 
-##How to install
+##インストール方法
     $ cd mrtparse-master
     $ python setup.py install
     running install
@@ -31,20 +31,20 @@ view pdf
     $
 
 
-##How to use
-Please overwrite the name space of time all the definition of mrtparse within. 
+##使い方
+mrtparse内の定義をすべて現時点の名前空間に上書きします。 
     
     from mrtparse import *
     
 
 ##Example
 ###print_all.py
-####content
-Script that outputs the parse the file format of the MRT.
-####Execution example
+####内容
+MRT形式のファイルをパースして出力するスクリプト
+####実行例
     $ cd example
-    $ ./print_all.py "File name format of the MRT"
-####Example output
+    $ ./print_all.py MRT形式のファイル名
+####出力例
     ---------------------------------------------------------------
     MRT Header
     Timestamp: 1392552061(2014-02-16 21:01:01)
@@ -111,11 +111,11 @@ Script that outputs the parse the file format of the MRT.
                 AS Number: 100
     ---------------------------------------------------------------
 ###exabgp_conf.py
-####content
-Script to be output to the configuration Parse a file format of the MRT
-####Execution example
-    $ ./exabgp_conf.py "File name format of the MRT"
-####Example output
+####内容
+MRT形式のファイルをパースしてコンフィグ形式に出力するスクリプト
+####実行例
+    $ ./exabgp_conf.py MRT形式のファイル名
+####出力例
      neighbor 192.168.1.100 {
             router-id 192.168.0.20;
             local-address 192.168.1.20;
@@ -128,7 +128,7 @@ Script to be output to the configuration Parse a file format of the MRT
             }
         }
 
-License
+ライセンス
 ----------
 Licensed under the [Apache License, Version 2.0][Apache]  
 Copyright &copy; 2014 [greenHippo, LLC.][greenHippo]  
