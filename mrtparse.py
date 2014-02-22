@@ -666,6 +666,8 @@ class BgpMessage(Base):
             self.unpack_update(buf, af)
         elif self.type == BGP_MSG_T['NOTIFICATION']:
             self.unpack_notification(buf)
+        elif self.type == BGP_MSG_T['ROUTE-REFRESH']:
+            self.unpack_route-refresh(buf)
         else:
             self.p += self.len - self.p
         return self.p
@@ -710,6 +712,11 @@ class BgpMessage(Base):
         self.err_code = self.val_num(buf, 1)
         self.err_subcode = self.val_num(buf, 1)
         self.data = self.val_num(buf, self.len - self.p)                
+
+    def unpack_route-refresh(self, buf):
+        self.afi = self.val_num(buf, 2)
+        self.reserved = self.val_num(buf, 1)
+        self.safi = self.val_num(buf, 1)
 
 class OptParams(Base):
     def __init__(self):
