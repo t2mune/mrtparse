@@ -44,8 +44,8 @@ def print_mrt(m):
 def print_td(m):
     global indt
     indt = 0
-    prline('%s' % m.type)
-    
+    prline('%s' % MSG_T[m.type])
+
     indt += 1
     prline('View Number: %d' % m.td.view)
     prline('Sequence Number: %d' % m.td.seq)
@@ -122,9 +122,9 @@ def print_bgp4mp(m):
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
-        print_bgp_msg(m.bgp.msg)
+        print_bgp_msg(m.bgp.msg, subtype)
 
-def print_bgp_msg(msg):
+def print_bgp_msg(msg, subtype):
     global indt
     indt = 0
     prline('BGP Message')
