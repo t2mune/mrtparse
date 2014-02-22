@@ -765,11 +765,14 @@ class OptParams(Base):
         n = self.val_num(buf, 2)
         self.graceful_restart['flag'] = n & 0xf000
         self.graceful_restart['sec'] = n & 0x0fff
+        self.graceful_restart['entry'] = []
         cap_len = self.cap_len
         while cap_len > 2:
-            self.graceful_restart['afi'] = self.val_num(buf, 2)
-            self.graceful_restart['safi'] = self.val_num(buf, 1)
-            self.graceful_restart['flag'] = self.val_num(buf, 1)
+            entry = {}
+            entry['afi'] = self.val_num(buf, 2)
+            entry['safi'] = self.val_num(buf, 1)
+            entry['flag'] = self.val_num(buf, 1)
+            self.graceful_restart['entry'].append(entry)
             cap_len -= 4
 
     def unpack_support_as4(self, buf):

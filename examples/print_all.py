@@ -122,7 +122,7 @@ def print_bgp4mp(m):
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
-        print_bgp_msg(m.bgp.msg, subtype)
+        print_bgp_msg(m.bgp.msg, m.subtype)
 
 def print_bgp_msg(msg, subtype):
     global indt
@@ -216,16 +216,12 @@ def print_bgp_opt_params(opt):
         prline('Restart Time in Seconds: %d' %
             opt.graceful_restart['sec'])
 
-        cap_len = opt.cap_len
-        while cap_len > 2:
+        for entry in opt.graceful_restart['entry']:
             prline('AFI: %d(%s)' %
-                (opt.graceful_restart['afi'],
-                 val_dict(AFI_T, opt.graceful_restart['afi'])))
+                (entry['afi'], val_dict(AFI_T, entry['afi'])))
             prline('SAFI: %d(%s)' %
-                (opt.graceful_restart['safi'],
-                 val_dict(SAFI_T, opt.graceful_restart['safi'])))
-            prline('Flag: 0x%02x' % opt.graceful_restart['flag'])
-            cap_len -= 4
+                (entry['safi'], val_dict(SAFI_T, entry['safi'])))
+            prline('Flag: 0x%02x' % entry['flag'])
 
     elif opt.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
         prline('AS Number: %s' % opt.support_as4)
