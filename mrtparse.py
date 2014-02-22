@@ -491,8 +491,8 @@ class Reader(Base):
 
         if self.mrt.type == MSG_T['TABLE_DUMP']:
             as_len = 2
-            self.mrt.table_dump = TableDump()
-            self.mrt.table_dump.unpack(data, self.mrt.subtype)
+            self.mrt.td = TableDump()
+            self.mrt.td.unpack(data, self.mrt.subtype)
         elif self.mrt.type == MSG_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
         elif ( self.mrt.type == MSG_T['BGP4MP']
@@ -540,7 +540,7 @@ class TableDump(Base):
         self.view = self.val_num(buf, 2)
         self.seq = self.val_num(buf, 2)
         self.prefix = self.val_addr(buf, subtype)
-        self.len = self.val_num(buf, 1)
+        self.plen = self.val_num(buf, 1)
         self.status = self.val_num(buf, 1)
         self.org_time = self.val_num(buf, 4)
         self.peer_ip = self.val_addr(buf, subtype)

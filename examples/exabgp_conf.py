@@ -36,13 +36,14 @@ def make_exabgp_conf(d):
     
     for m in d:
         if m.type == MSG_T['TABLE_DUMP_V2']:
+            line = ''
             if m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']:
                 line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
                 for attr in m.rib.entry[0].attr:
                     line += get_bgp_attr(attr)
             if m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
                 pass
-    print('%s next-hop %s;' % (line, nexthop))
+            print('%s next-hop %s;' % (line, nexthop))
     print('''
         }
     }

@@ -41,6 +41,26 @@ def print_mrt(m):
         or m.type == MSG_T['OSPFv3_ET']):
         prline('Microsecond Timestamp: %d' % m.micro_ts)
 
+def print_td(m):
+    global indt
+    indt = 0
+    prline('%s' % m.type)
+    
+    indt += 1
+    prline('View Number: %d' % m.td.view)
+    prline('Sequence Number: %d' % m.td.seq)
+    prline('Prefix: %s' % m.td.prefix)
+    prline('Prefix length: %d' % m.td.plen)
+    prline('Status: %d' % m.td.status)
+    prline('Originated Time: %d(%s)' %
+        (m.td.org_time,
+         datetime.fromtimestamp(m.td.org_time)))
+    prline('Peer IP Address: %s' % m.td.peer_ip)
+    prline('Peer AS: %s' % m.td.peer_as)
+    prline('Attribute Length: %d' % m.td.attr_len)
+    for attr in m.td.attr:
+        print_bgp_attr(attr)
+
 def print_td_v2(m):
     global indt
     indt = 0
@@ -286,11 +306,13 @@ def main():
     d = Reader(sys.argv[1])
     for m in d:
         print_mrt(m)
-        if (   m.type == MSG_T['BGP4MP']
-            or m.type == MSG_T['BGP4MP_ET']):
-            print_bgp4mp(m)
+        if m.type == MSG_T['TABLE_DUMP']:
+            print_td(m)
         elif m.type == MSG_T['TABLE_DUMP_V2']:
             print_td_v2(m)
+        elif ( m.type == MSG_T['BGP4MP']
+            or m.type == MSG_T['BGP4MP_ET']):
+            print_bgp4mp(m)
 
 if __name__ == '__main__':
     main()
