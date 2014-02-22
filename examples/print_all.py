@@ -166,6 +166,11 @@ def print_bgp_msg(msg, subtype):
             (msg.err_subcode,
             val_dict(BGP_ERR_SC, msg.err_code, msg.err_subcode)))
 
+    elif msg.type == BGP_MSG_T['ROUTE-REFRESH']:
+        prline('Address Family Identifier: %d(%s)' % 
+            (msg.afi,
+             val_dict(AFI_T, msg.afi)))
+
 def print_bgp_opt_params(opt):
     global indt
     indt = 1
