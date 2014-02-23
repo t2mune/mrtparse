@@ -3,7 +3,7 @@ mrtparse
 
 MRT形式のデータを読み込み、解析するためのモジュールです。  
 MRT形式とは、ルーティング情報（メッセージ、状態遷移、経路情報）を保存するためのフォーマットで、RFC6396で標準化されています。  
-Quagga/Zebra、BIRD、OpenBGPD、PyRTなどでMRT形式のデータが出力できます。
+Quagga/Zebra、BIRD、OpenBGPD、PyRTなどでMRT形式のデータを出力できます。
 
 ##解析可能なタイプ
 Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
