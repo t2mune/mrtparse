@@ -20,7 +20,7 @@ Python2、Python3
     
 
 ##インストール方法
-    $ cd *ダウンロード後解凍したmrtparseのディレクトリ*
+    $ cd _ダウンロード後解凍したmrtparseのディレクトリ_
     $ python setup.py install
     running install
     running build
