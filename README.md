@@ -58,95 +58,65 @@ MRT形式のファイル（gzip、bzip2にも対応）を文字列（ファイ�
     
 
 ##Example
+これらのスクリプトは、examples内に収録。
 ###print_all.py
-####content
-Script that outputs the parse the file format of the MRT.
-####Execution example
-    $ cd example
-    $ ./print_all.py "File name format of the MRT"
-####Example output
+####内容
+MRT形式のファイルの内容を出力する
+####実行例
+    print_all.py ファイルへのパス
+####出力例
     ---------------------------------------------------------------
     MRT Header
-    Timestamp: 1392552061(2014-02-16 21:01:01)
+        Timestamp: 1392828028(2014-02-20 01:40:28)
         Type: 16(BGP4MP)
-        Subtype: 1(BGP4MP_MESSAGE)
-        Length: 94
-    BGP4MP_MESSAGE
+        Subtype: 5(BGP4MP_STATE_CHANGE_AS4)
+        Length: 24
+    BGP4MP_STATE_CHANGE_AS4
         Peer AS Number: 100
         Local AS Number: 64512
         Interface Index: 0
         Address Family: 1(AFI_IPv4)
         Peer IP Address: 192.168.1.21
         Local IP Address: 192.168.1.100
-    BGP Message
-        Marker: -- ignored --
-        Length: 78
-        Type: 1(OPEN)
-        Version: 4
-        My AS: 100
-        Hold Time: 90
-        BGP Identifier: 192.168.0.21
-        Optional Parameter Length: 49
-        Parameter Type/Length: 2/6
-            Capabilities
-                Capability Code: 1(Multiprotocol Extensions for BGP-4)
-                Capability Length: 4
-                AFI: 1(AFI_IPv4)
-                Reserved: 0
-                SAFI: 1(SAFI_UNICAST)
-        Parameter Type/Length: 2/6
-            Capabilities
-                Capability Code: 1(Multiprotocol Extensions for BGP-4)
-                Capability Length: 4
-                AFI: 2(AFI_IPv6)
-                Reserved: 0
-                SAFI: 1(SAFI_UNICAST)
-        Parameter Type/Length: 2/2
-            Capabilities
-                Capability Code: 128(Unassigned)
-                Capability Length: 0
-        Parameter Type/Length: 2/2
-            Capabilities
-                Capability Code: 2(Route Refresh Capability for BGP-4)
-                Capability Length: 0
-        Parameter Type/Length: 2/4
-            Capabilities
-                Capability Code: 64(Graceful Restart Capability)
-                Capability Length: 2
-                Restart Timers: 120
-        Parameter Type/Length: 2/9
-            Capabilities
-                Capability Code: 3(Outbound Route Filtering Capability)
-                Capability Length: 7
-                AFI: 1(AFI_IPv4)
-                Reserved: 0
-                SAFI: 1(SAFI_UNICAST)
-                Number: 1
-                Type: 64
-                Send Receive: 1
-        Parameter Type/Length: 2/6
-            Capabilities
-                Capability Code: 65(Support for 4-octet AS number capability)
-                Capability Length: 4
-                AS Number: 100
+        Old State: 5(OpenConfirm)
+        New State: 6(Established)
     ---------------------------------------------------------------
-###exabgp_conf.py
-####content
-Script to be output to the configuration Parse a file format of the MRT
-####Execution example
-    $ ./exabgp_conf.py "File name format of the MRT"
-####Example output
-     neighbor 192.168.1.100 {
-            router-id 192.168.0.20;
-            local-address 192.168.1.20;
-            local-as 65000;
-            peer-as 64512;
-            graceful-restart;
+    MRT Header
+        Timestamp: 1392828028(2014-02-20 01:40:28)
+        Type: 16(BGP4MP)
+        Subtype: 4(BGP4MP_MESSAGE_AS4)
+        ...
         
-            static {
 
-            }
+###exabgp_conf.py
+####内容
+MRT形式のファイルをexabgp用のコンフィグ形式に変換して出力する。
+####実行例
+    exabgp_conf.py ファイルへのパス
+####出力例
+    neighbor 192.168.1.100 {
+        router-id 192.168.0.20;
+        local-address 192.168.1.20;
+        local-as 65000;
+        peer-as 64512;
+        graceful-restart;
+
+        static {
+                route 1.0.0.0/24 origin IGP as-path [29049 15169 ] next-hop 192.168.1.254;
+                route 1.0.4.0/24 origin IGP as-path [29049 6939 7545 56203 ] next-hop 192.168.1.254;
+                route 1.0.5.0/24 origin IGP as-path [29049 6939 7545 56203 ] next-hop 192.168.1.254;
+                route 1.0.6.0/24 origin IGP as-path [29049 20485 4826 38803 56203 ] community [20485:31701] next-hop 192.168.1.254;
+                route 1.0.7.0/24 origin IGP as-path [29049 20485 4826 38803 56203 ] community [20485:31701] next-hop 192.168.1.254;
+                route 1.0.20.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.22.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.24.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.26.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.28.0/22 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                ...
         }
+    }
+
+
 
 License
 ----------
