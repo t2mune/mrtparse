@@ -1,23 +1,14 @@
 mrtparse
 ========
 
-MRT形式のデータを読み込み、解析するためのモジュールです。  
+MRT形式のデータを読み込み、解析するためのモジュールです。
 MRT形式は、ルーティング情報（メッセージ、状態遷移、経路情報）を保存するためのフォーマットで、RFC6396で標準化されています。  
-RFC6396においてMRTのタイプとして定義されているTableDump、TableDumpV2、BGP4MP、BGP4MP_ETに対応しています
 
 ##動作環境
 Python2、Python3
 
-##対応タイプ(RFC6396)
-###TableDump
-BGPルーティング情報ベース（RIB）の内容をエンコードするために使用されるデータフォーマット。  
-###TableDumpV2
-ASNのサポートとのBGPマルチプロトコル拡張のためのフルサポートを含むようにTABLE_DUMPタイプを更新するデータフォーマット。 
-###BGP4MP
-Multiprotocol Extensions for BGP-4のデータを定義しているデータフォーマット。
-###BGP4MP_ET
-Multiprotocol Extensions for BGP-4のデータを定義していて、マイクロ秒での測定をサポートするデータフォーマット。
-
+##解析可能なタイプ(RFC6396)
+TableDump, TableDumpV2, BGP4MP, BGP4MP_ET
 
 ##インストール方法
     $ cd mrtparse-master
