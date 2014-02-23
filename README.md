@@ -63,7 +63,7 @@ These scripts are included in 'examples' directory.
 ###print_all.py
 ####Content
 It displays the contents of a MRT format file.
-####Execution example
+####Execution
     print_all.py ファイルへのパス
 ####出力例
     ---------------------------------------------------------------
