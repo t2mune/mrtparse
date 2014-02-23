@@ -20,7 +20,7 @@ Python2、Python3
     
 
 ##インストール方法
-    $ cd _ クローンディレクトリ _ 
+    $ cd クローンディレクトリ
     $ python setup.py install
     running install
     running build
