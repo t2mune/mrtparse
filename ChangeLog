@@ -1,5 +1,8 @@
+2014-02-23 Tetsumune KISO <t2mune@gmail.com>
+	* Bugfix - fixed a script "exabgp.py".
+
 2014-02-22 Nobuhiro ITOU<js333123@gmail.com>
-	* Route-Refresh - improved codes.
+	* Update - added a support for BGP Message "Route-Refresh"
 	* Release - mrtparse 0.9 released.
 
 2014-02-22 Tetsumune KISO <t2mune@gmail.com>
