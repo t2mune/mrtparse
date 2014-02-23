@@ -15,7 +15,7 @@ import gzip, bz2
 
 # mrtparse information
 __pyname__  = 'mrtparse'
-__version__ =  '0.9'
+__version__ =  '1.0'
 __descr__   = 'parse a MRT-format data'
 __url__     = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
