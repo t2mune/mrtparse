@@ -15,7 +15,13 @@ MRT formatは、ネットワークの経路情報を標準化されたデータ�
 Python2、Python3
 
 ##対応タイプ
-TableDump, TableDumpV2, BGP4MP, BGP4MP_ET
+###TableDump(RFC6396)  
+BGPルーティング情報ベース（RIB）の内容を符号化するために使用される。  
+###TableDumpV2(RFC6396)
+ASNのサポートとのBGPマルチプロトコル拡張のためのフルサポートを含むようにTABLE_DUMPタイプを更新します。 
+###BGP4MP
+
+###BGP4MP_ET
 
 ##オブジェクト樹形図
 view pdf
