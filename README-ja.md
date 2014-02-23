@@ -82,7 +82,7 @@ MRT形式のファイルの内容を出力する
         Type: 16(BGP4MP)
         Subtype: 4(BGP4MP_MESSAGE_AS4)
         Length: 39
-    .......
+    (.......省略.......)
 ###exabgp_conf.py
 ####内容
 MRT形式のファイルをパースしてコンフィグ形式に出力するスクリプト
