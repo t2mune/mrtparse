@@ -23,7 +23,7 @@ Access [https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git], and cl
 
 
 ##Install
-    $ cd 'Clone Directory'
+    $ cd <Clone Directory>
     $ python setup.py install
     running install
     running build
