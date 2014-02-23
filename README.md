@@ -44,15 +44,17 @@ or
     import mrtparse
     
 ##Programming
-Please overwrite the name space of time all the definition of mrtparse within.
+First, import module.
     
     from mrtparse import *
     
-Please passed to the Reader() in the argument file object or files, and to loop through one entry.
+MRT形式のファイル（gzip、bzip2にも対応）を文字列（ファイルへのパス）、 またはファイルオブジェクトでReader()に渡す。  
+返ってきたオブジェクトをループで1エントリずつ取り出して処理する。  
+
     
     d = Reader(f)
-        for m in d:
-            "Describe the processing content"
+    for m in d:
+        処理内容を記述する
     
 
 ##Example
