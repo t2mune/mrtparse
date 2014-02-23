@@ -1,7 +1,9 @@
 mrtparse
 ========
 
-mrtparse is a module to read and analyze the MRT format data.
+mrtparse is a module to read and analyze the MRT format data.  
+This format standardized in RFC6396 can be used to export routing protocol messages, state changes, and routing information base contents.  
+
 
 ##What is MRT format
 MRT format is a data format for storing data in a standardized format for routing information of the network.
