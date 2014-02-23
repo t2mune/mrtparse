@@ -58,7 +58,7 @@ MRT形式のファイル（gzip、bzip2にも対応）を文字列（ファイ�
     
 
 ##Example
-これらのスクリプトは、examples内に収録。
+These scripts are recorded in the examples.
 ###print_all.py
 ####内容
 MRT形式のファイルの内容を出力する
