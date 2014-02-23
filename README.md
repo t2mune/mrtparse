@@ -48,7 +48,7 @@ First, import the module.
     
     from mrtparse import *
     
-MRT形式のファイル（gzip、bzip2にも対応）を文字列（ファイルへのパス）、 またはファイルオブジェクトでReader()に渡す。  
+And pass a MRT format data as a filepath string or file object to a class Reader(). 
 返ってきたオブジェクトをループで1エントリずつ取り出して処理する。  
 
     
