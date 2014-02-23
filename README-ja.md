@@ -51,8 +51,8 @@ MRT形式のファイル（gzip、bzip2にも対応）を文字列（ファイ�
 
     
     d = Reader(f)
-        for m in d:
-            処理内容を記述する
+    for m in d:
+        処理内容を記述する
     
 ##Example
 ###print_all.py
