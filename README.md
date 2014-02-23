@@ -118,7 +118,9 @@ It converts MRT format to 'exabgp' config format and displays it.
     }
 
 ##Authors
-
+Tetsumune KISO <t2mune@gmail.com>  
+Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>  
+Nobuhiro ITOU <js333123@gmail.com>  
 
 License
 ----------
