@@ -50,7 +50,7 @@ First, import the module.
     
 And pass a MRT format data as a filepath string or file object to a class Reader().   
 It is also supported gzip and bzip2.  
-retrieve each entry from the returned object using a loop and process it  
+retrieve each entry from the returned object using a loop and process it.  
 
     
     d = Reader(f)
