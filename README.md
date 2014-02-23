@@ -44,7 +44,7 @@ or
     import mrtparse
     
 ##Programming
-First, import module.
+First, import the module.
     
     from mrtparse import *
     
