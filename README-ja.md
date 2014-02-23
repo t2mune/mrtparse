@@ -82,7 +82,6 @@ MRT形式のファイルの内容を出力する
         Type: 16(BGP4MP)
         Subtype: 4(BGP4MP_MESSAGE_AS4)
         Length: 39  
-        
         ....
         
 
