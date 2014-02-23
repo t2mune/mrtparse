@@ -1,7 +1,7 @@
 mrtparse
 ========
 
-The mrtparse, is a module to parse the file format of the MRT.
+mrtparse is a module to read and analyze the MRT format data.
 
 ##What is MRT format
 MRT format is a data format for storing data in a standardized format for routing information of the network.
