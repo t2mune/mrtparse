@@ -63,9 +63,9 @@ These scripts are included in 'examples' directory.
 ###print_all.py
 ####Description
 It displays the contents of a MRT format file.
-####Execution
-    print_all.py ファイルへのパス
-####出力例
+####Usage
+    print_all.py <path to the file>
+####Result
     ---------------------------------------------------------------
     MRT Header
         Timestamp: 1392828028(2014-02-20 01:40:28)
