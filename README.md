@@ -11,16 +11,6 @@ Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 ##Requirements
 Python2、Python3
 
-##Corresponding type(RFC6396)
-###TableDump
-Data format used to encode the contents BGP routing information base (RIB).
-###TableDumpV2
-Data format to update the TABLE_DUMP type to include full support for BGP Multiprotocol Extensions with the support of ASN.
-###BGP4MP
-Data format that defines the data Multiprotocol Extensions for BGP-4.
-###BGP4MP_ET
-Data format you are defining data Multiprotocol Extensions for BGP-4, supporting the measurements in microseconds.
-
 
 ##How to install
     $ cd mrtparse-master
