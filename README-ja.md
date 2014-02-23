@@ -39,6 +39,10 @@ mrtparse内の定義をすべて現時点の名前空間に上書きします。
     
     from mrtparse import *
     
+もしくは、
+    
+    import mrtparse
+    
 
 ##Example
 ###print_all.py
