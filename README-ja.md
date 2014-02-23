@@ -81,7 +81,8 @@ MRT形式のファイルの内容を出力する
         Timestamp: 1392828028(2014-02-20 01:40:28)
         Type: 16(BGP4MP)
         Subtype: 4(BGP4MP_MESSAGE_AS4)
-        Length: 39
+        Length: 39  
+        
     (...省略）
 ###exabgp_conf.py
 ####内容
