@@ -115,6 +115,10 @@ MRT形式のファイルをexabgp用のコンフィグ形式に変換して出�
         }
     }
 
+##Author
+Tetsumune KISO <t2mune@gmail.com>  
+Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>  
+Nobuhiro ITOU <js333123@gmail.com>
 
 ライセンス
 ----------
