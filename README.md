@@ -5,13 +5,13 @@ mrtparse is a module to read and analyze the MRT format data.
 The MRT format data can be used to export routing protocol messages, state changes, and routing information base contents, and is standardized in RFC6396.  
 Programs like Quagga / Zebra, BIRD, OpenBGPD and PyRT can dump the MRT fotmat data.
 
-##Currently supported types of MRT format
+##Currently supported types
 Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 
 ##Requirements
 Python2、Python3
 
-##Downloads
+##Download
 ###git command
     
     $ git clone https://github.com/YoshiyukiYamauchi/mrtparse.git
@@ -22,7 +22,7 @@ Python2、Python3
     
 
 
-##How to install
+##Install
     $ cd mrtparse-master
     $ python setup.py install
     running install
