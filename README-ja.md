@@ -42,7 +42,7 @@ Python2、Python3
     
 
 ##スクリプトの作成方法
-mrtparse内の定義をすべて現時点の名前空間に上書きします。
+モジュールを読み込む
     
     from mrtparse import *
     
