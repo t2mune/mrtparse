@@ -62,7 +62,7 @@ You can retrieve each entry from the returned object using a loop and then proce
 These scripts are included in 'examples' directory.
 ###print_all.py
 ####Content
-it displays the contents of a MRT format file.
+It displays the contents of a MRT format file.
 ####Execution example
     print_all.py ファイルへのパス
 ####出力例
