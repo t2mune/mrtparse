@@ -30,7 +30,6 @@ Python2、Python3
     byte-compiling /Library/Python/2.7/site-packages/mrtparse.py to mrtparse.pyc
     running install_egg_info
     Writing /Library/Python/2.7/site-packages/mrtparse-0.8-py2.7.egg-info
-    $
 
 
 ##使い方
