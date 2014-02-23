@@ -91,17 +91,28 @@ MRT形式のファイルをexabgp用のコンフィグ形式に変換して出�
 ####実行例
     $ ./exabgp_conf.py MRT形式のファイル名
 ####出力例
-     neighbor 192.168.1.100 {
-            router-id 192.168.0.20;
-            local-address 192.168.1.20;
-            local-as 65000;
-            peer-as 64512;
-            graceful-restart;
-        
-            static {
+    neighbor 192.168.1.100 {
+        router-id 192.168.0.20;
+        local-address 192.168.1.20;
+        local-as 65000;
+        peer-as 64512;
+        graceful-restart;
 
-            }
+        static {
+                route 1.0.0.0/24 origin IGP as-path [29049 15169 ] next-hop 192.168.1.254;
+                route 1.0.4.0/24 origin IGP as-path [29049 6939 7545 56203 ] next-hop 192.168.1.254;
+                route 1.0.5.0/24 origin IGP as-path [29049 6939 7545 56203 ] next-hop 192.168.1.254;
+                route 1.0.6.0/24 origin IGP as-path [29049 20485 4826 38803 56203 ] community [20485:31701] next-hop 192.168.1.254;
+                route 1.0.7.0/24 origin IGP as-path [29049 20485 4826 38803 56203 ] community [20485:31701] next-hop 192.168.1.254;
+                route 1.0.20.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.22.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.24.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.26.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                route 1.0.28.0/22 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
+                ...
         }
+    }
+
 
 ライセンス
 ----------
