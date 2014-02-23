@@ -33,7 +33,6 @@ Python2、Python3
 
 
 ##使い方
-mrtparse内の定義をすべて現時点の名前空間に上書きします。 
     
     from mrtparse import *
     
