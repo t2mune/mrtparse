@@ -11,6 +11,16 @@ Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 ##Requirements
 Python2、Python3
 
+##Downloads
+###git command
+    
+    $ git clone https://github.com/YoshiyukiYamauchi/mrtparse.git
+    
+###Browser
+[https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git]にアクセスして「Download ZIP」をクリック。
+[mrtparse_git]: https://github.com/YoshiyukiYamauchi/mrtparse.git
+    
+
 
 ##How to install
     $ cd mrtparse-master
