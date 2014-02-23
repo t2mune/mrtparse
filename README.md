@@ -6,14 +6,7 @@ The MRT format data can be used to export routing protocol messages, state chang
 Programs like Quagga / Zebra, BIRD, OpenBGPD and PyRT can dump the MRT fotmat data.
 
 ##Currently supported types of MRT format
-
-##What is MRT format
-MRT format is a data format for storing data in a standardized format for routing information of the network.
-
-##What you can do with mrtparse
-You can parse the route information of MRT format that has been acquired in such [RIPE][ripe].
-Of course, You can also parse the full route.
-[ripe]: http://data.ris.ripe.net/rrc00/
+Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 
 ##Requirements
 Python2、Python3
