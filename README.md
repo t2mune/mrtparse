@@ -5,6 +5,7 @@ mrtparse is a module to read and analyze the MRT format data.
 The MRT format data can be used to export routing protocol messages, state changes, and routing information base contents, and is standardized in RFC6396.  
 Programs like Quagga / Zebra, BIRD, OpenBGPD and PyRT can dump the MRT fotmat data.
 
+##Currently supported types of MRT format
 
 ##What is MRT format
 MRT format is a data format for storing data in a standardized format for routing information of the network.
