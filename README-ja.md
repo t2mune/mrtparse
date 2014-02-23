@@ -44,6 +44,17 @@ mrtparse内の定義をすべて現時点の名前空間に上書きします。
     import mrtparse
     
 
+##スクリプトの作成方法
+mrtparse内の定義をすべて現時点の名前空間に上書きします。
+    
+    from mrtparse import *
+    
+ファイルまたはファイルオブジェクトを引数でReader()に渡し、1エントリずつループ処理する。  
+    
+    d = Reader(f)
+        for m in d:
+            処理内容を記述する
+    
 ##Example
 ###print_all.py
 ####内容
