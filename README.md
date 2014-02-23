@@ -36,11 +36,10 @@ Access [https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git], and cl
 
 
 ##Usage
-Please overwrite the name space of time all the definition of mrtparse within. 
     
     from mrtparse import *
     
-Or
+or
     
     import mrtparse
     
