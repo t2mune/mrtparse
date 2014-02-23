@@ -23,7 +23,7 @@ Access [https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git], and cl
 
 
 ##Install
-    $ cd mrtparse-master
+    $ cd 'Clone Directory'
     $ python setup.py install
     running install
     running build
@@ -33,7 +33,6 @@ Access [https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git], and cl
     byte-compiling /Library/Python/2.7/site-packages/mrtparse.py to mrtparse.pyc
     running install_egg_info
     Writing /Library/Python/2.7/site-packages/mrtparse-0.8-py2.7.egg-info
-    $
 
 
 ##Usage
