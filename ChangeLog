@@ -1,5 +1,8 @@
 2014-02-23 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>
-	* Update - Update a README.
+	* Release - mrtparse 1.0 released.
+
+2014-02-23 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>
+	* Update - update a README.
 	
 2014-02-23 Tetsumune KISO <t2mune@gmail.com>
 	* Bugfix - fixed a script "exabgp.py".
