@@ -15,7 +15,7 @@ Python2、Python3
     $ git clone https://github.com/YoshiyukiYamauchi/mrtparse.git
     
 ###ブラウザ
-ブラウザから[https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git]にアクセスして「Download ZIP」をクリック。
+[https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git]にアクセスして「Download ZIP」をクリック。
 [mrtparse_git]: https://github.com/YoshiyukiYamauchi/mrtparse.git
     
 
