@@ -21,7 +21,6 @@ Access [https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git], and cl
 [mrtparse_git]: https://github.com/YoshiyukiYamauchi/mrtparse.git
     
 
-
 ##Install
     $ cd <Clone Directory>
     $ python setup.py install
