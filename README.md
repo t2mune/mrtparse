@@ -3,6 +3,9 @@ mrtparse
 
 The mrtparse, is a module to parse the file format of the MRT.
 
+##What is MRT format
+MRT format is a data format for storing data in a standardized format for routing information of the network.
+
 ##What you can do with mrtparse
 You can parse the route information of MRT format that has been acquired in such [RIPE][ripe].
 Of course, You can also parse the full route.
@@ -11,11 +14,16 @@ Of course, You can also parse the full route.
 ##Requirements
 Python2、Python3
 
-##Corresponding type
-TableDump, TableDumpV2, BGP4MP, BGP4MP_ET
+##Corresponding type(RFC6396)
+###TableDump
+Data format used to encode the contents BGP routing information base (RIB).
+###TableDumpV2
+Data format to update the TABLE_DUMP type to include full support for BGP Multiprotocol Extensions with the support of ASN.
+###BGP4MP
+Data format that defines the data Multiprotocol Extensions for BGP-4.
+###BGP4MP_ET
+Data format you are defining data Multiprotocol Extensions for BGP-4, supporting the measurements in microseconds.
 
-##Object tree diagram
-view pdf
 
 ##How to install
     $ cd mrtparse-master
@@ -31,10 +39,25 @@ view pdf
     $
 
 
-##How to use
+##Usage
 Please overwrite the name space of time all the definition of mrtparse within. 
     
     from mrtparse import *
+    
+Or
+    
+    import mrtparse
+    
+##Programming
+Please overwrite the name space of time all the definition of mrtparse within.
+    
+    from mrtparse import *
+    
+Please passed to the Reader() in the argument file object or files, and to loop through one entry.
+    
+    d = Reader(f)
+        for m in d:
+            "Describe the processing content"
     
 
 ##Example
