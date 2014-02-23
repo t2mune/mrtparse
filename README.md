@@ -61,7 +61,7 @@ You can retrieve each entry from the returned object using a loop and then proce
 ##Example
 These scripts are included in 'examples' directory.
 ###print_all.py
-####Content
+####Description
 It displays the contents of a MRT format file.
 ####Execution
     print_all.py ファイルへのパス
