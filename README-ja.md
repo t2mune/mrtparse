@@ -10,12 +10,12 @@ Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 Python2、Python3
 
 ##取得方法
-###CUI
+###gitコマンドでの取得方法
     
     $ git clone https://github.com/YoshiyukiYamauchi/mrtparse.git
     
-###GUI
-ブラウザから[https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git]にアクセスして「Download ZIP」
+###ブラウザからの取得方法
+ブラウザから[https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git]にアクセスして「Download ZIP」をクリック
 [mrtparse_git]: https://github.com/YoshiyukiYamauchi/mrtparse.git
     
 
