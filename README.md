@@ -90,11 +90,11 @@ It displays the contents of a MRT format file.
         
 
 ###exabgp_conf.py
-####内容
-MRT形式のファイルをexabgp用のコンフィグ形式に変換して出力する。
-####実行例
-    exabgp_conf.py ファイルへのパス
-####出力例
+####Description
+It converts MRT format to 'exabgp' config format and displays it.
+####Usage
+    exabgp_conf.py <path to the file>
+####Result
     neighbor 192.168.1.100 {
         router-id 192.168.0.20;
         local-address 192.168.1.20;
