@@ -155,6 +155,7 @@ def print_bgp_msg(msg, subtype):
         for attr in msg.attr:
             print_bgp_attr(attr)
 
+        indt = 1
         for nlri in msg.nlri:
             prline('NLRI: %s/%d' % (nlri.prefix, nlri.plen))
 

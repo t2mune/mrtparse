@@ -703,7 +703,7 @@ class BgpMessage(Base):
             attr_len -= attr.p
 
         self.nlri = []
-        while self.p > self.len:
+        while self.p < self.len:
             nlri = Nlri()
             self.p += nlri.unpack(buf[self.p:], af)
             self.nlri.append(nlri)
