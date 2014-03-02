@@ -29,9 +29,6 @@ BZ2_MAGIC  = b'\x42\x5a\x68'
 # MRT header length
 MRT_HDR_LEN = 12
 
-# AS number length(especially to parse AS_PATH attribute)
-as_len = 4
-
 # a variable to reverse the keys and values of dictionaries below
 dl = []
 
@@ -349,6 +346,14 @@ ORF_SEND_RECV = {
 }
 dl += [ORF_SEND_RECV]
 
+# AS Number Formats
+AS_REP = {
+    1:'asplain',
+    2:'asdot+',
+    3:'asdot',
+}
+dl += [AS_REP]
+
 # reverse the keys and values of dictionaries above
 for d in dl:
     for k in list(d.keys()):
@@ -362,6 +367,13 @@ def val_dict(d, *args):
             return val_dict(d[k], *args[1:])
         return d[k]
     return 'Unassigned'
+
+# AS number length(especially to parse AS_PATH attribute)
+as_len = 4
+
+# AS Number Notation
+# Default notation is 'asplain'(Defined in RFC5396)
+as_rep = AS_REP['asplain']
 
 # super class for all other classes
 class Base:
@@ -420,18 +432,21 @@ class Base:
         return addr
 
     def val_asn(self, buf):
-        global as_len
+        global as_len, as_rep
         asn = self.val_num(buf, as_len)
 
-        if as_len == 4 and asn > 65535:
+        if  (as_rep == AS_REP['asdot+'] or
+            (as_rep == AS_REP['asdot'] and asn > 0xffff)):
             asn = str(asn >> 16) + '.' + str(asn & 0xffff)
         else:
             asn = str(asn)
+
         return asn
 
 class Reader(Base):
     def __init__(self, arg):
         Base.__init__(self)
+        self.as_rep = as_rep
 
         if hasattr(arg, 'read'):
             self.f = arg
@@ -454,6 +469,8 @@ class Reader(Base):
         raise StopIteration
 
     def __iter__(self):
+        global as_rep
+        as_rep = self.as_rep
         return self
 
     def next(self):
@@ -537,6 +554,7 @@ class TableDump(Base):
         Base.__init__(self)
 
     def unpack(self, buf, subtype):
+        global as_len
         self.view = self.val_num(buf, 2)
         self.seq = self.val_num(buf, 2)
         self.prefix = self.val_addr(buf, subtype)
