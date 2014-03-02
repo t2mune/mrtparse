@@ -1,4 +1,5 @@
 2014-03-03 Tetsumune KISO <t2mune@gmail.com>
+	* Update - merged the code for SIGPIPE from Jay B.
 	* Update - added a support for display unrecognized path attributes(suggested by Jay B).
 
 2014-03-02 Nobuhiro ITOU <js333123@gmail.com>

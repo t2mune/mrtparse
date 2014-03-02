@@ -12,6 +12,8 @@ Copyright (C) greenHippo, LLC. All rights reserved.
 
 import sys, struct, socket
 import gzip, bz2
+import signal
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # mrtparse information
 __pyname__  = 'mrtparse'
