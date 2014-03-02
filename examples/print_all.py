@@ -310,6 +310,13 @@ def main():
         exit(1)
 
     d = Reader(sys.argv[1])
+
+    # if you want to use 'asdot+' or 'asdot' for AS numbers,
+    # comment out eithre line below.
+    # default is 'asplain'.
+    #
+    # d.as_rep = AS_REP['asdot+']
+    # d.as_rep = AS_REP['asdot']
     for m in d:
         print_mrt(m)
         if m.type == MSG_T['TABLE_DUMP']:
