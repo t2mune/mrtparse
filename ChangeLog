@@ -1,3 +1,6 @@
+2014-03-03 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added a support for display unrecognized path attributes(suggested by Jay B).
+
 2014-03-02 Nobuhiro ITOU <js333123@gmail.com>
 	* Update - changed default representaion from 'asdot' to 'asplain'(Defined by RFC5396). 
 	Thank you Jay B.
