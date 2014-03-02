@@ -245,43 +245,36 @@ def print_bgp_attr(attr):
     indt += 1
     line = '%s: ' % val_dict(BGP_ATTR_T, attr.type)
     if attr.type == BGP_ATTR_T['ORIGIN']:
-        line += '%d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin))
-    elif attr.type == BGP_ATTR_T['NEXT_HOP']:
-        line += '%s' % attr.next_hop
-    elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
-        line += '%d' % attr.med
-    elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
-        line += '%d' % attr.local_pref
-    elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
-        pass
-    elif attr.type == BGP_ATTR_T['AGGREGATOR']:
-        line += '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
-    elif attr.type == BGP_ATTR_T['COMMUNITY']:
-        line += '%s' % ' '.join(attr.comm)
-    elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
-        line += '%s' % attr.org_id
-    elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
-        line += '%s' % attr.cl_list
-    elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
-        ext_comm_list = []
-        for ext_comm in attr.ext_comm:
-            ext_comm_list.append('0x%016x' % ext_comm)
-        line += '%s' % ' '.join(ext_comm_list)
-    elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-        line += '%s %s' % (attr.aggr['asn'], attr.aggr['id'])
-    prline(line)
-
-    indt += 1
-    if(    attr.type == BGP_ATTR_T['AS_PATH']
+        prline(line + '%d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin)))
+    elif(    attr.type == BGP_ATTR_T['AS_PATH']
         or attr.type == BGP_ATTR_T['AS4_PATH']):
+        prline(line)
+        indt += 1
         for path_seg in attr.as_path:
             prline('Path Segment Type: %d(%s)' %
                 (path_seg['type'],
                  val_dict(AS_PATH_SEG_T, path_seg['type'])))
             prline('Path Segment Length: %d' % path_seg['len'])
             prline('Path Segment Value: %s' % path_seg['val'])
-
+    elif attr.type == BGP_ATTR_T['NEXT_HOP']:
+        prline(line + '%s' % attr.next_hop)
+    elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
+        prline(line + '%d' % attr.med)
+    elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
+        prline(line + '%d' % attr.local_pref)
+    elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
+        prline(line)
+    elif attr.type == BGP_ATTR_T['AGGREGATOR']:
+        prline(line + '%s %s' % (attr.aggr['asn'], attr.aggr['id']))
+    elif attr.type == BGP_ATTR_T['COMMUNITY']:
+        prline(line + '%s' % ' '.join(attr.comm))
+    elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
+        prline(line + '%s' % attr.org_id)
+    elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
+        prline(line + '%s' % attr.cl_list)
     elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
+        prline(line)
+        indt += 1
         prline('AFI: %d(%s), SAFI: %d(%s)' %
             (attr.mp_reach['afi'],
              val_dict(AFI_T, attr.mp_reach['afi']),
@@ -289,11 +282,11 @@ def print_bgp_attr(attr):
              val_dict(SAFI_T, attr.mp_reach['safi'])))
         prline('Length: %d, Next-Hop: %s' %
             (attr.mp_reach['nlen'], attr.mp_reach['next_hop']))
-
         for nlri in attr.mp_reach['nlri']:
             prline('NLRI: %s/%d' % (nlri.prefix, nlri.plen))
-
     elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
+        prline(line)
+        indt += 1
         prline('AFI: %d(%s), SAFI: %d(%s)' %
             (attr.mp_unreach['afi'],
              val_dict(AFI_T, attr.mp_unreach['afi']),
@@ -303,6 +296,20 @@ def print_bgp_attr(attr):
         for withdrawn in attr.mp_unreach['withdrawn']:
             prline('Withdrawn Route: %s/%d' %
                 (withdrawn.prefix, withdrawn.plen))
+    elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+        ext_comm_list = []
+        for ext_comm in attr.ext_comm:
+            ext_comm_list.append('0x%016x' % ext_comm)
+        prline(line + '%s' % ' '.join(ext_comm_list))
+    elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
+        prline(line + '%s %s' % (attr.aggr['asn'], attr.aggr['id']))
+    else:
+        line += '0x'
+        for c in attr.val:
+            if isinstance(c, str):
+                c = ord(c)
+            line += '%02x' % c
+        prline(line)
 
 def main():
     if len(sys.argv) != 2:

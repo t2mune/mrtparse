@@ -849,7 +849,7 @@ class BgpAttr(Base):
         elif self.type == BGP_ATTR_T['AS4_AGGREGATOR']:
             self.unpack_aggregator(buf)
         else:
-            self.p += self.len
+            self.val = self.val_str(buf, self.len)
         return self.p
 
     def unpack_origin(self, buf):
