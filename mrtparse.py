@@ -1002,7 +1002,6 @@ class BgpAttr(Base):
             attr = BgpAttr()
             self.p += attr.unpack(buf[self.p:])
             self.attr_set['attr'].append(attr)
-            attr_len -= attr.p
 
 class Nlri(Base):
     def __init__(self):

@@ -271,7 +271,7 @@ def print_bgp_attr(attr, n):
     elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
         prline(line + '%s' % attr.org_id)
     elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
-        prline(line + '%s' % attr.cl_list)
+        prline(line + '%s' % ' '.join(attr.cl_list))
     elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
         prline(line)
         indt += 1
