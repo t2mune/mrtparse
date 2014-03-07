@@ -242,9 +242,9 @@ def print_bgp_attr(attr, n):
         (attr.flag, attr.type, attr.len))
 
     indt += 1
-    line = '%s: ' % val_dict(BGP_ATTR_T, attr.type)
+    line = '%s' % val_dict(BGP_ATTR_T, attr.type)
     if attr.type == BGP_ATTR_T['ORIGIN']:
-        prline(line + '%d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin)))
+        prline(line + ': %d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin)))
     elif(  attr.type == BGP_ATTR_T['AS_PATH']
         or attr.type == BGP_ATTR_T['AS4_PATH']):
         prline(line)
@@ -256,46 +256,48 @@ def print_bgp_attr(attr, n):
             prline('Path Segment Length: %d' % path_seg['len'])
             prline('Path Segment Value: %s' % path_seg['val'])
     elif attr.type == BGP_ATTR_T['NEXT_HOP']:
-        prline(line + '%s' % attr.next_hop)
+        prline(line + ': %s' % attr.next_hop)
     elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
-        prline(line + '%d' % attr.med)
+        prline(line + ': %d' % attr.med)
     elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
-        prline(line + '%d' % attr.local_pref)
+        prline(line + ': %d' % attr.local_pref)
     elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
         prline(line)
     elif attr.type == BGP_ATTR_T['AGGREGATOR']:
-        prline(line + '%s %s' % (attr.aggr['asn'], attr.aggr['id']))
+        prline(line + ': %s %s' % (attr.aggr['asn'], attr.aggr['id']))
     elif attr.type == BGP_ATTR_T['COMMUNITY']:
-        prline(line + '%s' % ' '.join(attr.comm))
+        prline(line + ': %s' % ' '.join(attr.comm))
     elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
-        prline(line + '%s' % attr.org_id)
+        prline(line + ': %s' % attr.org_id)
     elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
-        prline(line + '%s' % ' '.join(attr.cl_list))
+        prline(line + ': %s' % ' '.join(attr.cl_list))
     elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
         prline(line)
         indt += 1
-        prline('AFI: %d(%s), SAFI: %d(%s)' %
+        prline('AFI: %d(%s)' %
             (attr.mp_reach['afi'],
-             val_dict(AFI_T, attr.mp_reach['afi']),
-             attr.mp_reach['safi'],
+             val_dict(AFI_T, attr.mp_reach['afi'])))
+        prline('SAFI: %d(%s)' %
+            (attr.mp_reach['safi'],
              val_dict(SAFI_T, attr.mp_reach['safi'])))
 
         if (   attr.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
             or attr.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
             prline('Route Distinguisher: %s' % attr.mp_reach['rd'])
 
-        prline('Length: %d, Next-Hop: %s' %
-            (attr.mp_reach['nlen'], attr.mp_reach['next_hop']))
+        prline('Length: %d' % attr.mp_reach['nlen'])
+        prline('Next-Hop: %s' % attr.mp_reach['next_hop'])
 
         for nlri in attr.mp_reach['nlri']:
             print_nlri(nlri, 'NLRI', attr.mp_reach['safi'])
     elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
         prline(line)
         indt += 1
-        prline('AFI: %d(%s), SAFI: %d(%s)' %
+        prline('AFI: %d(%s)' %
             (attr.mp_unreach['afi'],
-             val_dict(AFI_T, attr.mp_unreach['afi']),
-             attr.mp_unreach['safi'],
+             val_dict(AFI_T, attr.mp_unreach['afi'])))
+        prline('SAFI: %d(%s)' %
+            (attr.mp_unreach['safi'],
              val_dict(SAFI_T, attr.mp_unreach['safi'])))
 
         for withdrawn in attr.mp_unreach['withdrawn']:
@@ -304,9 +306,9 @@ def print_bgp_attr(attr, n):
         ext_comm_list = []
         for ext_comm in attr.ext_comm:
             ext_comm_list.append('0x%016x' % ext_comm)
-        prline(line + '%s' % ' '.join(ext_comm_list))
+        prline(line + ': %s' % ' '.join(ext_comm_list))
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-        prline(line + '%s %s' % (attr.aggr['asn'], attr.aggr['id']))
+        prline(line + ': %s %s' % (attr.aggr['asn'], attr.aggr['id']))
     elif attr.type == BGP_ATTR_T['ATTR_SET']:
         prline(line)
         indt += 1
@@ -314,7 +316,7 @@ def print_bgp_attr(attr, n):
         for attr in attr.attr_set['attr']:
             print_bgp_attr(attr, 3)
     else:
-        line += '0x'
+        line += ': 0x'
         for c in attr.val:
             if isinstance(c, str):
                 c = ord(c)
@@ -327,7 +329,7 @@ def print_nlri(nlri, title, *args):
 
     if (   safi == SAFI_T['L3VPN_UNICAST']
         or safi == SAFI_T['L3VPN_MULTICAST']):
-        prline('%s:' % title)
+        prline('%s' % title)
         indt += 1
         plen = nlri.plen - (len(nlri.label) * 3 + 8) * 8
         l = []
