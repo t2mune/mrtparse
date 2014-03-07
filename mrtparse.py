@@ -373,6 +373,10 @@ def val_dict(d, *args):
         return d[k]
     return 'Unassigned'
 
+# MPLS Label
+LBL_BOTTOM    = 0x01     # Defined in RFC3032
+LBL_WITHDRAWN = 0x800000 # Defined in RFC3107
+
 # AS number length(especially to parse AS_PATH attribute)
 as_len = 4
 
@@ -899,10 +903,7 @@ class BgpAttr(Base):
     def unpack_aggregator(self, buf):
         global as_len
         self.aggr = {}
-        if self.len < 8:
-            as_len = 2
-        else:
-            as_len = 4
+        asl_len = 2 if self.len < 8 else 4
         self.aggr['asn'] = self.val_asn(buf)
         self.aggr['id'] = self.val_addr(buf, AFI_T['IPv4'])
 
@@ -1009,9 +1010,7 @@ class Nlri(Base):
 
     def unpack(self, buf, *args):
         af = args[0]
-        saf = 0
-        if len(args) > 1:
-            saf = args[1]
+        saf = args[1] if len(args) > 1 else 0
 
         self.plen = plen = self.val_num(buf, 1)
         if (   saf == SAFI_T['L3VPN_UNICAST']
@@ -1020,11 +1019,11 @@ class Nlri(Base):
             while True:
                 label= (self.val_num(buf, 2) << 8) + self.val_num(buf, 1)
                 self.label.append(label)
-                plen -= 3 * 8
-                if label & 0x01 or label == 0x800000:
+                if (    label & LBL_BOTTOM 
+                    or label == LBL_WITHDRAWN):
                     break
             self.rd = self.val_rd(buf)
-            plen -= 8 * 8
+            plen -= (3 * len(self.label) + 8) * 8
 
         self.prefix = self.val_addr(buf, af, plen)
         return self.p

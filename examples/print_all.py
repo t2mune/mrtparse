@@ -148,8 +148,7 @@ def print_bgp_msg(msg, subtype):
     elif msg.type == BGP_MSG_T['UPDATE']:
         prline('Withdrawn Routes Length: %d' % msg.wd_len)
         for withdrawn in msg.withdrawn:
-            prline('Withdrawn Route: %s/%d' %
-                (withdrawn.prefix, withdrawn.plen))
+            print_nlri(withdrawn, 'Withdrawn Routes')
 
         prline('Total Path Attribute Length: %d' % msg.attr_len)
         for attr in msg.attr:
@@ -157,7 +156,7 @@ def print_bgp_msg(msg, subtype):
 
         indt = 1
         for nlri in msg.nlri:
-            prline('NLRI: %s/%d' % (nlri.prefix, nlri.plen))
+            print_nlri(nlri, 'NLRI')
 
     elif msg.type == BGP_MSG_T['NOTIFICATION']:
         prline('Error Code: %d(%s)' % 
@@ -246,7 +245,7 @@ def print_bgp_attr(attr, n):
     line = '%s: ' % val_dict(BGP_ATTR_T, attr.type)
     if attr.type == BGP_ATTR_T['ORIGIN']:
         prline(line + '%d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin)))
-    elif(    attr.type == BGP_ATTR_T['AS_PATH']
+    elif(  attr.type == BGP_ATTR_T['AS_PATH']
         or attr.type == BGP_ATTR_T['AS4_PATH']):
         prline(line)
         indt += 1
@@ -289,7 +288,7 @@ def print_bgp_attr(attr, n):
             (attr.mp_reach['nlen'], attr.mp_reach['next_hop']))
 
         for nlri in attr.mp_reach['nlri']:
-            print_nlri(nlri, attr.mp_reach['safi'], 'NLRI')
+            print_nlri(nlri, 'NLRI', attr.mp_reach['safi'])
     elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
         prline(line)
         indt += 1
@@ -300,7 +299,7 @@ def print_bgp_attr(attr, n):
              val_dict(SAFI_T, attr.mp_unreach['safi'])))
 
         for withdrawn in attr.mp_unreach['withdrawn']:
-            print_nlri(withdrawn, attr.mp_unreach['safi'], 'Withdrawn Routes')
+            print_nlri(withdrawn, 'Withdrawn Routes', attr.mp_unreach['safi'])
     elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
         ext_comm_list = []
         for ext_comm in attr.ext_comm:
@@ -322,8 +321,10 @@ def print_bgp_attr(attr, n):
             line += '%02x' % c
         prline(line)
 
-def print_nlri(nlri, safi, title):
+def print_nlri(nlri, title, *args):
     global indt
+    safi = args[0] if len(args) > 0 else 0
+
     if (   safi == SAFI_T['L3VPN_UNICAST']
         or safi == SAFI_T['L3VPN_MULTICAST']):
         prline('%s:' % title)
@@ -347,7 +348,7 @@ def main():
     d = Reader(sys.argv[1])
 
     # if you want to use 'asdot+' or 'asdot' for AS numbers,
-    # comment out eithre line below.
+    # comment out either line below.
     # default is 'asplain'.
     #
     # d.as_rep = AS_REP['asdot+']
