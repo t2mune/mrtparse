@@ -405,11 +405,12 @@ class Base:
         return val
 
     def val_str(self, buf, _len):
-        if _len > 0 and len(buf) - self.p >= _len:
-            val = buf[self.p:self.p+_len]
-        else:
-            val = None
+        if _len <= 0 and len(buf) - self.p < _len:
+            return None
+
+        val = buf[self.p:self.p+_len]
         self.p += _len
+
         return val
 
     def val_addr(self, buf, af, *args):
@@ -428,12 +429,13 @@ class Base:
         else:
             _len = _max
 
-        if _len >= 0 and len(buf) - self.p >= _len:
-            addr = socket.inet_ntop(
-                _af, buf[self.p:self.p+_len] + b'\x00'*(_max - _len))
-        else:
-            addr = None
+        if _len <= 0 and len(buf) - self.p < _len:
+            return None
+
+        addr = socket.inet_ntop(
+            _af, buf[self.p:self.p+_len] + b'\x00'*(_max - _len))
         self.p += _len
+
         return addr
 
     def val_asn(self, buf):
