@@ -390,22 +390,18 @@ class Base:
         self.p = 0
 
     def val_num(self, buf, _len):
-        if _len == 1:
-            fmt = '>B'
-        elif _len == 2:
-            fmt = '>H'
-        elif _len == 4:
-            fmt = '>I'
-        elif _len == 8:
-            fmt = '>Q'
-        else:
+        if _len <= 0 and len(buf) - self.p < _len:
             return None
 
-        if _len > 0 and len(buf) - self.p >= _len:
-            val = struct.unpack(fmt, buf[self.p:self.p+_len])[0]
-        else:
-            val = None
+        val = 0
+        for i in buf[self.p:self.p+_len]:
+            val <<= 8
+            if isinstance(i, int):
+                val += i
+            else:
+                val += struct.unpack('>B', i)[0]
         self.p += _len
+
         return val
 
     def val_str(self, buf, _len):
@@ -1017,9 +1013,9 @@ class Nlri(Base):
             or saf == SAFI_T['L3VPN_MULTICAST']):
             self.label = []
             while True:
-                label= (self.val_num(buf, 2) << 8) + self.val_num(buf, 1)
+                label= self.val_num(buf, 3)
                 self.label.append(label)
-                if (    label & LBL_BOTTOM 
+                if (   label & LBL_BOTTOM 
                     or label == LBL_WITHDRAWN):
                     break
             self.rd = self.val_rd(buf)
