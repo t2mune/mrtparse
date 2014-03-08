@@ -1,3 +1,6 @@
+2014-03-09 Tetsumune KISO <t2mune@gmail.com>
+	* Update - changed codes in function "val_num" of "mrtparse.py".
+
 2014-03-08 Tetsumune KISO <t2mune@gmail.com>
 	* Update - improved codes.
 
@@ -10,7 +13,7 @@
 	* Update - added a support for display unrecognized path attributes(suggested by Jay B).
 
 2014-03-02 Nobuhiro ITOU <js333123@gmail.com>
-	* Update - changed default representaion from 'asdot' to 'asplain'(Defined by RFC5396). 
+	* Update - changed default representaion from "asdot" to "asplain"(Defined by RFC5396). 
 	Thank you Jay B.
 
 2014-02-27 Tetsumune KISO <t2mune@gmail.com>
