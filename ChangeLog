@@ -1,3 +1,6 @@
+2014-03-10 Tetsumune KISO <t2mune@gmail.com>
+	* Bugfix - can't parse "Data" properly in BGP notification message.
+
 2014-03-09 Tetsumune KISO <t2mune@gmail.com>
 	* Update - changed codes in function "val_num" of "mrtparse.py".
 
