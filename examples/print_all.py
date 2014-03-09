@@ -165,12 +165,13 @@ def print_bgp_msg(msg, subtype):
         prline('Error Subcode: %d(%s)' % 
             (msg.err_subcode,
             val_dict(BGP_ERR_SC, msg.err_code, msg.err_subcode)))
+        prline('Data: %s' % msg.data)
 
     elif msg.type == BGP_MSG_T['ROUTE-REFRESH']:
         prline('AFI: %d(%s)' % 
             (msg.afi,
              val_dict(AFI_T, msg.afi)))
-        prline('Reserved: %d' % (msg.reserved))
+        prline('Reserved: %d' % (msg.rsvd))
         prline('SAFI: %d(%s)' % 
             (msg.safi,
              val_dict(SAFI_T, msg.safi)))
@@ -195,7 +196,7 @@ def print_bgp_opt_params(opt):
         prline('AFI: %d(%s)' %
             (opt.multi_ext['afi'],
              val_dict(AFI_T, opt.multi_ext['afi'])))
-        prline('Reserved: %d' % opt.multi_ext['reserved'])
+        prline('Reserved: %d' % opt.multi_ext['rsvd'])
         prline('SAFI: %d(%s)' %
             (opt.multi_ext['safi'],
              val_dict(SAFI_T, opt.multi_ext['safi'])))

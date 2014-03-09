@@ -742,11 +742,11 @@ class BgpMessage(Base):
     def unpack_notification(self, buf):
         self.err_code = self.val_num(buf, 1)
         self.err_subcode = self.val_num(buf, 1)
-        self.data = self.val_num(buf, self.len - self.p)                
+        self.data = self.val_str(buf, self.len - self.p)                
 
     def unpack_route_refresh(self, buf):
         self.afi = self.val_num(buf, 2)
-        self.reserved = self.val_num(buf, 1)
+        self.rsvd = self.val_num(buf, 1)
         self.safi = self.val_num(buf, 1)
 
 class OptParams(Base):
@@ -782,7 +782,7 @@ class OptParams(Base):
     def unpack_multi_ext(self, buf):
         self.multi_ext = {}
         self.multi_ext['afi'] = self.val_num(buf, 2)
-        self.multi_ext['reserved'] = self.val_num(buf, 1)
+        self.multi_ext['rsvd'] = self.val_num(buf, 1)
         self.multi_ext['safi'] = self.val_num(buf, 1)
    
     def unpack_orf(self, buf):
