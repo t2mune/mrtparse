@@ -89,6 +89,7 @@ def print_td_v2(m):
         prline('Entry Count: %d' % m.rib.count)
 
         for entry in m.rib.entry:
+            indt = 1
             prline('Peer Index: %d' % entry.peer_index)
             prline('Originated Time: %d(%s)' %
                 (entry.org_time,
