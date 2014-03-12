@@ -1013,15 +1013,19 @@ class Nlri(Base):
         self.plen = plen = self.val_num(buf, 1)
         if (   saf == SAFI_T['L3VPN_UNICAST']
             or saf == SAFI_T['L3VPN_MULTICAST']):
-            self.label = []
-            while True:
-                label= self.val_num(buf, 3)
-                self.label.append(label)
-                if (   label & LBL_BOTTOM 
-                    or label == LBL_WITHDRAWN):
-                    break
-            self.rd = self.val_rd(buf)
-            plen -= (3 * len(self.label) + 8) * 8
+            plen = self.unpack_l3vpn(buf, plen)
 
         self.prefix = self.val_addr(buf, af, plen)
         return self.p
+
+    def unpack_l3vpn(self, buf, plen):
+        self.label = []
+        while True:
+            label= self.val_num(buf, 3)
+            self.label.append(label)
+            if (   label & LBL_BOTTOM 
+                or label == LBL_WITHDRAWN):
+                break
+        self.rd = self.val_rd(buf)
+        plen -= (3 * len(self.label) + 8) * 8
+        return plen
