@@ -901,7 +901,7 @@ class BgpAttr(Base):
     def unpack_aggregator(self, buf):
         global as_len
         self.aggr = {}
-        asl_len = 2 if self.len < 8 else 4
+        as_len = 2 if self.len < 8 else 4
         self.aggr['asn'] = self.val_asn(buf)
         self.aggr['id'] = self.val_addr(buf, AFI_T['IPv4'])
 
