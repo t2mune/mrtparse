@@ -33,15 +33,19 @@ def make_exabgp_conf(d):
     
         static {'''
     % (neighbor, router_id, local_addr, local_as, peer_as))
-    
+
     for m in d:
-        if m.type == MSG_T['TABLE_DUMP_V2']:
-            line = ''
-            if m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']:
-                line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
-                for attr in m.rib.entry[0].attr:
-                    line += get_bgp_attr(attr)
-                print('%s next-hop %s;' % (line, nexthop))
+        if m.type != MSG_T['TABLE_DUMP_V2']:
+            continue
+
+        if m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']:
+            continue
+
+        line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
+        for attr in m.rib.entry[0].attr:
+            line += get_bgp_attr(attr)
+        print('%s next-hop %s;' % (line, nexthop))
+
     print('''
         }
     }
