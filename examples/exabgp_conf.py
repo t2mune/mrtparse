@@ -106,20 +106,20 @@ def get_bgp_attr(attr):
         line += ' extended-community [%s]' % ' '.join(ext_comm_list)
 
     elif attr.type == BGP_ATTR_T['AS4_PATH']:
-        as_path = ''
-        for path_seg in attr.as_path:
+        as4_path = ''
+        for path_seg in attr.as4_path:
             if path_seg['type'] == AS_PATH_SEG_T['AS_SET']:
-                as_path += '(%s) ' % path_seg['val']
+                as4_path += '(%s) ' % path_seg['val']
             else:
-                as_path += '%s ' % path_seg['val']
-        line += ' as4-path [%s]' % as_path
+                as4_path += '%s ' % path_seg['val']
+        line += ' as4-path [%s]' % as4_path
 
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-        asn = attr.aggr['asn']
+        asn = attr.as4_aggr['asn']
         m = r.search(asn)
         if m is not None:
             asn = int(m.group(1)) * 65536 + int(m.group(2))
-        line += ' as4-aggregator (%s:%s)' % (str(asn), attr.aggr['id'])
+        line += ' as4-aggregator (%s:%s)' % (str(asn), attr.as4_aggr['id'])
     return line
 
 def main():

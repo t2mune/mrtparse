@@ -247,8 +247,7 @@ def print_bgp_attr(attr, n):
     line = '%s' % val_dict(BGP_ATTR_T, attr.type)
     if attr.type == BGP_ATTR_T['ORIGIN']:
         prline(line + ': %d(%s)' % (attr.origin, val_dict(ORIGIN_T, attr.origin)))
-    elif(  attr.type == BGP_ATTR_T['AS_PATH']
-        or attr.type == BGP_ATTR_T['AS4_PATH']):
+    elif attr.type == BGP_ATTR_T['AS_PATH']:
         prline(line)
         indt += 1
         for path_seg in attr.as_path:
@@ -309,8 +308,17 @@ def print_bgp_attr(attr, n):
         for ext_comm in attr.ext_comm:
             ext_comm_list.append('0x%016x' % ext_comm)
         prline(line + ': %s' % ' '.join(ext_comm_list))
+    elif attr.type == BGP_ATTR_T['AS4_PATH']:
+        prline(line)
+        indt += 1
+        for path_seg in attr.as4_path:
+            prline('Path Segment Type: %d(%s)' %
+                (path_seg['type'],
+                 val_dict(AS_PATH_SEG_T, path_seg['type'])))
+            prline('Path Segment Length: %d' % path_seg['len'])
+            prline('Path Segment Value: %s' % path_seg['val'])
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-        prline(line + ': %s %s' % (attr.aggr['asn'], attr.aggr['id']))
+        prline(line + ': %s %s' % (attr.as4_aggr['asn'], attr.as4_aggr['id']))
     elif attr.type == BGP_ATTR_T['ATTR_SET']:
         prline(line)
         indt += 1

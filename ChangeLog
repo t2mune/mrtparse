@@ -1,3 +1,7 @@
+2014-03-18 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added attributes "as4_path" and "as4_aggr".
+	* Update - improved codes.
+
 2014-03-13 Tetsumune KISO <t2mune@gmail.com>
 	* Bugfix - invalid object "asl_len" in "mrtparse.py".
 	* Update - improved codes in "exabgp_conf.py".
