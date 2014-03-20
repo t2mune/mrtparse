@@ -342,10 +342,12 @@ def print_nlri(nlri, title, *args):
         prline('%s' % title)
         indt += 1
         plen = nlri.plen - (len(nlri.label) * 3 + 8) * 8
-        l = []
+        l_all = []
+        l_val = []
         for label in nlri.label:
-            l.append(str(label >> 4))
-        prline('Label: %s' % ' '.join(l))
+            l_all.append('0x%06x' % label)
+            l_val.append(str(label >> 4))
+        prline('Label: %s(%s)' % (' '.join(l_all), ' '.join(l_val)))
         prline('Route Distinguisher: %s' % nlri.rd)
         prline('Prefix: %s/%d' % (nlri.prefix, plen))
         indt -= 1
