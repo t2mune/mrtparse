@@ -1,4 +1,5 @@
 2014-03-21 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added a support for PyPy.
 	* Update - improved codes in 'print_all.py'.
 
 2014-03-18 Tetsumune KISO <t2mune@gmail.com>

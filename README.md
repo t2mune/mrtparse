@@ -9,7 +9,7 @@ Programs like Quagga / Zebra, BIRD, OpenBGPD and PyRT can dump the MRT fotmat da
 Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 
 ##Requirements
-Python2、Python3
+Python2 or Python3 or PyPy
 
 ##Download
 ###git command

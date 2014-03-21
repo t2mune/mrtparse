@@ -9,7 +9,7 @@ Quagga/Zebra、BIRD、OpenBGPD、PyRTなどでMRT形式のデータを出力す�
 Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 
 ##動作環境
-Python2、Python3
+Python2 または Python3 または PyPy
 
 ##取得方法
 ###gitコマンド
