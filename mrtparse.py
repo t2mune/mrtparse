@@ -513,6 +513,8 @@ class Reader(Base):
             sys.stderr.write("error: mrt data is too short\n")
             self.close()
 
+        self.buf = hdr + data
+
         if (   self.mrt.type == MSG_T['BGP4MP_ET']
             or self.mrt.type == MSG_T['ISIS_ET']
             or self.mrt.type == MSG_T['OSPFv3_ET']):
