@@ -486,19 +486,14 @@ class Reader(Base):
         as_rep = self.as_rep
         return self
 
-    def next(self):
-        global as_len
-        as_len = 4
-        self.mrt = Mrt()
-        self.unpack()
-        return self.mrt
-
     def __next__(self):
         global as_len
         as_len = 4
         self.mrt = Mrt()
         self.unpack()
         return self.mrt
+
+    next = __next__
 
     def unpack(self):
         hdr = self.f.read(MRT_HDR_LEN)
