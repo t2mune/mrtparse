@@ -1,3 +1,6 @@
+2014-04-16 Tetsumune KISO <t2mune@gmail.com>
+	* Bugfix - can't parse a prefix using python3.
+
 2014-04-03 Tetsumune KISO <t2mune@gmail.com>
 	* Update - improved codes in 'mrtparse.py'.
 

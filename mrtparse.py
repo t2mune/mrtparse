@@ -423,7 +423,7 @@ class Base:
         else:
             n = -1
 
-        n = m if len(args) == 0 else (int(args[0]) + 7) / 8
+        n = m if len(args) == 0 else (int(args[0]) + 7) // 8
 
         if n <= 0 and len(buf) - self.p < n:
             return None
