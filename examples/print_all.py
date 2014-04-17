@@ -287,6 +287,10 @@ def print_bgp_attr(attr, n):
             prline('Route Distinguisher: %s' % attr.mp_reach['rd'])
 
         prline('Length: %d' % attr.mp_reach['nlen'])
+
+        if 'next_hop' not in attr.mp_reach:
+            return
+
         prline('Next-Hop: %s' % attr.mp_reach['next_hop'])
 
         for nlri in attr.mp_reach['nlri']:
