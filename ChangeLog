@@ -1,3 +1,6 @@
+2014-04-20 Tetsumune KISO <t2mune@gmail.com>
+	* Update - state the Apache license 2.0 explicitly.
+
 2014-04-17 Tetsumune KISO <t2mune@gmail.com>
 	* Bugfix - can't display BGP attribute "MP_REACH_NLRI" in "print_all.py",
 	which have unknown AFI, SAFI.
