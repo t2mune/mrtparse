@@ -401,14 +401,16 @@ class Base:
         self.p = 0
 
     def val_num(self, buf, n):
-        if n <= 0 and len(buf) - self.p < n:
+        if n <= 0 or len(buf) - self.p < n:
             return None
 
         val = 0
         for i in buf[self.p:self.p+n]:
             val <<= 8
+            # for python3
             if isinstance(i, int):
                 val += i
+            # for python2
             else:
                 val += struct.unpack('>B', i)[0]
         self.p += n
@@ -416,7 +418,7 @@ class Base:
         return val
 
     def val_str(self, buf, n):
-        if n <= 0 and len(buf) - self.p < n:
+        if n <= 0 or len(buf) - self.p < n:
             return None
 
         val = buf[self.p:self.p+n]
@@ -434,9 +436,9 @@ class Base:
         else:
             n = -1
 
-        n = m if len(args) == 0 else (int(args[0]) + 7) // 8
+        n = m if len(args) == 0 else (args[0] + 7) // 8
 
-        if n <= 0 and len(buf) - self.p < n:
+        if n <= 0 or len(buf) - self.p < n:
             return None
 
         addr = socket.inet_ntop(
@@ -468,8 +470,10 @@ class Reader(Base):
         Base.__init__(self)
         self.as_rep = as_rep
 
+        # for file instance
         if hasattr(arg, 'read'):
             self.f = arg
+        # for file path
         elif isinstance(arg, str):
             f = open(arg, 'rb')
             hdr = f.read(max(len(BZ2_MAGIC), len(GZIP_MAGIC)))
@@ -500,6 +504,7 @@ class Reader(Base):
         self.unpack()
         return self.mrt
 
+    # for python2 compatiblity
     next = __next__
 
     def unpack(self):
@@ -1037,7 +1042,7 @@ class Nlri(Base):
         while True:
             label= self.val_num(buf, 3)
             self.label.append(label)
-            if (   label & LBL_BOTTOM 
+            if (   label &  LBL_BOTTOM 
                 or label == LBL_WITHDRAWN):
                 break
         self.rd = self.val_rd(buf)
