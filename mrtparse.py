@@ -504,7 +504,7 @@ class Reader(Base):
         self.unpack()
         return self.mrt
 
-    # for python2 compatiblity
+    # for python2 compatibility
     next = __next__
 
     def unpack(self):
