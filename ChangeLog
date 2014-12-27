@@ -1,5 +1,6 @@
 2014-12-27 Tetsumune KISO <t2mune@gmail.com>
-	* Bugfix - can't parse default route properly.
+	* Update - added a support for IPv6 in "exabgp_conf.py".
+	* Bugfix - can't parse default route properly in "mrtparse.py".
 
 2014-06-24 Tetsumune KISO <t2mune@gmail.com>
 	* Update - improved codes in "mrtparse.py".

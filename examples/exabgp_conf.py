@@ -30,10 +30,11 @@ def make_exabgp_conf(d):
     local_addr = '192.168.1.20'
     neighbor   = '192.168.1.100'
     nexthop    = '192.168.1.254'
+    nexthop6   = '2001:0DB8::1'
     local_as   = 65000
     peer_as    = 64512
     indent     = '    '
-    
+
     print('''
     neighbor %s {
         router-id %s;
@@ -41,7 +42,7 @@ def make_exabgp_conf(d):
         local-as %d;
         peer-as %d;
         graceful-restart;
-    
+
         static {'''
     % (neighbor, router_id, local_addr, local_as, peer_as))
 
@@ -49,13 +50,14 @@ def make_exabgp_conf(d):
         if m.type != MSG_T['TABLE_DUMP_V2']:
             continue
 
-        if m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']:
-            continue
-
-        line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
-        for attr in m.rib.entry[0].attr:
-            line += get_bgp_attr(attr)
-        print('%s next-hop %s;' % (line, nexthop))
+        if (    m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+             or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
+            line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
+            for attr in m.rib.entry[0].attr:
+                line += get_bgp_attr(attr)
+            if m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+                nexthop = nexthop6
+            print('%s next-hop %s;' % (line, nexthop))
 
     print('''
         }
