@@ -51,11 +51,11 @@ def make_exabgp_conf(d):
             continue
 
         if (    m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-             or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
+             or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']):
             line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
             for attr in m.rib.entry[0].attr:
                 line += get_bgp_attr(attr)
-            if m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+            if m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
                 nexthop = nexthop6
             print('%s next-hop %s;' % (line, nexthop))
 
