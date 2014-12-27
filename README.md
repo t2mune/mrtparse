@@ -93,7 +93,8 @@ It displays the contents of a MRT format file.
 
 ###exabgp_conf.py
 ####Description
-It converts MRT format to 'exabgp' config format and displays it.
+It converts MRT format to [exabgp][exabgp_git] config format and displays it.
+[exabgp_git]: https://github.com/Exa-Networks/exabgp
 ####Usage
     exabgp_conf.py <path to the file>
 ####Result

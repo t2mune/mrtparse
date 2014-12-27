@@ -92,7 +92,8 @@ MRT形式のファイルの内容を出力する
 
 ###exabgp_conf.py
 ####内容
-MRT形式のファイルをexabgp用のコンフィグ形式に変換して出力する。
+MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変換して出力する。
+[exabgp_git]: https://github.com/Exa-Networks/exabgp
 ####実行例
     exabgp_conf.py ファイルへのパス
 ####出力例
