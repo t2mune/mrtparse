@@ -1,3 +1,6 @@
+2014-12-27 Tetsumune KISO <t2mune@gmail.com>
+	* Bugfix - can't parse default route properly.
+
 2014-06-24 Tetsumune KISO <t2mune@gmail.com>
 	* Update - improved codes in "mrtparse.py".
 

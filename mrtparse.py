@@ -438,7 +438,7 @@ class Base:
 
         n = m if len(args) == 0 else (args[0] + 7) // 8
 
-        if n <= 0 or len(buf) - self.p < n:
+        if n < 0 or len(buf) - self.p < n:
             return None
 
         addr = socket.inet_ntop(
