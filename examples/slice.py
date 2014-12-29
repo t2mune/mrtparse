@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-slice.py - a script to create a configuration file for exabgp using mrtparse.
+slice.py - This script slices MRT format data.
 
 Copyright (C) 2014 greenHippo, LLC.
 
