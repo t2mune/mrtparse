@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-exabgp_conf.py - a script to create a configuration file for exabgp using mrtparse.
+slice.py - a script to create a configuration file for exabgp using mrtparse.
 
 Copyright (C) 2014 greenHippo, LLC.
 
@@ -23,7 +23,7 @@ Authors:
 '''
 
 from mrtparse import *
-import os, sys, argparse, time, gzip, bz2
+import argparse, time, gzip, bz2
 from datetime import datetime
 
 def parse_args():
