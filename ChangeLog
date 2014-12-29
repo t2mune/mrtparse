@@ -1,3 +1,8 @@
+2014-12-30 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added "slice.py".
+	* Change - changed returned object from "self.mrt" to "self" in def
+	__iter__ of class Reader
+
 2014-12-28 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
 	* Release - mrtparse 1.1 released. 
 

@@ -383,6 +383,7 @@ def main():
     # d.as_rep = AS_REP['asdot+']
     # d.as_rep = AS_REP['asdot']
     for m in d:
+        m = m.mrt
         print_mrt(m)
         if m.type == MSG_T['TABLE_DUMP']:
             print_td(m)

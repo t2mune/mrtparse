@@ -502,7 +502,7 @@ class Reader(Base):
         as_len = 4
         self.mrt = Mrt()
         self.unpack()
-        return self.mrt
+        return self
 
     # for python2 compatibility
     next = __next__

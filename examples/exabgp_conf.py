@@ -47,6 +47,7 @@ def make_exabgp_conf(d):
     % (neighbor, router_id, local_addr, local_as, peer_as))
 
     for m in d:
+        m = m.mrt
         if m.type != MSG_T['TABLE_DUMP_V2']:
             continue
 
