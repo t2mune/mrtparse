@@ -76,7 +76,7 @@ def slice_mrt(args):
     for m in d:
         if start_time and (m.mrt.ts < start_time):
             continue
-        if end_time and (m.mrt.ts > end_time):
+        if end_time and (m.mrt.ts >= end_time):
             break
         if interval and (m.mrt.ts >= t + interval):
             f.close()
