@@ -123,10 +123,10 @@ It converts MRT format to [exabgp][exabgp_git] config format and displays it.
 
 ###slice.py
 ####Description
-It outputs the following data of a MRT format file.
-1. The data for the interval of the specified seconds from the specified start time to the specified end time.
-2. The data from the specified start time to the specified end time.
-3. The data for the interval of the specified seconds.
+It outputs the following data of a MRT format file.  
+1. The data for the interval of the specified seconds from the specified start time to the specified end time.  
+2. The data from the specified start time to the specified end time.  
+3. The data for the interval of the specified seconds.  
 ####Usage
     summary.py [-h] [-s START_TIME] [-e END_TIME] [-i INTERVAL] [-c {gz,bz2}] -f <path to the file>
 ####Result
