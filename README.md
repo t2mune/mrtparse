@@ -128,7 +128,7 @@ It outputs the following data of a MRT format file.
 2. The data from the specified start time to the specified end time.  
 3. The data for the interval of the specified seconds.  
 ####Usage
-    summary.py [-h] [-s START_TIME] [-e END_TIME] [-i INTERVAL] [-c {gz,bz2}] -f <path to the file>
+    slice.py [-h] [-s START_TIME] [-e END_TIME] [-i INTERVAL] [-c {gz,bz2}] -f <path to the file>
 ####Result
     # slice.py -s '2014-08-11 03:46:40' -e '2014-08-11 03:46:50' -i 2 -f latest-update.gz
     # ls
