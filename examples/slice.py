@@ -29,9 +29,9 @@ from datetime import datetime
 def parse_args():
     parser = argparse.ArgumentParser(description='This script slices MRT format data.')
     parser.add_argument('-s', '--start-time', type=str,
-        help='specifies the end time in format YYYY-MM-DD HH:MM:SS')
-    parser.add_argument('-e', '--end-time', type=str,
         help='specifies the start time in format YYYY-MM-DD HH:MM:SS')
+    parser.add_argument('-e', '--end-time', type=str,
+        help='specifies the end time in format YYYY-MM-DD HH:MM:SS')
     parser.add_argument('-i', '--interval', type=int,
         help='specifies the interval in seconds')
     parser.add_argument('-c', '--compress-type', type=str, choices=['gz', 'bz2'],
