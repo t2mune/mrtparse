@@ -119,6 +119,45 @@ MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変
         }
     }
 
+###slice.py
+####内容
+MRT形式のファイルについて、下記データをファイル出力する
+1. 指定された開始時間から終了時間までの指定された秒単位の間隔についてのデータ
+2. 指定された開始時間から終了時間までのデータ
+3. 指定された秒単位の間隔についてのデータ
+####実行例
+    summary.py [-h] [-s 開始時間] [-e 終了時間] [-i 秒単位の間隔] [-c {gz,bz2}] -f ファイルへのパス
+####出力例
+    # slice.py -s '2014-08-11 03:46:40' -e '2014-08-11 03:46:50' -i 2 -f latest-update.gz
+    # ls
+    latest-update.gz-20140811-034640
+    latest-update.gz-20140811-034642
+    latest-update.gz-20140811-034644
+    latest-update.gz-20140811-034646
+    latest-update.gz-20140811-034648
+
+
+###summary.py
+####内容
+MRT形式のファイルのサマリーを出力する
+####実行例
+    summary.py ファイルへのパス
+####出力例
+    [2014-08-11 03:45:00 - 2014-08-11 03:49:59]
+    BGP4MP:                         5973
+    BGP4MP_MESSAGE:                   34
+        UPDATE:                       24
+        KEEPALIVE:                    10
+    BGP4MP_MESSAGE_AS4:             5896
+        UPDATE:                     5825
+        KEEPALIVE:                    71
+    BGP4MP_STATE_CHANGE_AS4:          43
+        Idle:                          1
+        Connect:                      20
+        Active:                       18
+        OpenSent:                      4
+
+
 ##作者
 Tetsumune KISO <t2mune@gmail.com>  
 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>  

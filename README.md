@@ -120,6 +120,46 @@ It converts MRT format to [exabgp][exabgp_git] config format and displays it.
         }
     }
 
+
+###slice.py
+####Description
+It outputs the following data of a MRT format file.
+1. The data for the interval of the specified seconds from the specified start time to the specified end time.
+2. The data from the specified start time to the specified end time.
+3. The data for the interval of the specified seconds.
+####Usage
+    summary.py [-h] [-s START_TIME] [-e END_TIME] [-i INTERVAL] [-c {gz,bz2}] -f <path to the file>
+####Result
+    # slice.py -s '2014-08-11 03:46:40' -e '2014-08-11 03:46:50' -i 2 -f latest-update.gz
+    # ls
+    latest-update.gz-20140811-034640
+    latest-update.gz-20140811-034642
+    latest-update.gz-20140811-034644
+    latest-update.gz-20140811-034646
+    latest-update.gz-20140811-034648
+
+
+###summary.py
+####Description
+It displays the summary of a MRT format file.
+####Usage
+    summary.py <path to the file>
+####Result
+    [2014-08-11 03:45:00 - 2014-08-11 03:49:59]
+    BGP4MP:                         5973
+    BGP4MP_MESSAGE:                   34
+        UPDATE:                       24
+        KEEPALIVE:                    10
+    BGP4MP_MESSAGE_AS4:             5896
+        UPDATE:                     5825
+        KEEPALIVE:                    71
+    BGP4MP_STATE_CHANGE_AS4:          43
+        Idle:                          1
+        Connect:                      20
+        Active:                       18
+        OpenSent:                      4
+
+
 ##Authors
 Tetsumune KISO <t2mune@gmail.com>  
 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>  
