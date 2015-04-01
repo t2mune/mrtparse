@@ -334,6 +334,13 @@ def print_bgp_attr(attr, n):
             prline('Path Segment Value: %s' % path_seg['val'])
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
         prline(line + ': %s %s' % (attr.as4_aggr['asn'], attr.as4_aggr['id']))
+    elif attr.type == BGP_ATTR_T['AIGP']:
+        prline(line)
+        indt += 1
+        for aigp in attr.aigp:
+            prline('Type: %d' % aigp['type'])
+            prline('Length: %d' % aigp['len'])
+            prline('Value: %d' % aigp['val'])
     elif attr.type == BGP_ATTR_T['ATTR_SET']:
         prline(line)
         indt += 1

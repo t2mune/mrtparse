@@ -1,5 +1,5 @@
-2015-01-20 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
-	* Update - update "README.md", "README-ja.md".
+2015-04-01 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added a support for BGP path attribute "AIGP".
 
 2015-01-04 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added "summary.py".

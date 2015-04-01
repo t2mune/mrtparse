@@ -184,6 +184,7 @@ BGP_ATTR_T = {
     16:'EXTENDED_COMMUNITIES', # Defined in RFC4360
     17:'AS4_PATH',             # Defined in RFC6793
     18:'AS4_AGGREGATOR',       # Defined in RFC6793
+    26:'AIGP',                 # Defined in RFC7311                  
     128:'ATTR_SET',            # Defined in RFC6368
 }
 dl += [BGP_ATTR_T]
@@ -864,6 +865,8 @@ class BgpAttr(Base):
             self.unpack_as4_path(buf)
         elif self.type == BGP_ATTR_T['AS4_AGGREGATOR']:
             self.unpack_as4_aggregator(buf)
+        elif self.type == BGP_ATTR_T['AIGP']:
+            self.unpack_aigp(buf)
         elif self.type == BGP_ATTR_T['ATTR_SET']:
             self.unpack_attr_set(buf)
         else:
@@ -1009,6 +1012,16 @@ class BgpAttr(Base):
         self.as4_aggr = {}
         self.as4_aggr['asn'] = self.val_asn(buf, 4)
         self.as4_aggr['id'] = self.val_addr(buf, AFI_T['IPv4'])
+
+    def unpack_aigp(self,buf):
+        attr_len = self.p + self.len
+        self.aigp = []
+        while self.p < attr_len:
+            aigp = {}
+            aigp['type'] = self.val_num(buf, 1)
+            aigp['len'] = self.val_num(buf, 2)
+            aigp['val'] = self.val_num(buf, aigp['len'] - 3)
+            self.aigp.append(aigp)
 
     def unpack_attr_set(self, buf):
         attr_len = self.p + self.len
