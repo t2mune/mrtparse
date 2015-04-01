@@ -2,7 +2,7 @@
 '''
 exabgp_conf.py - a script to create a configuration file for exabgp using mrtparse.
 
-Copyright (C) 2014 greenHippo, LLC.
+Copyright (C) 2015 greenHippo, LLC.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

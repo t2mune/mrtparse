@@ -168,6 +168,6 @@ Nobuhiro ITOU <js333123@gmail.com>
 License
 ----------
 Licensed under the [Apache License, Version 2.0][Apache]  
-Copyright &copy; 2014 [greenHippo, LLC.][greenHippo]  
+Copyright &copy; 2015 [greenHippo, LLC.][greenHippo]  
 [Apache]: http://www.apache.org/licenses/LICENSE-2.0
 [greenHippo]: http://greenhippo.co.jp
