@@ -302,7 +302,8 @@ def print_bgp_attr(attr, n):
         if 'next_hop' not in attr.mp_reach:
             return
 
-        prline('Next-Hop: %s' % attr.mp_reach['next_hop'])
+        next_hop = " ".join(attr.mp_reach['next_hop'])
+        prline('Next-Hop: %s' % next_hop)
 
         for nlri in attr.mp_reach['nlri']:
             print_nlri(nlri, 'NLRI', attr.mp_reach['safi'])
