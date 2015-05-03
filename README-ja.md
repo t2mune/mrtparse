@@ -115,9 +115,9 @@ MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変
       -n NEIGHBOR, --neighbor NEIGHBOR
                             specify neighbor address
       -4 NEXT_HOP, --ipv4 NEXT_HOP
-                            convert IPv4 entries and specify IPv4 next-hop if exists
+                            convert IPv4 entries and specify IPv4 next-hop
       -6 NEXT_HOP, --ipv6 NEXT_HOP
-                            convert IPv6 entries and specify IPv6 next-hop if exists
+                            convert IPv6 entries and specify IPv6 next-hop
       -a, --all-entries     convert all entries
                             (default: convert only first entry per one prefix)
 ####出力例
