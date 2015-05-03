@@ -1,3 +1,6 @@
+2015-05-04 Tetsumune KISO <t2mune@gmail.com>
+	* Bugfix - can't handle flags properly in "exabgp_conf.py".
+
 2015-05-03 Tetsumune KISO <t2mune@gmail.com>
 	* Update - changed command line options in "slice.py".
 	* Update - added command line options in "exabgp_conf.py".

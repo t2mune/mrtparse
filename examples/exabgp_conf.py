@@ -34,11 +34,12 @@ FLAG_T = {
 def parse_args():
     global flags
 
-    if ('-4' or '--ipv4') in sys.argv:
+    if '-4' in sys.argv or '--ipv4' in sys.argv:
         flags |= FLAG_T['IPv4']
-    if ('-6' or '--ipv6') in sys.argv:
+    if '-6' in sys.argv or '--ipv6' in sys.argv:
         flags |= FLAG_T['IPv6']
-    if not (('-4' or '--ipv4' or '-6' or '--ipv6') in sys.argv):
+    if (    '-4' not in sys.argv and '--ipv4' not in sys.argv 
+        and '-6' not in sys.argv and '--ipv6' not in sys.argv):
         flags = FLAG_T['IPv4'] | FLAG_T['IPv6']
 
     p = argparse.ArgumentParser(
