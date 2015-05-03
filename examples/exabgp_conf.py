@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-exabgp_conf.py - a script to create a configuration file for exabgp using mrtparse.
+exabgp_conf.py - a script to convert ExaBGP format config.
 
 Copyright (C) 2015 greenHippo, LLC.
 
@@ -42,9 +42,10 @@ def parse_args():
         flags = FLAG_T['IPv4'] | FLAG_T['IPv6']
 
     p = argparse.ArgumentParser(
-        description='This script converts to ExaBGP-formatted config.')
-    p.add_argument('path_to_file',
-        help='specify path to MRT-fomatted file')
+        description='This script converts to ExaBGP format config.')
+    p.add_argument(
+        'path_to_file',
+        help='specify path to MRT format file')
     p.add_argument(
         '-r', '--router-id', type=str, default='192.168.0.1',
         help='specify router-id')

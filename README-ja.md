@@ -95,31 +95,33 @@ MRT形式のファイルの内容を出力する
 MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変換して出力する。
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
 ####使用方法
-    usage: exabgp_conf.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
-                          [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 NEXT_HOP]
-                          [-6 NEXT_HOP] [-a] path_to_file
+    使用方法: exabgp_conf.py [-h] [-r ルータID] [-l ローカルAS] [-p ピアAS]
+                          [-L ローカルアドレス] [-n ネイバーアドレス] [-4 ネクストホップ]
+                          [-6 ネクストホップ] [-a] ファイルのパス
+ 
+    このスクリプトはExaBGP形式の設定ファイルに変換する
+
+    オプションなし引数:
+      ファイルのパス        MRT形式のファイルのパスを指定する
     
-    positional arguments:
-      path_to_file          specify path to MRT-fomatted file
-    
-    optional arguments:
-      -h, --help            show this help message and exit
-      -r ROUTER_ID, --router-id ROUTER_ID
+    オプションあり引数:
+      -h, --help            ヘルプを表示して終了する
+      -r ルータID, --router-id ルータID
                             specify router-id
-      -l LOCAL_AS, --local-as LOCAL_AS
-                            specify local AS number
-      -p PEER_AS, --peer-as PEER_AS
-                            specify peer AS number
-      -L LOCAL_ADDR, --local-addr LOCAL_ADDR
-                            specify local address
-      -n NEIGHBOR, --neighbor NEIGHBOR
-                            specify neighbor address
-      -4 NEXT_HOP, --ipv4 NEXT_HOP
-                            convert IPv4 entries and specify IPv4 next-hop
-      -6 NEXT_HOP, --ipv6 NEXT_HOP
-                            convert IPv6 entries and specify IPv6 next-hop
-      -a, --all-entries     convert all entries
-                            (default: convert only first entry per one prefix)
+      -l ローカルAS, --local-as ローカルAS
+                            ローカルAS番号を指定する
+      -p ピアAS, --peer-as ピアAS
+                            ピアAS番号を指定する
+      -L ローカルアドレス, --local-addr ローカルアドレス
+                            ローカルのアドレスを指定する
+      -n ネイバーアドレス, --neighbor ネイバーアドレス
+                            ネイバーのアドレスを指定する
+      -4 ネクストホップ, --ipv4 ネクストホップ
+                            IPv4のエントリーを変換し、ネクストホップをする
+      -6 ネクストホップ, --ipv6 ネクストホップ
+                            IPv6のエントリーを変換し、指定されたネクストホップを使用する
+      -a, --all-entries     全てのエントリーを変換する
+                            (デフォルト動作: 同じ経路に対し最初のエントリーのみ変換する)
 ####出力例
     neighbor 192.168.1.100 {
         router-id 192.168.0.20;
@@ -150,15 +152,33 @@ MRT形式のファイルについて、下記データをファイル出力す�
 2. 指定された開始時間から終了時間までのデータ  
 3. 指定された秒単位の間隔についてのデータ  
 ####使用方法
-    slice.py [-h] [-s 開始時間] [-e 終了時間] [-i 秒単位の間隔] [-c {gz,bz2}] -f ファイルへのパス
+    使用方法: slice.py [-h] [-s 開始時間] [-e 終了時間] [-i 間隔] [-c {gz,bz2}]
+                    ファイルのパス
+    
+    このスクリプトはMRT形式のファイルを分割する
+    
+    オプションなし引数:
+      ファイルのパス        MRT形式のファイルのパスを指定する
+    
+    オプションあり引数:
+      -h, --help            ヘルプメッセージを表示して終了する
+      -s 開始時間, --start-time 開始時間
+                            開始時間を YYYY-MM-DD HH:MM:SS の形式で指定する
+      -e 終了時間, --end-time 終了時間
+                            終了時間を YYYY-MM-DD HH:MM:SS の形式で指定する
+      -i 間隔, --interval 間隔
+                            ファイルを分割する間隔(秒)を指定する
+      -c {gz,bz2}, --compress-type {gz,bz2}
+                            分割ファイルの圧縮形式(gz, bz2)を指定する
 ####出力例
-    # slice.py -s '2014-08-11 03:46:40' -e '2014-08-11 03:46:50' -i 2 -f latest-update.gz
+    # slice.py -s '2015-04-26 03:26:00' -e '2014-04-26 03:27:00' -i 10 -c bz2 -f latest-update.gz
     # ls
-    latest-update.gz-20140811-034640
-    latest-update.gz-20140811-034642
-    latest-update.gz-20140811-034644
-    latest-update.gz-20140811-034646
-    latest-update.gz-20140811-034648
+    latest-update-20150426-032600.bz2
+    latest-update-20150426-032610.bz2
+    latest-update-20150426-032620.bz2
+    latest-update-20150426-032630.bz2
+    latest-update-20150426-032640.bz2
+    latest-update-20150426-032650.bz2
 
 
 ###summary.py

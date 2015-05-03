@@ -23,21 +23,27 @@ Authors:
 '''
 
 from mrtparse import *
-import argparse, time, gzip, bz2
+import argparse, time, gzip, bz2, re
 from datetime import datetime
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='This script slices MRT format data.')
-    parser.add_argument('-s', '--start-time', type=str,
-        help='specifies the start time in format YYYY-MM-DD HH:MM:SS')
-    parser.add_argument('-e', '--end-time', type=str,
-        help='specifies the end time in format YYYY-MM-DD HH:MM:SS')
-    parser.add_argument('-i', '--interval', type=int,
-        help='specifies the interval in seconds')
-    parser.add_argument('-c', '--compress-type', type=str, choices=['gz', 'bz2'],
-        help='specifies the compress type (gz, bz2)')
-    parser.add_argument('-f', '--filename', type=str, required=True,
-        help='a file path to MRT format data')
+    parser = argparse.ArgumentParser(
+        description='This script slices MRT format data.')
+    parser.add_argument(
+        'path_to_file',
+        help='specify path to MRT format file')
+    parser.add_argument(
+        '-s', '--start-time', type=str,
+        help='specify start time in format YYYY-MM-DD HH:MM:SS')
+    parser.add_argument(
+        '-e', '--end-time', type=str,
+        help='specify end time in format YYYY-MM-DD HH:MM:SS')
+    parser.add_argument(
+        '-i', '--interval', type=int,
+        help='specify interval in seconds')
+    parser.add_argument(
+        '-c', '--compress-type', type=str, choices=['gz', 'bz2'],
+        help='specify compress type (gz, bz2)')
     return parser.parse_args()
 
 def conv_unixtime(t):
@@ -53,6 +59,7 @@ def conv_unixtime(t):
     return t
 
 def file_open(f, t, c):
+    f = re.sub(r'.gz$|.bz2$', '', f)
     t = datetime.fromtimestamp(t).strftime('%Y%m%d-%H%M%S')
     if c is None:
         return open('%s-%s' % (f, t), 'wb')
@@ -67,12 +74,12 @@ def slice_mrt(args):
     interval = args.interval
 
     if t is None:
-        d = Reader(args.filename)
+        d = Reader(args.path_to_file)
         m = d.next()
         t = m.mrt.ts
 
-    f = file_open(args.filename, t, args.compress_type)
-    d = Reader(args.filename)
+    f = file_open(args.path_to_file, t, args.compress_type)
+    d = Reader(args.path_to_file)
     for m in d:
         if start_time and (m.mrt.ts < start_time):
             continue
@@ -81,7 +88,7 @@ def slice_mrt(args):
         if interval and (m.mrt.ts >= t + interval):
             f.close()
             t += interval
-            f = file_open(args.filename, t, args.compress_type)
+            f = file_open(args.path_to_file, t, args.compress_type)
         f.write(m.buf)
     f.close()
 

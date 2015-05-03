@@ -98,7 +98,10 @@ This script converts MRT format to [ExaBGP][exabgp_git] config format and displa
 ####Usage
     usage: exabgp_conf.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
                           [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 NEXT_HOP]
-                          [-6 NEXT_HOP] [-a] path_to_file
+                          [-6 NEXT_HOP] [-a]
+                          path_to_file
+
+    This script converts to ExaBGP format config.
     
     positional arguments:
       path_to_file          specify path to MRT-fomatted file
@@ -152,15 +155,34 @@ This script outputs the following data of a MRT format file.
 2. The data from the specified start time to the specified end time.  
 3. The data for the interval of the specified seconds.  
 ####Usage
-    slice.py [-h] [-s START_TIME] [-e END_TIME] [-i INTERVAL] [-c {gz,bz2}] -f <path to the file>
+    usage: slice.py [-h] [-s START_TIME] [-e END_TIME] [-i INTERVAL] [-c {gz,bz2}]
+                    path_to_file
+    
+    This script slices MRT format data.
+    
+    positional arguments:
+      path_to_file          specify path to MRT format file
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      -s START_TIME, --start-time START_TIME
+                            specify start time in format YYYY-MM-DD HH:MM:SS
+      -e END_TIME, --end-time END_TIME
+                            specify end time in format YYYY-MM-DD HH:MM:SS
+      -i INTERVAL, --interval INTERVAL
+                            specify interval in seconds
+      -c {gz,bz2}, --compress-type {gz,bz2}
+                            specify compress type (gz, bz2)
+
 ####Result
-    # slice.py -s '2014-08-11 03:46:40' -e '2014-08-11 03:46:50' -i 2 -f latest-update.gz
+    # slice.py -s '2015-04-26 03:26:00' -e '2014-04-26 03:27:00' -i 10 -c bz2 -f latest-update.gz
     # ls
-    latest-update.gz-20140811-034640
-    latest-update.gz-20140811-034642
-    latest-update.gz-20140811-034644
-    latest-update.gz-20140811-034646
-    latest-update.gz-20140811-034648
+    latest-update-20150426-032600.bz2
+    latest-update-20150426-032610.bz2
+    latest-update-20150426-032620.bz2
+    latest-update-20150426-032630.bz2
+    latest-update-20150426-032640.bz2
+    latest-update-20150426-032650.bz2
 
 
 ###summary.py
