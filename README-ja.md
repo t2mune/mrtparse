@@ -105,7 +105,7 @@ MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変
       ファイルのパス        MRT形式のファイルのパスを指定する
     
     オプションあり引数:
-      -h, --help            ヘルプを表示して終了する
+      -h, --help            ヘルプメッセージを表示して終了する
       -r ルータID, --router-id ルータID
                             specify router-id
       -l ローカルAS, --local-as ローカルAS
