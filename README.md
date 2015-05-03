@@ -64,7 +64,7 @@ You can retrieve each entry from the returned object using a loop and then proce
 These scripts are included in 'examples' directory.
 ###print_all.py
 ####Description
-It displays the contents of a MRT format file.
+This script displays the contents of a MRT format file.
 ####Usage
     print_all.py <path to the file>
 ####Result
@@ -93,10 +93,34 @@ It displays the contents of a MRT format file.
 
 ###exabgp_conf.py
 ####Description
-It converts MRT format to [exabgp][exabgp_git] config format and displays it.
+This script converts MRT format to [ExaBGP][exabgp_git] config format and displays it.
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
 ####Usage
-    exabgp_conf.py <path to the file>
+usage: exabgp_conf.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
+                      [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 NEXT_HOP]
+                      [-6 NEXT_HOP] [-a] path_to_file
+
+positional arguments:
+  path_to_file          specify path to MRT-fomatted file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r ROUTER_ID, --router-id ROUTER_ID
+                        specify router-id
+  -l LOCAL_AS, --local-as LOCAL_AS
+                        specify local AS number
+  -p PEER_AS, --peer-as PEER_AS
+                        specify peer AS number
+  -L LOCAL_ADDR, --local-addr LOCAL_ADDR
+                        specify local address
+  -n NEIGHBOR, --neighbor NEIGHBOR
+                        specify neighbor address
+  -4 NEXT_HOP, --ipv4 NEXT_HOP
+                        convert IPv4 entries and specify IPv4 next-hop if exists
+  -6 NEXT_HOP, --ipv6 NEXT_HOP
+                        convert IPv6 entries and specify IPv6 next-hop if exists
+  -a, --all-entries     convert all entries
+                        (default: convert only first entry per one prefix)
 ####Result
     neighbor 192.168.1.100 {
         router-id 192.168.0.20;
@@ -123,7 +147,7 @@ It converts MRT format to [exabgp][exabgp_git] config format and displays it.
 
 ###slice.py
 ####Description
-It outputs the following data of a MRT format file.  
+This script outputs the following data of a MRT format file.  
 1. The data for the interval of the specified seconds from the specified start time to the specified end time.  
 2. The data from the specified start time to the specified end time.  
 3. The data for the interval of the specified seconds.  
@@ -141,23 +165,23 @@ It outputs the following data of a MRT format file.
 
 ###summary.py
 ####Description
-It displays the summary of a MRT format file.
+This script displays the summary of a MRT format file.
 ####Usage
     summary.py <path to the file>
 ####Result
     [2014-08-11 03:45:00 - 2014-08-11 03:49:59]
-    BGP4MP:                         5973
-    BGP4MP_MESSAGE:                   34
-        UPDATE:                       24
-        KEEPALIVE:                    10
-    BGP4MP_MESSAGE_AS4:             5896
-        UPDATE:                     5825
-        KEEPALIVE:                    71
-    BGP4MP_STATE_CHANGE_AS4:          43
-        Idle:                          1
-        Connect:                      20
-        Active:                       18
-        OpenSent:                      4
+    BGP4MP:                             5973
+        BGP4MP_MESSAGE:                   34
+            UPDATE:                       24
+            KEEPALIVE:                    10
+        BGP4MP_MESSAGE_AS4:             5896
+            UPDATE:                     5825
+            KEEPALIVE:                    71
+        BGP4MP_STATE_CHANGE_AS4:          43
+            Idle:                          1
+            Connect:                      20
+            Active:                       18
+            OpenSent:                      4
 
 
 ##Authors

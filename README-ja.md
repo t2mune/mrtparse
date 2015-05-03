@@ -64,7 +64,7 @@ MRT形式のファイル（gzip、bzip2にも対応）を文字列（ファイ�
 ###print_all.py
 ####内容
 MRT形式のファイルの内容を出力する
-####実行例
+####使用方法
     print_all.py ファイルへのパス
 ####出力例
     ---------------------------------------------------------------
@@ -94,8 +94,32 @@ MRT形式のファイルの内容を出力する
 ####内容
 MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変換して出力する。
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
-####実行例
-    exabgp_conf.py ファイルへのパス
+####使用方法
+usage: exabgp_conf.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
+                      [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 NEXT_HOP]
+                      [-6 NEXT_HOP] [-a] path_to_file
+
+positional arguments:
+  path_to_file          specify path to MRT-fomatted file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r ROUTER_ID, --router-id ROUTER_ID
+                        specify router-id
+  -l LOCAL_AS, --local-as LOCAL_AS
+                        specify local AS number
+  -p PEER_AS, --peer-as PEER_AS
+                        specify peer AS number
+  -L LOCAL_ADDR, --local-addr LOCAL_ADDR
+                        specify local address
+  -n NEIGHBOR, --neighbor NEIGHBOR
+                        specify neighbor address
+  -4 NEXT_HOP, --ipv4 NEXT_HOP
+                        convert IPv4 entries and specify IPv4 next-hop if exists
+  -6 NEXT_HOP, --ipv6 NEXT_HOP
+                        convert IPv6 entries and specify IPv6 next-hop if exists
+  -a, --all-entries     convert all entries
+                        (default: convert only first entry per one prefix)
 ####出力例
     neighbor 192.168.1.100 {
         router-id 192.168.0.20;
@@ -125,7 +149,7 @@ MRT形式のファイルについて、下記データをファイル出力す�
 1. 指定された開始時間から終了時間までの指定された秒単位の間隔についてのデータ  
 2. 指定された開始時間から終了時間までのデータ  
 3. 指定された秒単位の間隔についてのデータ  
-####実行例
+####使用方法
     slice.py [-h] [-s 開始時間] [-e 終了時間] [-i 秒単位の間隔] [-c {gz,bz2}] -f ファイルへのパス
 ####出力例
     # slice.py -s '2014-08-11 03:46:40' -e '2014-08-11 03:46:50' -i 2 -f latest-update.gz
@@ -140,22 +164,22 @@ MRT形式のファイルについて、下記データをファイル出力す�
 ###summary.py
 ####内容
 MRT形式のファイルのサマリーを出力する
-####実行例
+####使用方法
     summary.py ファイルへのパス
 ####出力例
     [2014-08-11 03:45:00 - 2014-08-11 03:49:59]
-    BGP4MP:                         5973
-    BGP4MP_MESSAGE:                   34
-        UPDATE:                       24
-        KEEPALIVE:                    10
-    BGP4MP_MESSAGE_AS4:             5896
-        UPDATE:                     5825
-        KEEPALIVE:                    71
-    BGP4MP_STATE_CHANGE_AS4:          43
-        Idle:                          1
-        Connect:                      20
-        Active:                       18
-        OpenSent:                      4
+    BGP4MP:                             5973
+        BGP4MP_MESSAGE:                   34
+            UPDATE:                       24
+            KEEPALIVE:                    10
+        BGP4MP_MESSAGE_AS4:             5896
+            UPDATE:                     5825
+            KEEPALIVE:                    71
+        BGP4MP_STATE_CHANGE_AS4:          43
+            Idle:                          1
+            Connect:                      20
+            Active:                       18
+            OpenSent:                      4
 
 
 ##作者

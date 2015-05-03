@@ -1,3 +1,6 @@
+2015-05-03 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added command line options in "exabgp_conf.py".
+
 2015-05-02 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
 	* Update - added next hop of ipv6 link local addresses.
 

@@ -23,18 +23,59 @@ Authors:
 '''
 
 from mrtparse import *
-import sys, re
+import sys, re, argparse
 
-def make_exabgp_conf(d):
-    router_id  = '192.168.0.20'
-    local_addr = '192.168.1.20'
-    neighbor   = '192.168.1.100'
-    nexthop    = '192.168.1.254'
-    nexthop6   = '2001:0DB8::1'
-    local_as   = 65000
-    peer_as    = 64512
-    indent     = '    '
+flags = 0x00
+FLAG_T = {
+    'IPv4': 0x01,
+    'IPv6': 0x02,
+}
 
+def parse_args():
+    global flags
+
+    if ('-4' or '--ipv4') in sys.argv:
+        flags |= FLAG_T['IPv4']
+    if ('-6' or '--ipv6') in sys.argv:
+        flags |= FLAG_T['IPv6']
+    if not ('-4' or '--ipv4' or '-6' or '--ipv6' in sys.argv):
+        flags = FLAG_T['IPv4'] | FLAG_T['IPv6']
+
+    p = argparse.ArgumentParser(
+        description='This script converts to ExaBGP-formatted config.')
+    p.add_argument('path_to_file',
+        help='specify path to MRT-fomatted file')
+    p.add_argument(
+        '-r', '--router-id', type=str, default='192.168.0.1',
+        help='specify router-id')
+    p.add_argument(
+        '-l', '--local-as', type=int, default=64512,
+        help='specify local AS number')
+    p.add_argument(
+        '-p', '--peer-as', type=int, default=65000,
+        help='specify peer AS number')
+    p.add_argument(
+        '-L', '--local-addr', type=str, default='192.168.1.1',
+        help='specify local address')
+    p.add_argument(
+        '-n', '--neighbor', type=str, default='192.168.1.100',
+        help='specify neighbor address')
+    p.add_argument(
+        '-4', '--ipv4', type=str, default='192.168.1.254',
+        metavar='NEXT_HOP', dest='next_hop',
+        help='convert IPv4 entries and specify IPv4 next-hop if exists')
+    p.add_argument(
+        '-6', '--ipv6', type=str, default='2001:db8::1',
+        metavar='NEXT_HOP', dest='next_hop6',
+        help='convert IPv6 entries and specify IPv6 next-hop if exists''')
+    p.add_argument(
+        '-a', '--all-entries', default=False, action='store_true',
+        help='convert all entries \
+            (default: convert only first entry per one prefix)')
+
+    return p.parse_args()
+
+def conv_exabgp_conf(args, d):
     print('''
     neighbor %s {
         router-id %s;
@@ -44,26 +85,51 @@ def make_exabgp_conf(d):
         graceful-restart;
 
         static {'''
-    % (neighbor, router_id, local_addr, local_as, peer_as))
+    % (args.neighbor, args.router_id, args.local_addr, args.local_as, args.peer_as))
 
     for m in d:
         m = m.mrt
+
         if m.type != MSG_T['TABLE_DUMP_V2']:
             continue
 
-        if (    m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-             or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']):
-            line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
-            for attr in m.rib.entry[0].attr:
-                line += get_bgp_attr(attr)
-            if m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
-                nexthop = nexthop6
-            print('%s next-hop %s;' % (line, nexthop))
+        if (    m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']
+            and m.subtype != TD_V2_ST['RIB_IPV6_UNICAST']):
+            continue
+
+        if (m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+            and not (flags & FLAG_T['IPv4'])):
+            continue
+
+        if (m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+            and not (flags & FLAG_T['IPv6'])):
+            continue
+
+        route = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
+
+        entry = []
+        if args.all_entries is True:
+            entry = m.rib.entry
+        else:
+            entry.append(m.rib.entry[0])
+
+        print_entry(args, entry, m.subtype, route)
 
     print('''
         }
     }
     ''')
+
+def print_entry(args, entry, subtype, route):
+    for e in entry:
+        line = route
+        for attr in e.attr:
+            line += get_bgp_attr(attr)
+
+        if subtype == TD_V2_ST['RIB_IPV4_UNICAST']:
+            print('%s next-hop %s;' % (line, args.next_hop))
+        elif subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
+            print('%s next-hop %s;' % (line, args.next_hop6))
 
 def get_bgp_attr(attr):
     line = ''
@@ -134,15 +200,13 @@ def get_bgp_attr(attr):
         if m is not None:
             asn = int(m.group(1)) * 65536 + int(m.group(2))
         line += ' as4-aggregator (%s:%s)' % (str(asn), attr.as4_aggr['id'])
+
     return line
 
 def main():
-    if len(sys.argv) != 2:
-        print('Usage: %s FILENAME' % sys.argv[0])
-        exit(1)
-
-    d = Reader(sys.argv[1])
-    make_exabgp_conf(d)
+    args = parse_args()
+    d = Reader(args.path_to_file)
+    conv_exabgp_conf(args, d)
 
 if __name__ == '__main__':
     main()
