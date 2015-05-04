@@ -1,3 +1,6 @@
+2015-05-04 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
+	* Release - mrtparse 1.2 released. 
+
 2015-05-04 Tetsumune KISO <t2mune@gmail.com>
 	* Bugfix - can't handle flags properly in "exabgp_conf.py".
 
