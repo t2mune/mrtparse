@@ -30,6 +30,7 @@ FLAG_T = {
     'IPv4': 0x01,
     'IPv6': 0x02,
 }
+next_hop = ''
 
 def parse_args():
     global flags
@@ -49,25 +50,25 @@ def parse_args():
         help='specify path to MRT format file')
     p.add_argument(
         '-r', '--router-id', type=str, default='192.168.0.1',
-        help='specify router-id')
+        help='specify router-id (default: 192.168.0.1)')
     p.add_argument(
         '-l', '--local-as', type=int, default=64512,
-        help='specify local AS number')
+        help='specify local AS number (default: 64512)')
     p.add_argument(
         '-p', '--peer-as', type=int, default=65000,
-        help='specify peer AS number')
+        help='specify peer AS number (default: 65000)')
     p.add_argument(
         '-L', '--local-addr', type=str, default='192.168.1.1',
-        help='specify local address')
+        help='specify local address (default: 192.168.1.1)')
     p.add_argument(
         '-n', '--neighbor', type=str, default='192.168.1.100',
-        help='specify neighbor address')
+        help='specify neighbor address (default: 192.168.1.100)')
     p.add_argument(
-        '-4', '--ipv4', type=str, default='192.168.1.254',
+        '-4', '--ipv4', type=str, nargs='?',
         metavar='NEXT_HOP', dest='next_hop',
         help='convert IPv4 entries and specify IPv4 next-hop if exists')
     p.add_argument(
-        '-6', '--ipv6', type=str, default='2001:db8::1',
+        '-6', '--ipv6', type=str, nargs='?',
         metavar='NEXT_HOP', dest='next_hop6',
         help='convert IPv6 entries and specify IPv6 next-hop if exists''')
     p.add_argument(
@@ -75,9 +76,17 @@ def parse_args():
         help='convert all entries \
             (default: convert only first entry per one prefix)')
 
-    return p.parse_args()
+    if re.search('^-', sys.argv[-1]): 
+        r = p.parse_args()
+    else:
+        r = p.parse_args(sys.argv[:-1])
+        r.path_to_file=sys.argv[-1]
+
+    return r
 
 def conv_exabgp_conf(args, d):
+    global next_hop
+
     print('''
     neighbor %s {
         router-id %s;
@@ -85,6 +94,7 @@ def conv_exabgp_conf(args, d):
         local-as %d;
         peer-as %d;
         graceful-restart;
+        aigp enable;
 
         static {'''
     % (args.neighbor, args.router_id, args.local_addr, args.local_as, args.peer_as))
@@ -107,7 +117,7 @@ def conv_exabgp_conf(args, d):
             and not (flags & FLAG_T['IPv6'])):
             continue
 
-        route = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
+        line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
 
         entry = []
         if args.all_entries is True:
@@ -115,25 +125,20 @@ def conv_exabgp_conf(args, d):
         else:
             entry.append(m.rib.entry[0])
 
-        print_entry(args, entry, m.subtype, route)
+        for e in entry:
+            next_hop = ''
+            for attr in e.attr:
+                line += get_bgp_attr(args, m.subtype, attr)
+            print('%s next-hop %s;' % (line, next_hop))
 
     print('''
         }
     }
     ''')
 
-def print_entry(args, entry, subtype, route):
-    for e in entry:
-        line = route
-        for attr in e.attr:
-            line += get_bgp_attr(attr)
+def get_bgp_attr(args, subtype, attr):
+    global next_hop
 
-        if subtype == TD_V2_ST['RIB_IPV4_UNICAST']:
-            print('%s next-hop %s;' % (line, args.next_hop))
-        elif subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
-            print('%s next-hop %s;' % (line, args.next_hop6))
-
-def get_bgp_attr(attr):
     line = ''
     r = re.compile("([0-9]+)\.([0-9]+)")
 
@@ -156,7 +161,7 @@ def get_bgp_attr(attr):
         line += ' as-path [%s]' % as_path
 
     elif attr.type == BGP_ATTR_T['NEXT_HOP']:
-        pass
+        next_hop = args.next_hop if args.next_hop else attr.next_hop
 
     elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
         line += ' med %d' % attr.med
@@ -181,6 +186,13 @@ def get_bgp_attr(attr):
     elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
         line += ' cluster-list [%s]' % ' '.join(attr.cl_list)
 
+    elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
+        next_hop = attr.mp_reach['next_hop'][0]
+        if subtype == TD_V2_ST['RIB_IPV4_UNICAST'] and args.next_hop:
+            next_hop = args.next_hop
+        elif subtype == TD_V2_ST['RIB_IPV6_UNICAST'] and args.next_hop6:
+            next_hop = args.next_hop6
+
     elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
         ext_comm_list = []
         for ext_comm in attr.ext_comm:
@@ -202,6 +214,9 @@ def get_bgp_attr(attr):
         if m is not None:
             asn = int(m.group(1)) * 65536 + int(m.group(2))
         line += ' as4-aggregator (%s:%s)' % (str(asn), attr.as4_aggr['id'])
+
+    elif attr.type == BGP_ATTR_T['AIGP']:
+        line += ' aigp %d' % attr.aigp[0]['val']
 
     return line
 

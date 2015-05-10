@@ -97,8 +97,8 @@ This script converts MRT format to [ExaBGP][exabgp_git] config format and displa
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
 ####Usage
     usage: exabgp_conf.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
-                          [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 NEXT_HOP]
-                          [-6 NEXT_HOP] [-a]
+                          [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
+                          [-6 [NEXT_HOP]] [-a]
                           path_to_file
 
     This script converts to ExaBGP format config.
@@ -109,19 +109,19 @@ This script converts MRT format to [ExaBGP][exabgp_git] config format and displa
     optional arguments:
       -h, --help            show this help message and exit
       -r ROUTER_ID, --router-id ROUTER_ID
-                            specify router-id
+                            specify router-id (default: 192.168.0.1)
       -l LOCAL_AS, --local-as LOCAL_AS
-                            specify local AS number
+                            specify local AS number (default: 64512)
       -p PEER_AS, --peer-as PEER_AS
-                            specify peer AS number
+                            specify peer AS number (default: 65000)
       -L LOCAL_ADDR, --local-addr LOCAL_ADDR
-                            specify local address
+                            specify local address (default: 192.168.1.1)
       -n NEIGHBOR, --neighbor NEIGHBOR
-                            specify neighbor address
-      -4 NEXT_HOP, --ipv4 NEXT_HOP
-                            convert IPv4 entries and specify IPv4 next-hop
-      -6 NEXT_HOP, --ipv6 NEXT_HOP
-                            convert IPv6 entries and specify IPv6 next-hop
+                            specify neighbor address (default: 192.168.1.100)
+      -4 [NEXT_HOP], --ipv4 [NEXT_HOP]
+                            convert IPv4 entries and specify IPv4 next-hop if exists
+      -6 [NEXT_HOP], --ipv6 [NEXT_HOP]
+                            convert IPv6 entries and specify IPv6 next-hop if exists
       -a, --all-entries     convert all entries
                             (default: convert only first entry per one prefix)
 ####Result
@@ -131,6 +131,7 @@ This script converts MRT format to [ExaBGP][exabgp_git] config format and displa
         local-as 65000;
         peer-as 64512;
         graceful-restart;
+        aigp enable;
 
         static {
                 route 1.0.0.0/24 origin IGP as-path [29049 15169 ] next-hop 192.168.1.254;
