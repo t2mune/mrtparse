@@ -130,6 +130,7 @@ MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変
         local-as 65000;
         peer-as 64512;
         graceful-restart;
+        aigp enable;
 
         static {
                 route 1.0.0.0/24 origin IGP as-path [29049 15169 ] next-hop 192.168.1.254;
