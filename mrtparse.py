@@ -398,6 +398,8 @@ as_rep = AS_REP['asplain']
 
 # super class for all other classes
 class Base:
+    __slots__ = ['p']
+
     def __init__(self):
         self.p = 0
 
@@ -467,6 +469,8 @@ class Base:
         return rd
 
 class Reader(Base):
+    __slots__ = ['as_rep', 'buf', 'len', 'mrt']
+
     def __init__(self, arg):
         Base.__init__(self)
         self.as_rep = as_rep
@@ -563,6 +567,10 @@ class Reader(Base):
             self.p += self.len
 
 class Mrt(Base):
+    __slots__ = ['ts', 'type', 'subtype', 'len', 'view', 'seq', 'prefix',
+                 'plen', 'status', 'org_time', 'peer_ip', 'peer_as', 'attr',
+                 'micro_ts', 'peer', 'td', 'bgp', 'rib']
+
     def __init__(self):
         Base.__init__(self)
         self.ts = None
@@ -593,6 +601,9 @@ class Mrt(Base):
         return self.p
 
 class TableDump(Base):
+    __slots__ = ['view', 'seq', 'prefix', 'plen', 'status', 'org_time',
+                 'peer_ip', 'peer_as', 'attr', 'attr_len']
+
     def __init__(self):
         Base.__init__(self)
         self.view = None
@@ -627,6 +638,8 @@ class TableDump(Base):
         return self.p
 
 class PeerIndexTable(Base):
+    __slots__ = ['collector', 'view_len', 'view', 'count', 'entry']
+
     def __init__(self):
         Base.__init__(self)
         self.collector = None
@@ -648,6 +661,8 @@ class PeerIndexTable(Base):
         return self.p
 
 class PeerEntries(Base):
+    __slots__ = ['type', 'bgp_id', 'ip', 'asn']
+
     def __init__(self):
         Base.__init__(self)
         self.type = None
@@ -668,6 +683,8 @@ class PeerEntries(Base):
         return self.p
 
 class AfiSpecRib(Base):
+    __slots__ = ['seq', 'plen', 'prefix', 'count', 'entry']
+
     def __init__(self):
         Base.__init__(self)
         self.seq = None
@@ -689,6 +706,8 @@ class AfiSpecRib(Base):
         return self.p
 
 class RibEntries(Base):
+    __slots__ = ['peer_index', 'org_time', 'attr', 'attr_len']
+
     def __init__(self):
         Base.__init__(self)
         self.peer_index = None
@@ -711,6 +730,9 @@ class RibEntries(Base):
         return self.p
 
 class Bgp4Mp(Base):
+    __slots__ = ['peer_as', 'local_as', 'ifindex', 'af', 'peer_ip', 'local_ip',
+                 'old_state', 'new_state', 'msg']
+
     def __init__(self):
         Base.__init__(self)
         self.peer_as = None
@@ -751,6 +773,11 @@ class Bgp4Mp(Base):
         return self.p
 
 class BgpMessage(Base):
+    __slots__ = ['marker', 'len', 'type', 'ver', 'my_as', 'holdtime', 'bgp_id',
+                 'bgp_id', 'opt_params', 'opt_len', 'wd_len', 'attr',
+                 'attr_len', 'withdrawn', 'nlri', 'err_code', 'err_subcode',
+                 'data', 'afi', 'rsvd', 'safi']
+
     def __init__(self):
         Base.__init__(self)
         self.marker = None
@@ -838,6 +865,9 @@ class BgpMessage(Base):
         self.safi = self.val_num(buf, 1)
 
 class OptParams(Base):
+    __slots__ = ['type', 'len', 'cap_type', 'cap_len', 'multi_ext', 'orf',
+                 'graceful_restart', 'support_as4']
+
     def __init__(self):
         Base.__init__(self)
         self.type = None
@@ -913,6 +943,11 @@ class OptParams(Base):
         self.support_as4 = self.val_asn(buf, 4)
 
 class BgpAttr(Base):
+    __slots__ = ['flag', 'type', 'len', 'val', 'origin', 'as_path', 'next_hop',
+                 'med', 'local_pref', 'aggr', 'comm', 'org_id', 'cl_list',
+                 'mp_reach', 'mp_unreach', 'ext_comm', 'as4_path', 'as4_aggr',
+                 'aigp', 'attr_set']
+
     def __init__(self):
         Base.__init__(self)
         self.flag = None
@@ -1147,6 +1182,8 @@ class BgpAttr(Base):
             self.attr_set['attr'].append(attr)
 
 class Nlri(Base):
+    __slots__ = ['prefix', 'label', 'rd', 'plen']
+
     def __init__(self):
         Base.__init__(self)
         self.prefix = None
