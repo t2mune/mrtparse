@@ -470,6 +470,9 @@ class Reader(Base):
     def __init__(self, arg):
         Base.__init__(self)
         self.as_rep = as_rep
+        self.buf = None
+        self.len = None
+        self.mrt = None
 
         # for file instance
         if hasattr(arg, 'read'):
@@ -562,6 +565,25 @@ class Reader(Base):
 class Mrt(Base):
     def __init__(self):
         Base.__init__(self)
+        self.ts = None
+        self.type = None
+        self.subtype = None
+        self.len = None
+        self.view = None
+        self.seq = None
+        self.prefix = None
+        self.plen = None
+        self.status = None
+        self.org_time = None
+        self.peer_ip = None
+        self.peer_as = None
+        self.attr = None
+        self.micro_ts = None
+        self.peer = None
+        self.td = None
+        self.bgp = None
+        self.rib = None
+
 
     def unpack(self, buf):
         self.ts = self.val_num(buf, 4)
@@ -573,6 +595,16 @@ class Mrt(Base):
 class TableDump(Base):
     def __init__(self):
         Base.__init__(self)
+        self.view = None
+        self.seq = None
+        self.prefix = None
+        self.plen = None
+        self.status = None
+        self.org_time = None
+        self.peer_ip = None
+        self.peer_as = None
+        self.attr = None
+        self.attr_len = None
 
     def unpack(self, buf, subtype):
         global as_len
@@ -597,6 +629,11 @@ class TableDump(Base):
 class PeerIndexTable(Base):
     def __init__(self):
         Base.__init__(self)
+        self.collector = None
+        self.view_len = None
+        self.view = None
+        self.count = None
+        self.entry = None
 
     def unpack(self, buf):
         self.collector = self.val_addr(buf, AFI_T['IPv4'])
@@ -613,6 +650,10 @@ class PeerIndexTable(Base):
 class PeerEntries(Base):
     def __init__(self):
         Base.__init__(self)
+        self.type = None
+        self.bgp_id = None
+        self.ip = None
+        self.asn = None
 
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
@@ -629,6 +670,11 @@ class PeerEntries(Base):
 class AfiSpecRib(Base):
     def __init__(self):
         Base.__init__(self)
+        self.seq = None
+        self.plen = None
+        self.prefix = None
+        self.count = None
+        self.entry = None
 
     def unpack(self, buf, af):
         self.seq = self.val_num(buf, 4)
@@ -645,6 +691,11 @@ class AfiSpecRib(Base):
 class RibEntries(Base):
     def __init__(self):
         Base.__init__(self)
+        self.peer_index = None
+        self.org_time = None
+        self.attr = None
+        self.attr_len = None
+
 
     def unpack(self, buf):
         self.peer_index = self.val_num(buf, 2)
@@ -662,6 +713,15 @@ class RibEntries(Base):
 class Bgp4Mp(Base):
     def __init__(self):
         Base.__init__(self)
+        self.peer_as = None
+        self.local_as = None
+        self.ifindex = None
+        self.af = None
+        self.peer_ip = None
+        self.local_ip = None
+        self.old_state = None
+        self.new_state = None
+        self.msg = None
 
     def unpack(self, buf, subtype):
         global as_len
@@ -693,6 +753,26 @@ class Bgp4Mp(Base):
 class BgpMessage(Base):
     def __init__(self):
         Base.__init__(self)
+        self.marker = None
+        self.len = None
+        self.type = None
+        self.ver = None
+        self.my_as = None
+        self.holdtime = None
+        self.bgp_id = None
+        self.opt_params = None
+        self.opt_len = None
+        self.wd_len = None
+        self.attr = None
+        self.attr_len = None
+        self.withdrawn = None
+        self.nlri = None
+        self.err_code = None
+        self.err_subcode = None
+        self.data = None
+        self.afi = None
+        self.rsvd = None
+        self.safi = None
 
     def unpack(self, buf, af):
         self.marker = self.val_str(buf, 16)
@@ -760,6 +840,14 @@ class BgpMessage(Base):
 class OptParams(Base):
     def __init__(self):
         Base.__init__(self)
+        self.type = None
+        self.len = None
+        self.cap_type = None
+        self.cap_len = None
+        self.multi_ext = None
+        self.orf = None
+        self.graceful_restart = None
+        self.support_as4 = None
 
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
@@ -827,6 +915,26 @@ class OptParams(Base):
 class BgpAttr(Base):
     def __init__(self):
         Base.__init__(self)
+        self.flag = None
+        self.type = None
+        self.len = None
+        self.val = None
+        self.origin = None
+        self.as_path = None
+        self.next_hop = None
+        self.med = None
+        self.local_pref = None
+        self.aggr = None
+        self.comm = None
+        self.org_id = None
+        self.cl_list = None
+        self.mp_reach = None
+        self.mp_unreach = None
+        self.ext_comm = None
+        self.as4_path = None
+        self.as4_aggr = None
+        self.aigp = None
+        self.attr_set = None
 
     def unpack(self, buf):
         self.flag = self.val_num(buf, 1)
@@ -1041,6 +1149,10 @@ class BgpAttr(Base):
 class Nlri(Base):
     def __init__(self):
         Base.__init__(self)
+        self.prefix = None
+        self.label = None
+        self.rd = None
+        self.plen = None
 
     def unpack(self, buf, *args):
         af = args[0]
