@@ -1,3 +1,6 @@
+2015-06-22 Fabian Raab <fabian.raab@tum.de>
+	* dl += [AFI_T] BUGFIX
+	
 2015-05-10 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added a support for BGP path attribute "AIGP" in
 	"exabgp_conf.py".
