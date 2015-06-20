@@ -109,7 +109,7 @@ TD_ST = {
     1:'AFI_IPv4',
     2:'AFI_IPv6',
 }
-dl += [AFI_T]
+dl += [TD_ST]
 
 # TABLE_DUMP_V2 Subtypes
 # Defined in RFC6396
