@@ -58,7 +58,7 @@ BZ2_MAGIC  = b'\x42\x5a\x68'
 # MRT header length
 MRT_HDR_LEN = 12
 
-class FillEnum(object):
+class _FillEnum(object):
 
     """This Decorator returns an Enum, which contains all values in `values`.
 
@@ -108,7 +108,7 @@ class FillEnum(object):
 
         return new_enum_cls
 
-class BaseEnum(int, enum.Enum):
+class _BaseEnum(int, enum.Enum):
     """This class is the abstract Base for Type and Code Enums here.
 
     It Provides a customized __str__ and __repr__ string prints.
@@ -152,7 +152,7 @@ AFI_T = {
 dl += [AFI_T]
 
 @enum.unique
-class AfiT(BaseEnum):
+class AfiT(_BaseEnum):
     """AFI Types. Assigend by IANA"""
     ipv4 = 1
     ipv6 = 2
@@ -169,7 +169,7 @@ SAFI_T = {
 dl += [SAFI_T]
 
 @enum.unique
-class SafiT(BaseEnum):
+class SafiT(_BaseEnum):
     """SAFI Types. Assigend by IANA"""
     unicast = 1
     multicast = 2
@@ -206,7 +206,7 @@ dl += [MSG_T]
 @enum.unique
 # The field has a length of 16bit. However we only use here 8bit for faster
 # class level initialization until we need more bits.
-@FillEnum(BaseEnum, range(2**8), prefix='val', module=__name__)
+@_FillEnum(_BaseEnum, range(2**8), prefix='val', module=__name__)
 class MsgT(object):
     """MRT Message Types. Defined in RFC6396."""
     null = 0           # Deprecated in RFC6396
@@ -246,7 +246,7 @@ BGP_ST = {
 dl += [BGP_ST]
 
 @enum.unique
-class BgpSt(BaseEnum):
+class BgpSt(_BaseEnum):
     """BGP,BGP4PLUS,BGP4PLUS_01 Subtypes. Deprecated in RFC6396."""
     bgp_null = 0
     bgp_update = 1
@@ -267,7 +267,7 @@ TD_ST = {
 dl += [AFI_T]
 
 @enum.unique
-class TdSt(BaseEnum):
+class TdSt(_BaseEnum):
     """TABLE_DUMP Subtypes. Defined in RFC6396."""
     afi_ipv4 = 1
     afi_ipv6 = 2
@@ -286,7 +286,7 @@ TD_V2_ST = {
 dl += [TD_V2_ST]
 
 @enum.unique
-class TdV2St(BaseEnum):
+class TdV2St(_BaseEnum):
     """TABLE_DUMP_V2 Subtypes. Defined in RFC6396."""
     peer_index_table = 1
     rib_ipv4_unicast = 2
@@ -311,7 +311,7 @@ BGP4MP_ST = {
 dl += [BGP4MP_ST]
 
 @enum.unique
-class Bgp4mpSt(BaseEnum):
+class Bgp4mpSt(_BaseEnum):
     """BGP4MP,BGP4MP_ET Subtypes. Defined in RFC6396."""
     bgp4mp_state_change = 0
     bgp4mp_message = 1
@@ -337,7 +337,7 @@ MSG_ST = {
 @enum.unique
 # The field has a length of 16bit. However we only use here 8bit for faster
 # class level initialization until we need more bits.
-@FillEnum(BaseEnum, range(2**8), prefix='val', module=__name__)
+@_FillEnum(_BaseEnum, range(2**8), prefix='val', module=__name__)
 class MsgSt(object):
     """MRT Message Subtypes. Defined in RFC6396."""
     bgp_st9 = 9
@@ -369,7 +369,7 @@ BGP_FSM = {
 dl += [BGP_FSM]
 
 @enum.unique
-class BgpFsm(BaseEnum):
+class BgpFsm(_BaseEnum):
     """BGP FSM States. Defined in RFC4271."""
     idle = 1
     connect = 2
@@ -409,7 +409,7 @@ BGP_ATTR_T = {
 dl += [BGP_ATTR_T]
 
 @enum.unique
-class BgpAttrT(BaseEnum):
+class BgpAttrT(_BaseEnum):
     """BGP Attribute Types. Defined in RFC4271 and others."""
     reserved = 0
     origin = 1
@@ -465,7 +465,7 @@ ORIGIN_T = {
 dl += [ORIGIN_T]
 
 @enum.unique
-class OriginT(BaseEnum):
+class OriginT(_BaseEnum):
     """BGP ORIGIN Types. Defined in RFC4271."""
     igp = 0
     egp = 1
@@ -483,7 +483,7 @@ AS_PATH_SEG_T = {
 dl += [AS_PATH_SEG_T]
 
 @enum.unique
-class AsPathSegT(BaseEnum):
+class AsPathSegT(_BaseEnum):
     """BGP AS_PATH Types. Defined in RFC4271."""
     as_set = 1
     as_sequence = 2
@@ -502,7 +502,7 @@ COMM_T = {
 dl += [COMM_T]
 
 @enum.unique
-class CommT(BaseEnum):
+class CommT(_BaseEnum):
     """Reserved BGP COMMUNITY Types. Defined in RFC1997."""
     no_export = 0xffffff01
     no_advertise = 0xffffff02
@@ -530,7 +530,7 @@ BGP_MSG_T = {
 dl += [BGP_MSG_T]
 
 @enum.unique
-class BgpMsgT(BaseEnum):
+class BgpMsgT(_BaseEnum):
     """BGP Message Types. Defined in RFC4271."""
     reserved = 0
     open = 1
@@ -554,7 +554,7 @@ BGP_ERR_C = {
 dl += [BGP_ERR_C]
 
 @enum.unique
-class BgpErrC(BaseEnum):
+class BgpErrC(_BaseEnum):
     """BGP Error Codes. Defined in RFC4271."""
     reserved = (0,
         "Reserved")
@@ -583,7 +583,7 @@ BGP_HDR_ERR_SC = {
 dl += [BGP_HDR_ERR_SC]
 
 @enum.unique
-class BgpHdrErrSc(BaseEnum):
+class BgpHdrErrSc(_BaseEnum):
     """BGP Message Header Error Subcodes. Defined in RFC4271."""
     reserved = 0
     connection_not_sync = 1
@@ -610,7 +610,7 @@ BGP_OPEN_ERR_SC = {
 dl += [BGP_OPEN_ERR_SC]
 
 @enum.unique
-class BgpOpenErrSc(BaseEnum):
+class BgpOpenErrSc(_BaseEnum):
     """OPEN Message Error Subcodes. Defined in RFC4271."""
     reserved = (0,
         "Reserved")
@@ -649,7 +649,7 @@ BGP_UPDATE_ERR_SC = {
 dl += [BGP_UPDATE_ERR_SC]
 
 @enum.unique
-class BgpUpdateErrSc(BaseEnum):
+class BgpUpdateErrSc(_BaseEnum):
     """UPDATE Message Error Subcodes. Defined in RFC4271."""
     reserved = (0,
         "Reserved")
@@ -688,7 +688,7 @@ BGP_FSM_ERR_SC = {
 dl += [BGP_FSM_ERR_SC]
 
 @enum.unique
-class BgpFsmErrSc(BaseEnum):
+class BgpFsmErrSc(_BaseEnum):
     """BGP Finite State Machine Error Subcodes. Defined in RFC6608."""
     unspecified_err = (0,
         "Unspecified Error")
@@ -716,7 +716,7 @@ BGP_CEASE_ERR_SC = {
 dl += [BGP_CEASE_ERR_SC]
 
 @enum.unique
-class BgpCeaseErrSc(BaseEnum):
+class BgpCeaseErrSc(_BaseEnum):
     """BGP Cease NOTIFICATION Message Subcodes. Defined in RFC4486."""
     reserved = (0,
         "Reserved")
@@ -748,7 +748,7 @@ BGP_ERR_SC = {
     6:BGP_CEASE_ERR_SC,
 }
 
-class BgpErrSc(BaseEnum):
+class BgpErrSc(_BaseEnum):
     """BGP Error Subcodes."""
     bgp_hdr_err_sc = 1
     bgp_update_err_sc2 = 2
@@ -775,7 +775,7 @@ BGP_OPT_PARAMS_T = {
 dl += [BGP_OPT_PARAMS_T]
 
 @enum.unique
-class BgpOptParamsT(BaseEnum):
+class BgpOptParamsT(_BaseEnum):
     """BGP OPEN Optional Parameter Types. Defined in RFC5492."""
     reserved = 0
     authentication = 1 # Deprecated
@@ -803,7 +803,7 @@ BGP_CAP_C = {
 dl += [BGP_CAP_C]
 
 @enum.unique
-class BgpCapC(BaseEnum):
+class BgpCapC(_BaseEnum):
     """Capability Codes. Defined in RFC5492."""
     reserved = (0,
         "Reserved")
@@ -843,7 +843,7 @@ ORF_T = {
 dl += [ORF_T]
 
 @enum.unique
-class OrfT(BaseEnum):
+class OrfT(_BaseEnum):
     """Outbound Route Filtering Capability. Defined in RFC5291."""
     address_prefix_orf = (64, # Defined in RFC5292
         "Address Prefix ORF")
@@ -857,7 +857,7 @@ ORF_SEND_RECV = {
 dl += [ORF_SEND_RECV]
 
 @enum.unique
-class OrfSendRecv(BaseEnum):
+class OrfSendRecv(_BaseEnum):
     receive = 1
     send = 2
     both = 3
@@ -872,7 +872,7 @@ AS_REP = {
 dl += [AS_REP]
 
 @enum.unique
-class AsRep(BaseEnum):
+class AsRep(_BaseEnum):
     """AS Number Representation."""
     asplain = 1
     asdot_plus = 2
@@ -1282,15 +1282,15 @@ class OptParams(Base):
         self.cap_type = BgpCapC(self.val_num(buf, 1))
         self.cap_len = self.val_num(buf, 1)
 
-        if self.cap_type == BGP_CAP_C['Multiprotocol Extensions for BGP-4']:
+        if self.cap_type == BgpCapC.multiproto_extensions_bgp_4:
             self.unpack_multi_ext(buf)
-        elif self.cap_type == BGP_CAP_C['Route Refresh Capability for BGP-4']:
+        elif self.cap_type == BgpCapC.route_refresh_cap_bgp_4:
             self.p += self.len - 2
-        elif self.cap_type == BGP_CAP_C['Outbound Route Filtering Capability']:
+        elif self.cap_type == BgpCapC.outbound_route_filtering_cap:
             self.unpack_orf(buf)
-        elif self.cap_type == BGP_CAP_C['Graceful Restart Capability']:
+        elif self.cap_type == BgpCapC.graceful_restart_cap:
             self.unpack_graceful_restart(buf)
-        elif self.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
+        elif self.cap_type == BgpCapC.support_4_octet_as_numb_cap:
             self.unpack_support_as4(buf)
         else:
             self.p += self.len - 2
