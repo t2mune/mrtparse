@@ -96,8 +96,22 @@ class FillEnum(object):
         return new_enum_cls
 
 class BaseEnum(int, enum.Enum):
-    """This class provides __str__ and __repr__ for Type and Code Enums."""
+    """This class is the abstract Base for Type and Code Enums here.
+
+    It Provides a customized __str__ and __repr__ string prints.
+    It overwrites the __new__ method to allow tuple as input.
+
+    Args:
+        value: The associated value to the member. Must be a subclass of int.
+        nice (optional): A for humans nice readable and short description.
+    """
     __metaclass__ = ABCMeta
+
+    def __new__(cls, value, nice=None):
+        obj = int.__new__(cls, value)
+        obj._value_ = value
+        obj.nice = nice
+        return obj
 
     def __str__(self):
         return (str(self.value) +
@@ -392,45 +406,40 @@ class BgpAttrT(BaseEnum):
     local_pref = 5
     atomic_aggregate = 6
     aggregator = 7
-    community = 8                   # Defined in RFC1997
-    originator_id = 9               # Defined in RFC4456
-    cluster_list = 10               # Defined in RFC4456
-    dpa = 11                        # Deprecated in RFC6938
-    advertiser = 12                 # Deprecated in RFC6938
-    rcid_path_cluster_id = 13       # Deprecated in RFC6938
-    mp_reach_nlri = 14              # Defined in RFC4760
-    mp_unreach_nlri = 15            # Defined in RFC4760
-    extended_communities = 16       # Defined in RFC4360
-    as4_path = 17                   # Defined in RFC6793
-    as4_aggregator = 18             # Defined in RFC6793
+    community = 8                      # Defined in RFC1997
+    originator_id = 9                  # Defined in RFC4456
+    cluster_list = 10                  # Defined in RFC4456
+    dpa = 11                           # Deprecated in RFC6938
+    advertiser = 12                    # Deprecated in RFC6938
+    rcid_path_cluster_id = 13          # Deprecated in RFC6938
+    mp_reach_nlri = 14                 # Defined in RFC4760
+    mp_unreach_nlri = 15               # Defined in RFC4760
+    extended_communities = 16          # Defined in RFC4360
+    as4_path = 17                      # Defined in RFC6793
+    as4_aggregator = 18                # Defined in RFC6793
     # Deprecated in [Gargi_Nalawade][draft-kapoor-nalawade-idr-bgp-ssa-00]
     #     [draft-nalawade-idr-mdt-safi-00][draft-wijnands-mt-discovery-00]
-    safi_specific_attr = 19
-    connector_attr = 20             # Deprecated in RFC6037
-    as_pathlimit = 21               # Deprecated in [draft-ietf-idr-as-pathlimit]
-    pmsi_tunnel = 22                # Defined in RFC6514
-    tunnel_encapsulation_attr = 23  # Defined in RFC5512
-    traffic_engineering = 24        # Defined in RFC5543
-    ipv6_addr_specific_ext_comm = 25# Defined in RFC5701
-    aigp = 26                       # Defined in RFC7311
-    pe_distinguisher_labels = 27    # Defined in RFC6514
-    bgp_entropy_label_cap_attr = 28 # Deprecated in RFC6790, RFC7447
+    safi_specific_attr = (19,
+        "SAFI Specific Attribute (SSA) (deprecated)")
+    connector_attr = (20,              # Deprecated in RFC6037
+        "Connector Attribute (deprecated)")
+    as_pathlimit = (21,           # Deprecated in [draft-ietf-idr-as-pathlimit]
+        "AS_PATHLIMIT (deprecated)")
+    pmsi_tunnel = 22                   # Defined in RFC6514
+    tunnel_encapsulation_attr = (23,   # Defined in RFC5512
+        "Tunnel Encapsulation Attribute")
+    traffic_engineering = 24           # Defined in RFC5543
+    ipv6_addr_specific_ext_comm = (25, # Defined in RFC5701
+        "IPv6 Address Specific Extended Community")
+    aigp = 26                          # Defined in RFC7311
+    pe_distinguisher_labels = 27       # Defined in RFC6514
+    bgp_entropy_label_cap_attr = (28,  # Deprecated in RFC6790, RFC7447
+        "BGP Entropy Label Capability Attribute (deprecated)")
     # Defined in [draft-ietf-idr-ls-distribution]
     # (TEMPORARY - registered 2014-03-11, expires 2016-03-11)
-    bgp_ls_attr = 29
-    attr_set = 128                  # Defined in RFC6368
-
-BgpAttrT.safi_specific_attr.nice = "SAFI Specific Attribute (SSA) (deprecated)"
-BgpAttrT.connector_attr.nice = "Connector Attribute (deprecated)"
-BgpAttrT.as_pathlimit.nice = "AS_PATHLIMIT (deprecated)"
-BgpAttrT.tunnel_encapsulation_attr.nice = "Tunnel Encapsulation Attribute"
-BgpAttrT.ipv6_addr_specific_ext_comm.nice = (
-    "IPv6 Address Specific Extended Community")
-BgpAttrT.bgp_entropy_label_cap_attr.nice = (
-    "BGP Entropy Label Capability Attribute (deprecated)")
-BgpAttrT.bgp_ls_attr.nice = (
-    "BGP-LS Attribute (TEMPORARY - registered 2014-03-11, expires 2016-03-11)")
-
+    bgp_ls_attr = (29,
+        "BGP-LS Attribute (TEMPORARY - registered 2014-03-11, expires 2016-03-11)")
+    attr_set = 128                     # Defined in RFC6368
 
 
 # BGP ORIGIN Types
@@ -534,21 +543,21 @@ dl += [BGP_ERR_C]
 @enum.unique
 class BgpErrC(BaseEnum):
     """BGP Error Codes. Defined in RFC4271."""
-    reserved = 0
-    msg_header_err = 1
-    open_msg_err = 2
-    update_msg_err = 3
-    hold_timer_expired = 4
-    finite_state_machine_err = 5
-    cease = 6
+    reserved = (0,
+        "Reserved")
+    msg_header_err = (1,
+        "Message Header Error")
+    open_msg_err = (2,
+        "OPEN Message Error")
+    update_msg_err = (3,
+        "UPDATE Message Error")
+    hold_timer_expired = (4,
+        "Hold Timer Expired")
+    finite_state_machine_err = (5,
+        "Finite State Machine Error")
+    cease = (6,
+        "Cease")
 
-BgpErrC.reserved.nice = "Reserved"
-BgpErrC.msg_header_err.nice = "Message Header Error"
-BgpErrC.open_msg_err.nice = "OPEN Message Error"
-BgpErrC.update_msg_err.nice = "UPDATE Message Error"
-BgpErrC.hold_timer_expired.nice = "Hold Timer Expired"
-BgpErrC.finite_state_machine_err.nice = "Finite State Machine Error"
-BgpErrC.cease.nice = "Cease"
 
 # BGP Message Header Error Subcodes
 # Defined in RFC4271
@@ -590,23 +599,23 @@ dl += [BGP_OPEN_ERR_SC]
 @enum.unique
 class BgpOpenErrSc(BaseEnum):
     """OPEN Message Error Subcodes. Defined in RFC4271."""
-    reserved = 0
-    unsupported_vers_numb = 1
-    bad_peer_as = 2
-    bad_bgp_id = 3
-    unsupported_opt_parameter = 4
-    deprecated = 5
-    unacceptable_hold_time = 6
-    unsupported_capability = 7         # Defined in RFC5492
+    reserved = (0,
+        "Reserved")
+    unsupported_vers_numb = (1,
+        "Unsupported Version Number")
+    bad_peer_as = (2,
+        "Bad Peer AS")
+    bad_bgp_id = (3,
+        "Bad BGP Identifier")
+    unsupported_opt_parameter = (4,
+        "Unsupported Optional Parameter")
+    deprecated = (5,
+        "[Deprecated]")
+    unacceptable_hold_time = (6,
+        "Unacceptable Hold Time")
+    unsupported_capability = (7,       # Defined in RFC5492
+        "Unsupported Capability")
 
-BgpOpenErrSc.reserved.nice = "Reserved"
-BgpOpenErrSc.unsupported_vers_numb.nice = "Unsupported Version Number"
-BgpOpenErrSc.bad_peer_as.nice = "Bad Peer AS"
-BgpOpenErrSc.bad_bgp_id.nice = "Bad BGP Identifier"
-BgpOpenErrSc.unsupported_opt_parameter.nice = "Unsupported Optional Parameter"
-BgpOpenErrSc.deprecated.nice = "[Deprecated]"
-BgpOpenErrSc.unacceptable_hold_time.nice = "Unacceptable Hold Time"
-BgpOpenErrSc.unsupported_capability.nice = "Unsupported Capability"
 
 # UPDATE Message Error Subcodes
 # Defined in RFC4271
@@ -629,32 +638,31 @@ dl += [BGP_UPDATE_ERR_SC]
 @enum.unique
 class BgpUpdateErrSc(BaseEnum):
     """UPDATE Message Error Subcodes. Defined in RFC4271."""
-    reserved = 0
-    malformed_attr_list = 1
-    unrecognized_well_known_attr = 2
-    missing_well_known_attr = 3
-    attr_flags_err = 4
-    attr_length_err = 5
-    invalid_origin_attr = 6
-    deprecated = 7
-    invalid_next_hop_attr = 8
-    optional_attr_err = 9
-    invalid_network_field = 10
-    malformed_as_path = 11
+    reserved = (0,
+        "Reserved")
+    malformed_attr_list = (1,
+        "Malformed Attribute List")
+    unrecognized_well_known_attr = (2,
+        "Unrecognized Well-known Attribute")
+    missing_well_known_attr = (3,
+        "Missing Well-known Attribute")
+    attr_flags_err = (4,
+        "Attribute Flags Error")
+    attr_length_err = (5,
+        "Attribute Length Error")
+    invalid_origin_attr = (6,
+        "Invalid ORIGIN Attribute")
+    deprecated = (7,
+        "[Deprecated]")
+    invalid_next_hop_attr = (8,
+        "Invalid NEXT_HOP Attribute")
+    optional_attr_err = (9,
+        "Optional Attribute Error")
+    invalid_network_field = (10,
+        "Invalid Network Field")
+    malformed_as_path = (11,
+        "Malformed AS_PATH")
 
-BgpUpdateErrSc.reserved.nice = "Reserved"
-BgpUpdateErrSc.malformed_attr_list.nice = "Malformed Attribute List"
-BgpUpdateErrSc.unrecognized_well_known_attr.nice = (
-    "Unrecognized Well-known Attribute")
-BgpUpdateErrSc.missing_well_known_attr.nice = "Missing Well-known Attribute"
-BgpUpdateErrSc.attr_flags_err.nice = "Attribute Flags Error"
-BgpUpdateErrSc.attr_length_err.nice = "Attribute Length Error"
-BgpUpdateErrSc.invalid_origin_attr.nice = "Invalid ORIGIN Attribute"
-BgpUpdateErrSc.deprecated.nice = "[Deprecated]"
-BgpUpdateErrSc.invalid_next_hop_attr.nice = "Invalid NEXT_HOP Attribute"
-BgpUpdateErrSc.optional_attr_err.nice = "Optional Attribute Error"
-BgpUpdateErrSc.invalid_network_field.nice = "Invalid Network Field"
-BgpUpdateErrSc.malformed_as_path.nice = "Malformed AS_PATH"
 
 # BGP Finite State Machine Error Subcodes
 # Defined in RFC6608
@@ -669,18 +677,15 @@ dl += [BGP_FSM_ERR_SC]
 @enum.unique
 class BgpFsmErrSc(BaseEnum):
     """BGP Finite State Machine Error Subcodes. Defined in RFC6608."""
-    unspecified_err = 0
-    rcv_unexp_msg_in_opensent = 1
-    rcv_unexp_msg_in_openconfirm = 2
-    rcv_unexp_msg_in_established = 3
+    unspecified_err = (0,
+        "Unspecified Error")
+    rcv_unexp_msg_in_opensent = (1,
+        "Receive Unexpected Message in OpenSent State")
+    rcv_unexp_msg_in_openconfirm = (2,
+        "Receive Unexpected Message in OpenConfirm State")
+    rcv_unexp_msg_in_established = (3,
+        "Receive Unexpected Message in Established State")
 
-BgpFsmErrSc.unspecified_err.nice = "Unspecified Error"
-BgpFsmErrSc.rcv_unexp_msg_in_opensent.nice = (
-    "Receive Unexpected Message in OpenSent State")
-BgpFsmErrSc.rcv_unexp_msg_in_openconfirm.nice = (
-    "Receive Unexpected Message in OpenConfirm State")
-BgpFsmErrSc.rcv_unexp_msg_in_established.nice = (
-    "Receive Unexpected Message in Established State")
 
 # BGP Cease NOTIFICATION Message Subcodes
 # Defined in RFC4486
@@ -700,27 +705,24 @@ dl += [BGP_CEASE_ERR_SC]
 @enum.unique
 class BgpCeaseErrSc(BaseEnum):
     """BGP Cease NOTIFICATION Message Subcodes. Defined in RFC4486."""
-    reserved = 0
-    max_numb_of_prefixes_reached = 1
-    administrative_shutdown = 2
-    peer_de_configured = 3
-    administrative_reset = 4
-    connection_rejected = 5
-    other_configuration_change = 6
-    connection_collision_resolution = 7
-    out_of_resources = 8
-
-BgpCeaseErrSc.reserved.nice = "Reserved"
-BgpCeaseErrSc.max_numb_of_prefixes_reached.nice = (
-    "Maximum Number of Prefixes Reached")
-BgpCeaseErrSc.administrative_shutdown.nice = "Administrative Shutdown"
-BgpCeaseErrSc.peer_de_configured.nice = "Peer De-configured"
-BgpCeaseErrSc.administrative_reset.nice = "Administrative Reset"
-BgpCeaseErrSc.connection_rejected.nice = "Connection Rejected"
-BgpCeaseErrSc.other_configuration_change.nice = "Other Configuration Change"
-BgpCeaseErrSc.connection_collision_resolution.nice = (
-    "Connection Collision Resolution")
-BgpCeaseErrSc.out_of_resources.nice = "Out of Resources"
+    reserved = (0,
+        "Reserved")
+    max_numb_of_prefixes_reached = (1,
+        "Maximum Number of Prefixes Reached")
+    administrative_shutdown = (2,
+        "Administrative Shutdown")
+    peer_de_configured = (3,
+        "Peer De-configured")
+    administrative_reset = (4,
+        "Administrative Reset")
+    connection_rejected = (5,
+        "Connection Rejected")
+    other_configuration_change = (6,
+        "Other Configuration Change")
+    connection_collision_resolution = (7,
+        "Connection Collision Resolution")
+    out_of_resources = (8,
+        "Out of Resources")
 
 
 # BGP Error Subcodes
@@ -790,41 +792,34 @@ dl += [BGP_CAP_C]
 @enum.unique
 class BgpCapC(BaseEnum):
     """Capability Codes. Defined in RFC5492."""
-    reserved = 0
-    multiproto_extensions_bgp_4 = 1      # Defined in RFC2858
-    route_refresh_cap_bgp_4 = 2          # Defined in RFC2918
-    outbound_route_filtering_cap = 3     # Defined in RFC5291
-    multiple_routes_to_a_dest_cap = 4    # Defined in RFC3107
-    extended_next_hop_encoding = 5       # Defined in RFC5549
-    graceful_restart_cap = 64            # Defined in RFC4724
-    support_4_octet_as_numb_cap = 65     # Defined in RFC6793
-    deprecated = 66
-    support_for_dynamic_cap = 67         # draft-ietf-idr-dynamic-cap
-    multisession_bgp_cap = 68            # draft-ietf-idr-bgp-multisession
-    add_path_cap = 69                    # draft-ietf-idr-add-paths
-    enhanced_route_refresh_cap = 70      # draft-keyur-bgp-enhanced-route-refresh
-    long_lived_graceful_restart_cap = 71 # draft-uttaro-idr-bgp-persistence
-
-BgpCapC.reserved.nice = "Reserved"
-BgpCapC.multiproto_extensions_bgp_4.nice = "Multiprotocol Extensions for BGP-4"
-BgpCapC.route_refresh_cap_bgp_4.nice = (
-    "Route Refresh Capability for BGP-4")
-BgpCapC.outbound_route_filtering_cap.nice = (
-    "Outbound Route Filtering Capability")
-BgpCapC.multiple_routes_to_a_dest_cap.nice = (
-    "Multiple routes to a destination capability")
-BgpCapC.extended_next_hop_encoding.nice = "Extended Next Hop Encoding"
-BgpCapC.graceful_restart_cap.nice = "Graceful Restart Capability"
-BgpCapC.support_4_octet_as_numb_cap.nice = (
-    "Support for 4-octet AS number capability")
-BgpCapC.deprecated.nice = "[Deprecated]"
-BgpCapC.support_for_dynamic_cap.nice = (
-    "Support for Dynamic Capability (capability specific)")
-BgpCapC.multisession_bgp_cap.nice = "Multisession BGP Capability"
-BgpCapC.add_path_cap.nice = "ADD-PATH Capability"
-BgpCapC.enhanced_route_refresh_cap.nice = "Enhanced Route Refresh Capability"
-BgpCapC.long_lived_graceful_restart_cap.nice = (
-    "Long-Lived Graceful Restart (LLGR) Capability")
+    reserved = (0,
+        "Reserved")
+    multiproto_extensions_bgp_4 = (1,      # Defined in RFC2858
+        "Multiprotocol Extensions for BGP-4")
+    route_refresh_cap_bgp_4 = (2,          # Defined in RFC2918
+        "Route Refresh Capability for BGP-4")
+    outbound_route_filtering_cap = (3,     # Defined in RFC5291
+        "Outbound Route Filtering Capability")
+    multiple_routes_to_a_dest_cap = (4,    # Defined in RFC3107
+        "Multiple routes to a destination capability")
+    extended_next_hop_encoding = (5,       # Defined in RFC5549
+        "Extended Next Hop Encoding")
+    graceful_restart_cap = (64,            # Defined in RFC4724
+        "Graceful Restart Capability")
+    support_4_octet_as_numb_cap = (65,     # Defined in RFC6793
+        "Support for 4-octet AS number capability")
+    deprecated = (66,
+        "[Deprecated]")
+    support_for_dynamic_cap = (67,         # draft-ietf-idr-dynamic-cap
+        "Support for Dynamic Capability (capability specific)")
+    multisession_bgp_cap = (68,            # draft-ietf-idr-bgp-multisession
+        "Multisession BGP Capability")
+    add_path_cap = (69,                    # draft-ietf-idr-add-paths
+        "ADD-PATH Capability")
+    enhanced_route_refresh_cap = (70,      # draft-keyur-bgp-enhanced-route-refresh
+        "Enhanced Route Refresh Capability")
+    long_lived_graceful_restart_cap = (71, # draft-uttaro-idr-bgp-persistence
+        "Long-Lived Graceful Restart (LLGR) Capability")
 
 
 # Outbound Route Filtering Capability
@@ -837,9 +832,8 @@ dl += [ORF_T]
 @enum.unique
 class OrfT(BaseEnum):
     """Outbound Route Filtering Capability. Defined in RFC5291."""
-    address_prefix_orf = 64 # Defined in RFC5292
-
-OrfT.address_prefix_orf.nice = "Address Prefix ORF"
+    address_prefix_orf = (64, # Defined in RFC5292
+        "Address Prefix ORF")
 
 
 ORF_SEND_RECV = {
