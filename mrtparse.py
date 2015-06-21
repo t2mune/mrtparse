@@ -127,9 +127,12 @@ class _BaseEnum(int, enum.Enum):
         return obj
 
     def __str__(self):
-        return (str(self.value) +
-                " (" + str(getattr(self, 'nice', self.name)) + ")"
-                )
+        nice_str = getattr(self, 'nice', None)
+        if nice_str is not None:
+            name = nice_str
+        else:
+            name = self.name
+        return (str(self.value) + " (" + str(name) + ")")
 
     def __repr__(self):
         nice_str = getattr(self, 'nice', None)
