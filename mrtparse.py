@@ -24,6 +24,7 @@ Authors:
 from abc import ABCMeta
 import enum
 import gzip, bz2
+import inspect
 import signal
 import sys, struct, socket
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -43,6 +44,56 @@ BZ2_MAGIC  = b'\x42\x5a\x68'
 
 # MRT header length
 MRT_HDR_LEN = 12
+
+class FillEnum(object):
+
+    """This Decorator returns an Enum, which contains all values in `values`.
+
+    Values, which the passed class not include, will be auto generated with
+    `prefix` + value as name if they are in the `values` list.
+
+    Args:
+        enum_cls: The Enum class or a subclass of it.
+        values: An iterable list of values for the Enum members.
+        prefix: The prefix for the name of the auto generated Enum members.
+        *args: Will be passed to the `enum_cls` constructor.
+        **kwargs: Will be passed to the `enum_cls` constructor.
+    """
+
+    def __init__(self, enum_cls, values, prefix, *args, **kwargs):
+        self.enum_cls = enum_cls
+        self.values = values
+        self.prefix = prefix
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self, cls):
+        members = []
+        cls_values = set()  # set of values present in `cls`
+
+        # Copy members of passed class `cls`
+        attributes = inspect.getmembers(cls)
+        for attr in attributes:
+            if attr[0].startswith('__') and attr[0].endswith('__'):
+                continue
+            cls_values.add(attr[1])
+            members.append(attr)
+            any_member = attr[0]  # Any arbitrary member of the new Enum
+
+        # set members, which are in `values` and not already present in `cls`
+        for value in self.values:
+            if value in cls_values:
+                continue
+            members.append((self.prefix + str(value), value))
+            any_member = self.prefix + str(value)
+
+        new_enum_cls = self.enum_cls(cls.__name__, members,
+                                     *self.args, **self.kwargs)
+
+        # copy docstring
+        getattr(new_enum_cls, any_member).__class__.__doc__ = cls.__doc__
+
+        return new_enum_cls
 
 class BaseEnum(int, enum.Enum):
     """This class provides __str__ and __repr__ for Type and Code Enums."""
@@ -126,7 +177,10 @@ MSG_T = {
 dl += [MSG_T]
 
 @enum.unique
-class MsgT(BaseEnum):
+# The field has a length of 16bit. However we only use here 8bit for faster
+# class level initialization until we need more bits.
+@FillEnum(BaseEnum, range(2**8), prefix='val', module=__name__)
+class MsgT(object):
     """MRT Message Types. Defined in RFC6396."""
     null = 0           # Deprecated in RFC6396
     start = 1          # Deprecated in RFC6396
@@ -254,7 +308,10 @@ MSG_ST = {
 }
 
 @enum.unique
-class MsgSt(BaseEnum):
+# The field has a length of 16bit. However we only use here 8bit for faster
+# class level initialization until we need more bits.
+@FillEnum(BaseEnum, range(2**8), prefix='val', module=__name__)
+class MsgSt(object):
     """MRT Message Subtypes. Defined in RFC6396."""
     bgp_st9 = 9
     bgp_st10 = 10
