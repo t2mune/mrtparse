@@ -2,6 +2,11 @@
 
 from distutils.core import setup
 import mrtparse
+import sys
+
+requirements_list = []
+if sys.version_info < (3, 4):
+    requirements_list = ['enum34']
 
 setup(
     name=mrtparse.__pyname__,
@@ -12,4 +17,5 @@ setup(
     author_email=mrtparse.__email__,
     license=mrtparse.__license__,
     py_modules=[mrtparse.__pyname__],
+    install_requires=requirements_list,
 )
