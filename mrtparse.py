@@ -31,12 +31,25 @@ signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # mrtparse information
 __pyname__  = 'mrtparse'
-__version__ =  '1.2'
+__version__ = '1.2'
 __descr__   = 'parse a MRT-format data'
 __url__     = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__   = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
 __license__ = 'Apache License, Version 2.0'
+__all__     = (['Reader'] +
+               ['AFI_T', 'SAFI_T', 'MSG_T', 'BGP_ST', 'TD_ST', 'TD_V2_ST',
+                'BGP4MP_ST', 'MSG_ST', 'BGP_FSM', 'BGP_ATTR_T', 'ORIGIN_T',
+                'AS_PATH_SEG_T', 'COMM_T', 'BGP_MSG_T', 'BGP_ERR_C',
+                'BGP_HDR_ERR_SC', 'BGP_OPEN_ERR_SC', 'BGP_UPDATE_ERR_SC',
+                'BGP_FSM_ERR_SC', 'BGP_CEASE_ERR_SC', 'BGP_OPT_PARAMS_T',
+                'BGP_CAP_C', 'ORF_T', 'ORF_SEND_RECV', 'AS_REP'] +
+               ['AfiT', 'SafiT', 'MsgT', 'BgpSt', 'TdSt', 'TdV2St',
+                'Bgp4mpSt', 'MsgSt', 'BgpFsm', 'BgpAttrT', 'OriginT',
+                'AsPathSegT', 'CommT', 'BgpMsgT', 'BgpErrC',
+                'BgpHdrErrSc', 'BgpOpenErrSc', 'BgpUpdateErrSc',
+                'BgpFsmErrSc', 'BgpCeaseErrSc', 'BgpOptParamsT', 'BgpCapC',
+                'OrfT', 'OrfSendRecv', 'AsRep'])
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
