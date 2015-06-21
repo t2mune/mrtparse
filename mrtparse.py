@@ -37,7 +37,7 @@ __url__     = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__   = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
 __license__ = 'Apache License, Version 2.0'
-__all__     = (['Reader'] +
+__all__     = (['Reader', 'val_dict'] +
                ['AFI_T', 'SAFI_T', 'MSG_T', 'BGP_ST', 'TD_ST', 'TD_V2_ST',
                 'BGP4MP_ST', 'MSG_ST', 'BGP_FSM', 'BGP_ATTR_T', 'ORIGIN_T',
                 'AS_PATH_SEG_T', 'COMM_T', 'BGP_MSG_T', 'BGP_ERR_C',
