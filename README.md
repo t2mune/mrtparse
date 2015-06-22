@@ -91,14 +91,14 @@ This script displays the contents of a MRT format file.
         ...
         
 
-###exabgp_conf.py
+###mrt2exabgp.py
 ####Description
 This script converts MRT format to [ExaBGP][exabgp_git] config format and displays it.
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
 ####Usage
-    usage: exabgp_conf.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
+    usage: mrt2exabgp.py  [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
                           [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
-                          [-6 [NEXT_HOP]] [-a]
+                          [-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]]
                           path_to_file
 
     This script converts to ExaBGP format config.
@@ -124,6 +124,9 @@ This script converts MRT format to [ExaBGP][exabgp_git] config format and displa
                             convert IPv6 entries and specify IPv6 next-hop if exists
       -a, --all-entries     convert all entries
                             (default: convert only first entry per one prefix)
+      -A                    convert to ExaBGP API format
+      -G [NUM]              convert to ExaBGP API format (grouping with the same
+                            attributes)
 ####Result
     neighbor 192.168.1.100 {
         router-id 192.168.0.20;

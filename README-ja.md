@@ -90,14 +90,14 @@ MRT形式のファイルの内容を出力する
         ...
         
 
-###exabgp_conf.py
+###mrt2exabgp.py
 ####内容
 MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変換して出力する。
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
 ####使用方法
-    使用方法: exabgp_conf.py [-h] [-r ルータID] [-l ローカルAS] [-p ピアAS]
+    使用方法: mrt2exabgp.py  [-h] [-r ルータID] [-l ローカルAS] [-p ピアAS]
                              [-L ローカルアドレス] [-n ネイバーアドレス] [-4 [ネクストホップ]]
-                             [-6 [ネクストホップ]] [-a]
+                             [-6 [ネクストホップ]] [-a] [-A] [-G [NUM]]
                              ファイルのパス
  
     このスクリプトはExaBGP形式の設定ファイルに変換する
@@ -123,6 +123,9 @@ MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変
                             IPv6のエントリーを変換し、指定があればネクストホップを変更する
       -a, --all-entries     全てのエントリーを変換する
                             (初期動作: 同じ経路に対して、最初のエントリーのみ変換する)
+      -A                    ExaBGPのAPI用のフォーマットに変換する
+      -G [NUM]              ExaBGPのAPI用のフォーマットに変換する
+                            (同じアトリビュートをグルーピングする)
 ####出力例
     neighbor 192.168.1.100 {
         router-id 192.168.0.20;

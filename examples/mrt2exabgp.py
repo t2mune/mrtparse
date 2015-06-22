@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-exabgp_conf.py - a script to convert ExaBGP format config.
+mrt2exabgp.py - a script to convert MRT format to ExaBGP format.
 
 Copyright (C) 2015 greenHippo, LLC.
 
@@ -23,25 +23,32 @@ Authors:
 '''
 
 from mrtparse import *
-import sys, re, argparse
+import sys, re, argparse, time
 
 flags = 0x00
 FLAG_T = {
     'IPv4': 0x01,
     'IPv6': 0x02,
+    'ALL' : 0x04,
+    'API' : 0x08,
+    'API-GROUP' : 0x10,
 }
-next_hop = ''
 
 def parse_args():
     global flags
 
-    if '-4' in sys.argv or '--ipv4' in sys.argv:
+    if '-4' in sys.argv:
         flags |= FLAG_T['IPv4']
-    if '-6' in sys.argv or '--ipv6' in sys.argv:
+    if '-6' in sys.argv:
         flags |= FLAG_T['IPv6']
-    if (    '-4' not in sys.argv and '--ipv4' not in sys.argv 
-        and '-6' not in sys.argv and '--ipv6' not in sys.argv):
+    if '-4' not in sys.argv and '-6' not in sys.argv:
         flags = FLAG_T['IPv4'] | FLAG_T['IPv6']
+    if '-a' in sys.argv:
+        flags |= FLAG_T['ALL']
+    if '-A' in sys.argv:
+        flags |= FLAG_T['API']
+    if '-G' in sys.argv:
+        flags |= FLAG_T['API'] | FLAG_T['API-GROUP']
 
     p = argparse.ArgumentParser(
         description='This script converts to ExaBGP format config.')
@@ -49,32 +56,36 @@ def parse_args():
         'path_to_file',
         help='specify path to MRT format file')
     p.add_argument(
-        '-r', '--router-id', type=str, default='192.168.0.1',
+        '-r', type=str, default='192.168.0.1', dest='router_id',
         help='specify router-id (default: 192.168.0.1)')
     p.add_argument(
-        '-l', '--local-as', type=int, default=64512,
+        '-l', type=int, default=64512, dest='local_as',
         help='specify local AS number (default: 64512)')
     p.add_argument(
-        '-p', '--peer-as', type=int, default=65000,
+        '-p', type=int, default=65000, dest='peer_as',
         help='specify peer AS number (default: 65000)')
     p.add_argument(
-        '-L', '--local-addr', type=str, default='192.168.1.1',
+        '-L', type=str, default='192.168.1.1', dest='local_addr',
         help='specify local address (default: 192.168.1.1)')
     p.add_argument(
-        '-n', '--neighbor', type=str, default='192.168.1.100',
+        '-n', type=str, default='192.168.1.100', dest='neighbor',
         help='specify neighbor address (default: 192.168.1.100)')
     p.add_argument(
-        '-4', '--ipv4', type=str, nargs='?',
-        metavar='NEXT_HOP', dest='next_hop',
-        help='convert IPv4 entries and specify IPv4 next-hop if exists')
+        '-4', type=str, nargs='?', metavar='NEXT_HOP', dest='next_hop',
+        help='convert IPv4 entries and use IPv4 next-hop if specified')
     p.add_argument(
-        '-6', '--ipv6', type=str, nargs='?',
-        metavar='NEXT_HOP', dest='next_hop6',
-        help='convert IPv6 entries and specify IPv6 next-hop if exists''')
+        '-6', type=str, nargs='?', metavar='NEXT_HOP', dest='next_hop6',
+        help='convert IPv6 entries and use IPv6 next-hop if specified''')
     p.add_argument(
-        '-a', '--all-entries', default=False, action='store_true',
+        '-a', default=False, action='store_true',
         help='convert all entries \
             (default: convert only first entry per one prefix)')
+    p.add_argument(
+        '-A', action='store_false',
+        help='convert to ExaBGP API format')
+    p.add_argument(
+        '-G', type=int, default=1000000, nargs='?', metavar='NUM', dest='api_grp_num',
+        help='convert to ExaBGP API format (grouping with the same attributes)')
 
     if re.search('^-', sys.argv[-1]): 
         r = p.parse_args()
@@ -84,57 +95,99 @@ def parse_args():
 
     return r
 
-def conv_exabgp_conf(args, d):
+def mrt_type_check(m):
+    if m.type != MSG_T['TABLE_DUMP_V2']:
+        return 1
+
+    if (    m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']
+        and m.subtype != TD_V2_ST['RIB_IPV6_UNICAST']):
+        return 1
+
+    if (m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+        and not (flags & FLAG_T['IPv4'])):
+        return 1
+
+    if (m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+        and not (flags & FLAG_T['IPv6'])):
+        return 1
+
+    return 0
+
+def print_conf_header(args):
+    print('''\
+neighbor %s {
+    router-id %s;
+    local-address %s;
+    local-as %d;
+    peer-as %d;
+    graceful-restart;
+    aigp enable;
+
+    static {'''
+    % (args.neighbor, args.router_id, args.local_addr, \
+        args.local_as, args.peer_as))
+
+def print_conf_footer():
+    print('    }\n}')
+
+def print_api_grp(d):
+    for k in d:
+        sys.stdout.write('announce attribute%s nlri %s\n' \
+            % (k, ' '.join(d[k])))
+        sys.stdout.flush()
+
+def conv_format(args, d):
     global next_hop
 
-    print('''
-    neighbor %s {
-        router-id %s;
-        local-address %s;
-        local-as %d;
-        peer-as %d;
-        graceful-restart;
-        aigp enable;
+    attr_grp = {}
+    n = 1
 
-        static {'''
-    % (args.neighbor, args.router_id, args.local_addr, args.local_as, args.peer_as))
+    if flags & FLAG_T['API'] == 0:
+        print_conf_header(args)
 
     for m in d:
         m = m.mrt
 
-        if m.type != MSG_T['TABLE_DUMP_V2']:
+        if mrt_type_check(m):
             continue
-
-        if (    m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']
-            and m.subtype != TD_V2_ST['RIB_IPV6_UNICAST']):
-            continue
-
-        if (m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-            and not (flags & FLAG_T['IPv4'])):
-            continue
-
-        if (m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
-            and not (flags & FLAG_T['IPv6'])):
-            continue
-
-        line = '            route %s/%d' % (m.rib.prefix, m.rib.plen)
 
         entry = []
-        if args.all_entries is True:
+        if flags & FLAG_T['ALL']:
             entry = m.rib.entry
         else:
             entry.append(m.rib.entry[0])
 
+        line = ''
         for e in entry:
             next_hop = ''
-            for attr in e.attr:
-                line += get_bgp_attr(args, m.subtype, attr)
-            print('%s next-hop %s;' % (line, next_hop))
+            for a in e.attr:
+                line += get_bgp_attr(args, m.subtype, a)
+            
+            if flags & FLAG_T['API-GROUP']:
+                attr_grp.setdefault('%s next-hop %s' % (line, next_hop), [])\
+                    .append('%s/%d' % (m.rib.prefix, m.rib.plen))
+            elif flags & FLAG_T['API']:
+                sys.stdout.write('announce route %s/%d%s next-hop %s\n' \
+                    % (m.rib.prefix, m.rib.plen, line, next_hop))
+                sys.stdout.flush()
+            else:
+                print('        route %s/%d%s next-hop %s;' \
+                    % (m.rib.prefix, m.rib.plen, line, next_hop))
 
-    print('''
-        }
-    }
-    ''')
+        if flags & FLAG_T['API-GROUP'] and n == args.api_grp_num:
+            print_api_grp(attr_grp)
+            attr_grp = {}
+            n = 0
+        n += 1
+
+    if flags & FLAG_T['API-GROUP']:
+        print_api_grp(attr_grp)
+
+    if flags & FLAG_T['API']:
+        while True:
+            time.sleep(1)
+    else:
+        print_conf_footer()
 
 def get_bgp_attr(args, subtype, attr):
     global next_hop
@@ -223,7 +276,8 @@ def get_bgp_attr(args, subtype, attr):
 def main():
     args = parse_args()
     d = Reader(args.path_to_file)
-    conv_exabgp_conf(args, d)
+    conv_format(args, d)
 
 if __name__ == '__main__':
     main()
+

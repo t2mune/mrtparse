@@ -1,3 +1,7 @@
+2015-06-22 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
+        * Update - added the option to use the ExaBGP API.
+        * Update - changed the file name from "exabgp_conf.py" to "mrt2exabgp.py".
+
 2015-06-22 Fabian Raab <fabian.raab@tum.de>
 	* dl += [AFI_T] BUGFIX
 	
