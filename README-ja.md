@@ -95,7 +95,7 @@ MRT形式のファイルの内容を出力する
 MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変換して出力する。
 Exa-BGPのAPIに関して詳しく知りたい場合は、[Wiki][wiki]を読んで下さい。
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
-[wiki]: https://github.com/YoshiyukiYamauchi/mrtparse/wiki. 
+[wiki]: https://github.com/YoshiyukiYamauchi/mrtparse/wiki
 ####使用方法
     使用方法: mrt2exabgp.py [-h] [-r ルータID] [-l ローカルAS] [-p ピアAS]
                          [-L ローカルアドレス] [-n ネイバーのアドレス] [-4 [ネクストホップ]]

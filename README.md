@@ -96,7 +96,7 @@ This script displays the contents of a MRT format file.
 This script converts MRT format to [ExaBGP][exabgp_git] config/API format and displays it.
 If you want to know how to use ExaBGP API, please read [the wiki][wiki]. 
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
-[wiki]: https://github.com/YoshiyukiYamauchi/mrtparse/wiki. 
+[wiki]: https://github.com/YoshiyukiYamauchi/mrtparse/wiki
 ####Usage
     usage: mrt2exabgp.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
                          [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
