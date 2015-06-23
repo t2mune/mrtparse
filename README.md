@@ -93,64 +93,80 @@ This script displays the contents of a MRT format file.
 
 ###mrt2exabgp.py
 ####Description
-This script converts MRT format to [ExaBGP][exabgp_git] config format and displays it.
+This script converts MRT format to [ExaBGP][exabgp_git] config/API format and displays it.
+If you want to know how to use ExaBGP API, please read [the wiki][wiki]. 
 [exabgp_git]: https://github.com/Exa-Networks/exabgp
+[wiki]: https://github.com/YoshiyukiYamauchi/mrtparse/wiki. 
 ####Usage
-    usage: mrt2exabgp.py  [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
-                          [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
-                          [-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]]
-                          path_to_file
-
+    usage: mrt2exabgp.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
+                         [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
+                         [-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]]
+                         path_to_file
+    
     This script converts to ExaBGP format config.
     
     positional arguments:
-      path_to_file          specify path to MRT-fomatted file
+      path_to_file   specify path to MRT format file
     
     optional arguments:
-      -h, --help            show this help message and exit
-      -r ROUTER_ID, --router-id ROUTER_ID
-                            specify router-id (default: 192.168.0.1)
-      -l LOCAL_AS, --local-as LOCAL_AS
-                            specify local AS number (default: 64512)
-      -p PEER_AS, --peer-as PEER_AS
-                            specify peer AS number (default: 65000)
-      -L LOCAL_ADDR, --local-addr LOCAL_ADDR
-                            specify local address (default: 192.168.1.1)
-      -n NEIGHBOR, --neighbor NEIGHBOR
-                            specify neighbor address (default: 192.168.1.100)
-      -4 [NEXT_HOP], --ipv4 [NEXT_HOP]
-                            convert IPv4 entries and specify IPv4 next-hop if exists
-      -6 [NEXT_HOP], --ipv6 [NEXT_HOP]
-                            convert IPv6 entries and specify IPv6 next-hop if exists
-      -a, --all-entries     convert all entries
-                            (default: convert only first entry per one prefix)
-      -A                    convert to ExaBGP API format
-      -G [NUM]              convert to ExaBGP API format (grouping with the same
-                            attributes)
-####Result
-    neighbor 192.168.1.100 {
-        router-id 192.168.0.20;
-        local-address 192.168.1.20;
-        local-as 65000;
-        peer-as 64512;
+      -h, --help     show this help message and exit
+      -r ROUTER_ID   specify router-id (default: 192.168.0.1)
+      -l LOCAL_AS    specify local AS number (default: 64512)
+      -p PEER_AS     specify peer AS number (default: 65000)
+      -L LOCAL_ADDR  specify local address (default: 192.168.1.1)
+      -n NEIGHBOR    specify neighbor address (default: 192.168.1.100)
+      -4 [NEXT_HOP]  convert IPv4 entries and use IPv4 next-hop if specified
+      -6 [NEXT_HOP]  convert IPv6 entries and use IPv6 next-hop if specified
+      -a             convert all entries (default: convert only first entry per
+                     one prefix)
+      -A             convert to ExaBGP API format
+      -G [NUM]       convert to ExaBGP API format and group updates with the same
+                     attributes for each spceified the number of prefixes
+                     (default: 1000000)
+
+####Result (Config format)
+    neighbor 192.168.1.1 {
+        router-id 192.168.0.2;
+        local-address 192.168.1.2;
+        local-as 64512;
+        peer-as 65000;
         graceful-restart;
         aigp enable;
-
+    
         static {
-                route 1.0.0.0/24 origin IGP as-path [29049 15169 ] next-hop 192.168.1.254;
-                route 1.0.4.0/24 origin IGP as-path [29049 6939 7545 56203 ] next-hop 192.168.1.254;
-                route 1.0.5.0/24 origin IGP as-path [29049 6939 7545 56203 ] next-hop 192.168.1.254;
-                route 1.0.6.0/24 origin IGP as-path [29049 20485 4826 38803 56203 ] community [20485:31701] next-hop 192.168.1.254;
-                route 1.0.7.0/24 origin IGP as-path [29049 20485 4826 38803 56203 ] community [20485:31701] next-hop 192.168.1.254;
-                route 1.0.20.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
-                route 1.0.22.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
-                route 1.0.24.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
-                route 1.0.26.0/23 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
-                route 1.0.28.0/22 origin IGP as-path [29049 2914 2519 ] community [2914:410 2914:1403 2914:2401 2914:3400] next-hop 192.168.1.254;
-                ...
+            route 1.0.0.0/24 origin IGP as-path [57821 12586 13101 15169 ] community [12586:147 12586:13000 64587:13101] next-hop 192.168.1.254;
+            route 1.0.4.0/24 origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254;
+            route 1.0.5.0/24 origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254;
+            route 1.0.6.0/24 origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254;
+            route 1.0.7.0/24 origin IGP as-path [57821 6939 4826 56203 56203 56203 ] next-hop 192.168.1.254;
+            route 1.0.64.0/18 origin IGP as-path [57821 6939 4725 4725 7670 7670 7670 18144 ] atomic-aggregate aggregator (18144:219.118.225.189) next-hop 192.168.1.254;
+            route 1.0.128.0/17 origin IGP as-path [57821 12586 3257 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254;
+            route 1.0.128.0/18 origin IGP as-path [57821 12586 3257 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254;
+            ...
         }
     }
 
+####Result (API format)
+    announce route 1.0.0.0/24 origin IGP as-path [57821 12586 13101 15169 ] community [12586:147 12586:13000 64587:13101] next-hop 192.168.1.254
+    announce route 1.0.4.0/24 origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254
+    announce route 1.0.5.0/24 origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254
+    announce route 1.0.6.0/24 origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254
+    announce route 1.0.7.0/24 origin IGP as-path [57821 6939 4826 56203 56203 56203 ] next-hop 192.168.1.254
+    announce route 1.0.64.0/18 origin IGP as-path [57821 6939 4725 4725 7670 7670 7670 18144 ] atomic-aggregate aggregator (18144:219.118.225.189) next-hop 192.168.1.254
+    announce route 1.0.128.0/17 origin IGP as-path [57821 12586 3257 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254
+    announce route 1.0.128.0/18 origin IGP as-path [57821 12586 3257 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254
+    ...
+
+####Result (API grouping format)
+    announce attribute origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254 nlri 1.0.4.0/24 1.0.5.0/24 1.0.6.0/24 103.2.176.0/24 103.2.177.0/24 103.2.178.0/24 103.2.179.0/24
+    announce attribute origin IGP as-path [57821 6939 4826 56203 56203 56203 ] next-hop 192.168.1.254 nlri 1.0.7.0/24
+    announce attribute origin IGP as-path [57821 6939 4725 4725 7670 7670 7670 18144 ] atomic-aggregate aggregator (18144:219.118.225.189) next-hop 192.168.1.254 nlri 1.0.64.0/18 58.183.0.0/16 222.231.64.0/18
+    announce attribute origin IGP as-path [57821 12586 3257 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.0.128.0/17 1.0.128.0/18 1.0.192.0/18 1.2.128.0/17 1.4.128.0/17 1.4.128.0/18 1.179.128.0/17 101.51.0.0/16 101.51.64.0/18 113.53.0.0/16 113.53.0.0/18 118.172.0.0/16 118.173.0.0/16 118.173.192.0/18 118.174.0.0/16 118.175.0.0/16 118.175.0.0/18 125.25.0.0/16 125.25.128.0/18 180.180.0.0/16 182.52.0.0/16 182.52.0.0/17 182.52.128.0/18 182.53.0.0/16 182.53.0.0/18 182.53.192.0/18
+    announce attribute origin IGP as-path [4608 1221 4637 4651 9737 23969 ] next-hop 192.168.1.254 nlri 1.0.128.0/24
+    announce attribute origin IGP as-path [57821 12586 3257 1299 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.0.160.0/19 1.0.224.0/19 118.173.64.0/19 118.173.192.0/19 118.174.128.0/19 118.174.192.0/19 118.175.160.0/19 125.25.0.0/19 125.25.128.0/19 182.53.0.0/19 203.113.0.0/19 203.113.96.0/19
+    announce attribute origin IGP as-path [57821 12586 3257 4134 ] community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.1.8.0/24 36.106.0.0/16 36.108.0.0/16 36.109.0.0/16 101.248.0.0/16 106.0.4.0/22 106.7.0.0/16 118.85.204.0/24 118.85.215.0/24 120.88.8.0/21 122.198.64.0/18 171.44.0.0/16 183.91.56.0/24 183.91.57.0/24 202.80.192.0/22 221.231.151.0/24
+    announce attribute origin IGP as-path [57821 12586 13101 15412 17408 58730 ] community [12586:147 12586:13000 64587:13101] next-hop 192.168.1.254 nlri 1.1.32.0/24 1.2.1.0/24 1.10.8.0/24 14.0.7.0/24 27.34.239.0/24 27.109.63.0/24 36.37.0.0/24 42.0.8.0/24 49.128.2.0/24 49.246.249.0/24 101.102.104.0/24 106.3.174.0/24 118.91.255.0/24 123.108.143.0/24 180.200.252.0/24 183.182.9.0/24 202.6.6.0/24 202.12.98.0/24 202.85.202.0/24 202.131.63.0/24 211.155.79.0/24 211.156.109.0/24 218.98.224.0/24 218.246.137.0/24
+    ...
 
 ###slice.py
 ####Description

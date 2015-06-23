@@ -85,7 +85,7 @@ def parse_args():
         help='convert to ExaBGP API format')
     p.add_argument(
         '-G', type=int, default=1000000, nargs='?', metavar='NUM', dest='api_grp_num',
-        help='convert to ExaBGP API format (grouping with the same attributes)')
+        help='convert to ExaBGP API format and group updates with the same attributes for each spceified the number of prefixes (default: 1000000)')
 
     if re.search('^-', sys.argv[-1]): 
         r = p.parse_args()
