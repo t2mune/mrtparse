@@ -90,7 +90,7 @@ MRT形式のファイルの内容を出力する
         ...
         
 
-###mrt2exabgp.py
+###mrt2exabgp.py (旧exabgp_conf.py)
 ####内容
 MRT形式のファイルを[exabgp][exabgp_git]用のコンフィグ形式に変換して出力する。
 Exa-BGPのAPIに関して詳しく知りたい場合は、[Wiki][wiki]を読んで下さい。

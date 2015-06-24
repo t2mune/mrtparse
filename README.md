@@ -91,7 +91,7 @@ This script displays the contents of a MRT format file.
         ...
         
 
-###mrt2exabgp.py
+###mrt2exabgp.py (formerly exabgp_conf.py)
 ####Description
 This script converts MRT format to [ExaBGP][exabgp_git] config/API format and displays it.
 If you want to know how to use ExaBGP API, please read [the wiki][wiki]. 
