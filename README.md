@@ -12,7 +12,8 @@ Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 ORIGIN(1), AS_PATH(2), NEXT_HOP(3), MULTI_EXIT_DISC(4), LOCAL_PREF(5), ATOMIC_AGGREGATE(6), AGGREGATOR(7), COMMUNITY(8), ORIGINATOR_ID(9), CLUSTER_LIST(10), MP_REACH_NLRI(14), MP_UNREACH_NLRI(15), EXTENDED_COMMUNITIES(16), AS4_PATH(17), AS4_AGGREGATOR(18), AIGP(26), ATTR_SET(128)
 
 ##Requirements
-Python2 or Python3 or PyPy
+ + Python2 or Python3 or PyPy
+ + `enum` module (either built in since Python3.4 or the backported version [`enum34`](https://pypi.python.org/pypi/enum34))
 
 ##Download
 ###git command
