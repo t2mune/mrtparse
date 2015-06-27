@@ -58,57 +58,110 @@ BZ2_MAGIC  = b'\x42\x5a\x68'
 # MRT header length
 MRT_HDR_LEN = 12
 
-class _FillEnum(object):
 
-    """This Decorator returns an Enum, which contains all values in `values`.
+class EnumMetaCreate(enum.EnumMeta):
 
-    Values, which the passed class not include, will be auto generated with
-    `prefix` + value as name if they are in the `values` list.
+    """Creates and return a new Enum if an value is requested not existing yet.
 
-    Args:
-        enum_cls: The Enum class or a subclass of it.
-        values: An iterable list of values for the Enum members.
-        prefix: The prefix for the name of the auto generated Enum members.
-        *args: Will be passed to the `enum_cls` constructor.
-        **kwargs: Will be passed to the `enum_cls` constructor.
+    If the constructor, of the Enum this metaclass is correspond to, is called
+    and the `value` does not exist in the Enum, a new Enum is created with the
+    `value` as the only member. The newly created Enum is save in a list and
+    this metaclass will return the same Enum object if the same value is
+    requested multiple times.
+
+    Warning:
+        This metaclass assumes that the class name is unique (therefore without
+        module path) in comparison to all classes, which use this metaclass.
+
+    Author:
+        Fabian Raab <fabian@raab.link>
     """
 
-    def __init__(self, enum_cls, values, prefix, *args, **kwargs):
-        self.enum_cls = enum_cls
-        self.values = values
-        self.prefix = prefix
-        self.args = args
-        self.kwargs = kwargs
+    # if the value is not part of the Enum, a new Enum will be created and
+    # listed here. see __call__() below
+    created_enums = dict()
 
-    def __call__(self, cls):
-        members = []
-        cls_values = set()  # set of values present in `cls`
+    def __call__(cls, value, names=None, *,
+                 module=None, qualname=None, type=None):
+        """Either returns an existing member, or creates a new enum class.
 
-        # Copy members of passed class `cls`
-        attributes = inspect.getmembers(cls)
-        for attr in attributes:
-            if attr[0].startswith('__') and attr[0].endswith('__'):
-                continue
-            cls_values.add(attr[1])
-            members.append(attr)
-            any_member = attr[0]  # Any arbitrary member of the new Enum
+        This method is used both when an enum class is given a value to match
+        to an enumeration member (i.e. Color(3)) and for the functional API
+        (i.e. Color = Enum('Color', names='red green blue')).
 
-        # set members, which are in `values` and not already present in `cls`
-        for value in self.values:
-            if value in cls_values:
-                continue
-            members.append((self.prefix + str(value), value))
-            any_member = self.prefix + str(value)
+        When used for the functional API:
 
-        new_enum_cls = self.enum_cls(cls.__name__, members,
-                                     *self.args, **self.kwargs)
+        `value` will be the name of the new class.
 
-        # copy docstring
-        getattr(new_enum_cls, any_member).__class__.__doc__ = cls.__doc__
+        `names` should be either a string of white-space/comma delimited names
+        (values will start at 1), or an iterator/mapping of name, value pairs.
 
-        return new_enum_cls
+        `module` should be set to the module this class is being created in;
+        if it is not set, an attempt to find that module will be made, but if
+        it fails the class will not be picklable.
 
-class _BaseEnum(int, enum.Enum):
+        `qualname` should be set to the actual location this class can be found
+        at in its module; by default it is set to the global scope.  If this is
+        not correct, unpickling will fail in some circumstances.
+
+        `type`, if set, will be mixed in as the first base class.
+
+        """
+        if names is None:  # simple value lookup
+            try:
+                return cls.__new__(cls, value)
+            except ValueError:
+
+                # If `value` is not in cls we create a new Enum, because Enums
+                # are singletons. The new Enum will have only one name-value
+                # pair
+                dictkey = str(cls.__name__) + str(value)
+                if dictkey not in cls.created_enums:
+                    new_enum = _BaseEnum(
+                        cls.__name__ + 'Val' + str(value),
+                        {'val' + str(value): (
+                            value, 'val' + str(value) + " unknown")},
+                        module=__name__
+                    )
+                    cls.created_enums[dictkey] = new_enum
+
+                return cls.created_enums[dictkey](value)
+
+        # otherwise, functional API: we're creating a new Enum type
+        return cls._create_(value, names, module=module,
+                            qualname=qualname, type=type)
+
+    def __getitem__(cls, name):
+        """This additionally searches trough the `created_enums` dict."""
+        member = cls._member_map_.get(name, None)
+
+        if member is None:
+            for key, value in cls.created_enums.items():
+
+                member = value._member_map_.get(name, None)
+                if member is not None and key == (str(cls.__name__) +
+                                                  str(member.value)):
+                    return member
+
+        return cls._member_map_[name]
+
+    def __getattr__(cls, name):
+        """Return the enum member matching `name`
+
+        We use __getattr__ instead of descriptors or inserting into the enum
+        class' __dict__ in order to support `name` and `value` being both
+        properties for enum members (which live in the class' __dict__) and
+        enum members themselves.
+
+        """
+        if enum._is_dunder(name):
+            raise AttributeError(name)
+        try:
+            return cls.__getitem__(name)
+        except KeyError:
+            raise AttributeError(name) from None
+
+class _BaseEnum(int, enum.Enum, metaclass=EnumMetaCreate):
     """This class is the abstract Base for Type and Code Enums here.
 
     It Provides a customized __str__ and __repr__ string prints.
@@ -207,10 +260,7 @@ MSG_T = {
 dl += [MSG_T]
 
 @enum.unique
-# The field has a length of 16bit. However we only use here 8bit for faster
-# class level initialization until we need more bits.
-@_FillEnum(_BaseEnum, range(2**8), prefix='val', module=__name__)
-class MsgT(object):
+class MsgT(_BaseEnum):
     """MRT Message Types. Defined in RFC6396."""
     null = 0           # Deprecated in RFC6396
     start = 1          # Deprecated in RFC6396
@@ -338,10 +388,7 @@ MSG_ST = {
 }
 
 @enum.unique
-# The field has a length of 16bit. However we only use here 8bit for faster
-# class level initialization until we need more bits.
-@_FillEnum(_BaseEnum, range(2**8), prefix='val', module=__name__)
-class MsgSt(object):
+class MsgSt(_BaseEnum):
     """MRT Message Subtypes. Defined in RFC6396."""
     bgp_st9 = 9
     bgp_st10 = 10
