@@ -419,8 +419,8 @@ class Base:
         global as_rep
         asn = self.val_num(buf, n)
 
-        if  (as_rep == AS_REP['asdot+'] or
-            (as_rep == AS_REP['asdot'] and asn > 0xffff)):
+        if (as_rep == AS_REP['asdot+'] or
+           (as_rep == AS_REP['asdot'] and asn > 0xffff)):
             asn = str(asn >> 16) + '.' + str(asn & 0xffff)
         else:
             asn = str(asn)

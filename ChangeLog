@@ -1,16 +1,19 @@
+2015-06-28 Tetsumune KISO <t2mune@gmail.com>
+	* Update - removed "val_dict" in "summary.py".
+
 2015-06-28 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
 	* Update - replaced "val_dict" by using a collections module.
 	Thank you Fabian Raab.
 
 2015-06-22 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
-        * Update - added the option to use the ExaBGP API.
-        * Update - changed the file name from "exabgp_conf.py" to "mrt2exabgp.py".
-        * Update - README.md, README-ja.md
-        Thank you Thomas Mangin.
+	* Update - added the option to use the ExaBGP API.
+	* Update - changed the file name from "exabgp_conf.py" to "mrt2exabgp.py".
+	* Update - README.md, README-ja.md
+	Thank you Thomas Mangin.
 
 2015-06-22 Fabian Raab <fabian.raab@tum.de>
 	* dl += [AFI_T] BUGFIX
-	
+
 2015-05-10 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added a support for BGP path attribute "AIGP" in
 	"exabgp_conf.py".

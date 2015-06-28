@@ -103,33 +103,33 @@ def print_summary():
         datetime.fromtimestamp(end_time).strftime('%Y-%m-%d %H:%M:%S')))
 
     for k1 in sorted(summary.keys()):
-        print_line(0, val_dict(MSG_T, k1), total(summary[k1]))
+        print_line(0, MSG_T[k1], total(summary[k1]))
 
         if k1 == MSG_T['TABLE_DUMP']:
             for k2 in sorted(summary[k1].keys()):
-                print_line(1, val_dict(TD_ST, k2), total(summary[k1][k2]))
+                print_line(1, TD_ST[k2], total(summary[k1][k2]))
 
         elif k1 == MSG_T['TABLE_DUMP_V2']:
             for k2 in sorted(summary[k1].keys()):
-                print_line(1, val_dict(TD_V2_ST, k2), total(summary[k1][k2]))
+                print_line(1, TD_V2_ST[k2], total(summary[k1][k2]))
 
         elif ( k1 == MSG_T['BGP4MP']
             or k1 == MSG_T['BGP4MP_ET']):
 
             for k2 in sorted(summary[k1].keys()):
-                print_line(1, val_dict(BGP4MP_ST, k2), total(summary[k1][k2]))
+                print_line(1, BGP4MP_ST[k2], total(summary[k1][k2]))
 
                 if (   k2 == BGP4MP_ST['BGP4MP_MESSAGE']
                     or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
                     or k2 == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
                     or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
                     for k3 in sorted(summary[k1][k2].keys()):
-                        print_line(2, val_dict(BGP_MSG_T, k3), total(summary[k1][k2][k3]))
+                        print_line(2, BGP_MSG_T[k3], total(summary[k1][k2][k3]))
 
                 elif ( k2 == BGP4MP_ST['BGP4MP_STATE_CHANGE']
                     or k2 == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
                     for k3 in sorted(summary[k1][k2].keys()):
-                        print_line(2, val_dict(BGP_FSM, k3), total(summary[k1][k2][k3]))
+                        print_line(2, BGP_FSM[k3], total(summary[k1][k2][k3]))
 
 def main():
     if len(sys.argv) != 2:
