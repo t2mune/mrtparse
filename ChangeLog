@@ -1,3 +1,7 @@
+2015-06-28 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
+	* Update - replaced "val_dict" by using a collections module.
+	Thank you Fabian Raab.
+
 2015-06-22 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
         * Update - added the option to use the ExaBGP API.
         * Update - changed the file name from "exabgp_conf.py" to "mrt2exabgp.py".
