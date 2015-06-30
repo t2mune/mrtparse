@@ -181,18 +181,14 @@ This script outputs the following data of a MRT format file.
     This script slices MRT format data.
     
     positional arguments:
-      path_to_file          specify path to MRT format file
+      path_to_file    specify path to MRT format file
     
     optional arguments:
-      -h, --help            show this help message and exit
-      -s START_TIME, --start-time START_TIME
-                            specify start time in format YYYY-MM-DD HH:MM:SS
-      -e END_TIME, --end-time END_TIME
-                            specify end time in format YYYY-MM-DD HH:MM:SS
-      -i INTERVAL, --interval INTERVAL
-                            specify interval in seconds
-      -c {gz,bz2}, --compress-type {gz,bz2}
-                            specify compress type (gz, bz2)
+      -h, --help     show this help message and exit
+      -s START_TIME  specify start time in format YYYY-MM-DD HH:MM:SS
+      -e END_TIME    specify end time in format YYYY-MM-DD HH:MM:SS
+      -i INTERVAL    specify interval in seconds
+      -c {gz,bz2}    specify compress type (gz, bz2)
 
 ####Result
     # slice.py -s '2015-04-26 03:26:00' -e '2014-04-26 03:27:00' -i 10 -c bz2 -f latest-update.gz

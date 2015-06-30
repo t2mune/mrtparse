@@ -33,16 +33,16 @@ def parse_args():
         'path_to_file',
         help='specify path to MRT format file')
     parser.add_argument(
-        '-s', '--start-time', type=str,
+        '-s', type=str, metavar='START_TIME', dest='start_time',
         help='specify start time in format YYYY-MM-DD HH:MM:SS')
     parser.add_argument(
-        '-e', '--end-time', type=str,
+        '-e', type=str, metavar='END_TIME', dest='end_time',
         help='specify end time in format YYYY-MM-DD HH:MM:SS')
     parser.add_argument(
-        '-i', '--interval', type=int,
+        '-i', type=int, metavar='INTERVAL', dest='interval',
         help='specify interval in seconds')
     parser.add_argument(
-        '-c', '--compress-type', type=str, choices=['gz', 'bz2'],
+        '-c', type=str, choices=['gz', 'bz2'], dest='compress_type',
         help='specify compress type (gz, bz2)')
     return parser.parse_args()
 
