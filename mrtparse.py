@@ -416,7 +416,6 @@ class Base:
         return addr
 
     def val_asn(self, buf, n):
-        global as_rep
         asn = self.val_num(buf, n)
 
         if (as_rep == AS_REP['asdot+'] or
@@ -502,13 +501,17 @@ class Reader(Base):
             self.unpack_td_v2(data)
         elif ( self.mrt.type == MSG_T['BGP4MP']
             or self.mrt.type == MSG_T['BGP4MP_ET']):
-            self.mrt.bgp = Bgp4Mp()
-            self.mrt.bgp.unpack(data, self.mrt.subtype)
+            if (   self.mrt.subtype == BGP4MP_ST['BGP4MP_ENTRY']
+                or self.mrt.subtype == BGP4MP_ST['BGP4MP_SNAPSHOT']):
+                self.p += self.mrt.len
+            else:
+                self.mrt.bgp = Bgp4Mp()
+                self.mrt.bgp.unpack(data, self.mrt.subtype)
         elif ( self.mrt.type == MSG_T['ISIS_ET']
             or self.mrt.type == MSG_T['OSPFv3_ET']):
-            self.p += self.len - 4
+            self.p += self.mrt.len - 4
         else:
-            self.p += self.len
+            self.p += self.mrt.len
         return self.p
 
     def unpack_td_v2(self, data):
@@ -524,7 +527,7 @@ class Reader(Base):
             self.mrt.rib = AfiSpecRib()
             self.mrt.rib.unpack(data, AFI_T['IPv6'])
         else:
-            self.p += self.len
+            self.p += self.mrt.len
 
 class Mrt(Base):
     def __init__(self):
@@ -636,9 +639,7 @@ class Bgp4Mp(Base):
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']):
             as_len = 2
-        elif ( subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
-            or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']
-            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
+        else:
             as_len = 4
 
         self.peer_as = self.val_asn(buf, as_len)
@@ -844,7 +845,6 @@ class BgpAttr(Base):
         self.origin = self.val_num(buf, 1)
 
     def unpack_as_path(self, buf):
-        global as_len
         attr_len = self.p + self.len
         self.as_path = []
         while self.p < attr_len:
