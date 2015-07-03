@@ -921,7 +921,7 @@ class BgpAttr(Base):
         self.mp_reach['next_hop'] = []
         self.mp_reach['next_hop'].append(
             self.val_addr(buf, self.mp_reach['afi']))
-        if (nlen == 32 and self.mp_reach['afi'] == AFI_T['IPv6']):
+        if nlen == 32 and self.mp_reach['afi'] == AFI_T['IPv6']:
             self.mp_reach['next_hop'].append(
                 self.val_addr(buf, self.mp_reach['afi']))
 
