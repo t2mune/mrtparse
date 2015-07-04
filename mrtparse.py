@@ -318,19 +318,24 @@ BGP_OPT_PARAMS_T = reverse_defaultdict({
 # Defined in RFC5492
 BGP_CAP_C = reverse_defaultdict({
     0:'Reserved',
-    1:'Multiprotocol Extensions for BGP-4',                     # Defined in RFC2858
-    2:'Route Refresh Capability for BGP-4',                     # Defined in RFC2918
-    3:'Outbound Route Filtering Capability',                    # Defined in RFC5291
-    4:'Multiple routes to a destination capability',            # Defined in RFC3107
-    5:'Extended Next Hop Encoding',                             # Defined in RFC5549
-    64:'Graceful Restart Capability',                           # Defined in RFC4724
-    65:'Support for 4-octet AS number capability',              # Defined in RFC6793
+    1:'Multiprotocol Extensions for BGP-4',          # Defined in RFC2858
+    2:'Route Refresh Capability for BGP-4',          # Defined in RFC2918
+    3:'Outbound Route Filtering Capability',         # Defined in RFC5291
+    4:'Multiple routes to a destination capability', # Defined in RFC3107
+    5:'Extended Next Hop Encoding',                  # Defined in RFC5549
+    64:'Graceful Restart Capability',                # Defined in RFC4724
+    65:'Support for 4-octet AS number capability',   # Defined in RFC6793
     66:'[Deprecated]',
-    67:'Support for Dynamic Capability (capability specific)',  # draft-ietf-idr-dynamic-cap
-    68:'Multisession BGP Capability',                           # draft-ietf-idr-bgp-multisession
-    69:'ADD-PATH Capability',                                   # draft-ietf-idr-add-paths
-    70:'Enhanced Route Refresh Capability',                     # draft-keyur-bgp-enhanced-route-refresh
-    71:'Long-Lived Graceful Restart (LLGR) Capability',         # draft-uttaro-idr-bgp-persistence
+    # draft-ietf-idr-dynamic-cap
+    67:'Support for Dynamic Capability (capability specific)',
+    # draft-ietf-idr-bgp-multisession
+    68:'Multisession BGP Capability',
+    # draft-ietf-idr-add-paths
+    69:'ADD-PATH Capability',
+    # draft-keyur-bgp-enhanced-route-refresh
+    70:'Enhanced Route Refresh Capability',
+    # draft-uttaro-idr-bgp-persistence
+    71:'Long-Lived Graceful Restart (LLGR) Capability',
 })
 
 # Outbound Route Filtering Capability
@@ -367,7 +372,13 @@ def as_len(n=None):
 
 # AS Number Notation
 # Default notation is 'asplain'(Defined in RFC5396)
-as_rep = AS_REP['asplain']
+def as_rep(n=None):
+    if n is not None:
+        as_rep.n = n
+    try:
+        return as_rep.n
+    except AttributeError:
+        return AS_REP['asplain']
 
 # super class for all other classes
 class Base:
@@ -424,8 +435,8 @@ class Base:
     def val_asn(self, buf, n):
         asn = self.val_num(buf, n)
 
-        if (as_rep == AS_REP['asdot+'] or
-           (as_rep == AS_REP['asdot'] and asn > 0xffff)):
+        if (as_rep() == AS_REP['asdot+'] or
+           (as_rep() == AS_REP['asdot'] and asn > 0xffff)):
             asn = str(asn >> 16) + '.' + str(asn & 0xffff)
         else:
             asn = str(asn)
@@ -441,7 +452,6 @@ class Base:
 class Reader(Base):
     def __init__(self, arg):
         Base.__init__(self)
-        self.as_rep = as_rep
 
         # for file instance
         if hasattr(arg, 'read'):
@@ -466,8 +476,6 @@ class Reader(Base):
         raise StopIteration
 
     def __iter__(self):
-        global as_rep
-        as_rep = self.as_rep
         return self
 
     def __next__(self):

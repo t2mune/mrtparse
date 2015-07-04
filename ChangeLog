@@ -1,4 +1,5 @@
 2015-07-05 Tetsumune KISO <t2mune@gmail.com>
+	* Update - replaced global variable "as_rep" with function "as_rep()".
 	* Update - replaced global variable "as_len" with function "as_len()".
 
 2015-07-04 Tetsumune KISO <t2mune@gmail.com>
