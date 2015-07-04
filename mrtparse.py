@@ -357,7 +357,13 @@ LBL_BOTTOM    = 0x01     # Defined in RFC3032
 LBL_WITHDRAWN = 0x800000 # Defined in RFC3107
 
 # AS number length for AS_PATH attribute
-as_len = 4
+def as_len(n=None):
+    if n is not None:
+        as_len.n = n
+    try:
+        return as_len.n
+    except AttributeError:
+        return 4
 
 # AS Number Notation
 # Default notation is 'asplain'(Defined in RFC5396)
@@ -465,8 +471,7 @@ class Reader(Base):
         return self
 
     def __next__(self):
-        global as_len
-        as_len = 4
+        as_len(4)
         self.mrt = Mrt()
         self.unpack()
         return self
@@ -545,8 +550,6 @@ class TableDump(Base):
         Base.__init__(self)
 
     def unpack(self, buf, subtype):
-        global as_len
-        as_len = 2
         self.view = self.val_num(buf, 2)
         self.seq = self.val_num(buf, 2)
         self.prefix = self.val_addr(buf, subtype)
@@ -554,7 +557,7 @@ class TableDump(Base):
         self.status = self.val_num(buf, 1)
         self.org_time = self.val_num(buf, 4)
         self.peer_ip = self.val_addr(buf, subtype)
-        self.peer_as = self.val_asn(buf, as_len)
+        self.peer_as = self.val_asn(buf, as_len(2))
         attr_len = self.attr_len = self.val_num(buf, 2)
         self.attr = []
         while attr_len > 0:
@@ -634,16 +637,13 @@ class Bgp4Mp(Base):
         Base.__init__(self)
 
     def unpack(self, buf, subtype):
-        global as_len
         if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']):
-            as_len = 2
-        else:
-            as_len = 4
+            as_len(2)
 
-        self.peer_as = self.val_asn(buf, as_len)
-        self.local_as = self.val_asn(buf, as_len)
+        self.peer_as = self.val_asn(buf, as_len())
+        self.local_as = self.val_asn(buf, as_len())
         self.ifindex = self.val_num(buf, 2)
         self.af = self.val_num(buf, 2)
         self.peer_ip = self.val_addr(buf, self.af)
@@ -853,7 +853,7 @@ class BgpAttr(Base):
             path_seg['type'] = self.val_num(buf, 1)
             path_seg['len'] = self.val_num(buf, 1)
             for i in range(path_seg['len']):
-                l.append(self.val_asn(buf, as_len))
+                l.append(self.val_asn(buf, as_len()))
             path_seg['val'] = ' '.join(l)
             self.as_path.append(path_seg)
 
