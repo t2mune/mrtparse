@@ -28,17 +28,17 @@ import signal
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # mrtparse information
-__pyname__  = 'mrtparse'
+__pyname__ = 'mrtparse'
 __version__ = '1.2'
-__descr__   = 'parse a MRT-format data'
-__url__     = 'https://github.com/YoshiyukiYamauchi/mrtparse'
-__author__  = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
-__email__   = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
+__descr__ = 'parse a MRT-format data'
+__url__ = 'https://github.com/YoshiyukiYamauchi/mrtparse'
+__author__ = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
+__email__ = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
 __license__ = 'Apache License, Version 2.0'
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
-BZ2_MAGIC  = b'\x42\x5a\x68'
+BZ2_MAGIC = b'\x42\x5a\x68'
 
 # MRT header length
 MRT_HDR_LEN = 12
@@ -358,7 +358,7 @@ AS_REP = reverse_defaultdict({
 })
 
 # MPLS Label
-LBL_BOTTOM    = 0x01     # Defined in RFC3032
+LBL_BOTTOM = 0x01     # Defined in RFC3032
 LBL_WITHDRAWN = 0x800000 # Defined in RFC3107
 
 # AS number length for AS_PATH attribute
@@ -452,14 +452,11 @@ class Base:
         return rd
 
 class Reader(Base):
-    __slots__ = ['as_rep', 'buf', 'len', 'mrt', 'f']
+    __slots__ = ['mrt', 'buf', 'f']
 
     def __init__(self, arg):
         Base.__init__(self)
-        self.as_rep = as_rep
-        self.buf = None
-        self.len = None
-        self.mrt = None
+        self.mrt = self.buf = self.f = "None"
 
         # for file instance
         if hasattr(arg, 'read'):
@@ -510,7 +507,7 @@ class Reader(Base):
 
         self.buf = hdr + data
 
-        if (   self.mrt.type == MSG_T['BGP4MP_ET']
+        if (self.mrt.type == MSG_T['BGP4MP_ET']
             or self.mrt.type == MSG_T['ISIS_ET']
             or self.mrt.type == MSG_T['OSPFv3_ET']):
             self.mrt.micro_ts = self.val_num(data, 4)
@@ -520,15 +517,15 @@ class Reader(Base):
             self.mrt.td.unpack(data, self.mrt.subtype)
         elif self.mrt.type == MSG_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
-        elif ( self.mrt.type == MSG_T['BGP4MP']
+        elif (self.mrt.type == MSG_T['BGP4MP']
             or self.mrt.type == MSG_T['BGP4MP_ET']):
-            if (   self.mrt.subtype == BGP4MP_ST['BGP4MP_ENTRY']
+            if (self.mrt.subtype == BGP4MP_ST['BGP4MP_ENTRY']
                 or self.mrt.subtype == BGP4MP_ST['BGP4MP_SNAPSHOT']):
                 self.p += self.mrt.len
             else:
                 self.mrt.bgp = Bgp4Mp()
                 self.mrt.bgp.unpack(data, self.mrt.subtype)
-        elif ( self.mrt.type == MSG_T['ISIS_ET']
+        elif (self.mrt.type == MSG_T['ISIS_ET']
             or self.mrt.type == MSG_T['OSPFv3_ET']):
             self.p += self.mrt.len - 4
         else:
@@ -539,11 +536,11 @@ class Reader(Base):
         if self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
             self.mrt.peer = PeerIndexTable()
             self.mrt.peer.unpack(data)
-        elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+        elif (self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
             or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']):
             self.mrt.rib = AfiSpecRib()
             self.mrt.rib.unpack(data, AFI_T['IPv4'])
-        elif ( self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+        elif (self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
             or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
             self.mrt.rib = AfiSpecRib()
             self.mrt.rib.unpack(data, AFI_T['IPv6'])
@@ -551,31 +548,13 @@ class Reader(Base):
             self.p += self.mrt.len
 
 class Mrt(Base):
-    __slots__ = ['ts', 'type', 'subtype', 'len', 'view', 'seq', 'prefix',
-                 'plen', 'status', 'org_time', 'peer_ip', 'peer_as', 'attr',
-                 'micro_ts', 'peer', 'td', 'bgp', 'rib']
+    __slots__ = ['ts', 'type', 'subtype', 'len', 'micro_ts', 'bgp', 'peer',
+    'td', 'rib']
 
     def __init__(self):
         Base.__init__(self)
-        self.ts = None
-        self.type = None
-        self.subtype = None
-        self.len = None
-        self.view = None
-        self.seq = None
-        self.prefix = None
-        self.plen = None
-        self.status = None
-        self.org_time = None
-        self.peer_ip = None
-        self.peer_as = None
-        self.attr = None
-        self.micro_ts = None
-        self.peer = None
-        self.td = None
-        self.bgp = None
-        self.rib = None
-
+        self.ts = self.type = self.subtype = self.len = self.micro_ts = \
+        self.bgp = self.peer = self.td = self.rib = "None"
 
     def unpack(self, buf):
         self.ts = self.val_num(buf, 4)
@@ -586,20 +565,13 @@ class Mrt(Base):
 
 class TableDump(Base):
     __slots__ = ['view', 'seq', 'prefix', 'plen', 'status', 'org_time',
-                 'peer_ip', 'peer_as', 'attr', 'attr_len']
+    'peer_ip', 'peer_as', 'attr_len', 'attr']
 
     def __init__(self):
         Base.__init__(self)
-        self.view = None
-        self.seq = None
-        self.prefix = None
-        self.plen = None
-        self.status = None
-        self.org_time = None
-        self.peer_ip = None
-        self.peer_as = None
-        self.attr = None
-        self.attr_len = None
+        self.view = self.seq = self.prefix = self.plen = self.status = \
+        self.org_time = self.peer_ip = self.peer_as = self.attr_len = \
+        self.attr = "None"
 
     def unpack(self, buf, subtype):
         self.view = self.val_num(buf, 2)
@@ -624,11 +596,8 @@ class PeerIndexTable(Base):
 
     def __init__(self):
         Base.__init__(self)
-        self.collector = None
-        self.view_len = None
-        self.view = None
-        self.count = None
-        self.entry = None
+        self.collector = self.view_len = self.view = self.count = \
+        self.entry = "None"
 
     def unpack(self, buf):
         self.collector = self.val_addr(buf, AFI_T['IPv4'])
@@ -647,10 +616,7 @@ class PeerEntries(Base):
 
     def __init__(self):
         Base.__init__(self)
-        self.type = None
-        self.bgp_id = None
-        self.ip = None
-        self.asn = None
+        self.type = self.bgp_id = self.ip = self.asn = "None"
 
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
@@ -669,11 +635,7 @@ class AfiSpecRib(Base):
 
     def __init__(self):
         Base.__init__(self)
-        self.seq = None
-        self.plen = None
-        self.prefix = None
-        self.count = None
-        self.entry = None
+        self.seq = self.plen = self.prefix = self.count = self.entry = "None"
 
     def unpack(self, buf, af):
         self.seq = self.val_num(buf, 4)
@@ -688,15 +650,11 @@ class AfiSpecRib(Base):
         return self.p
 
 class RibEntries(Base):
-    __slots__ = ['peer_index', 'org_time', 'attr', 'attr_len']
+    __slots__ = ['peer_index', 'org_time', 'attr_len', 'attr']
 
     def __init__(self):
         Base.__init__(self)
-        self.peer_index = None
-        self.org_time = None
-        self.attr = None
-        self.attr_len = None
-
+        self.peer_index = self.org_time = self.attr_len = self.attr = "None"
 
     def unpack(self, buf):
         self.peer_index = self.val_num(buf, 2)
@@ -712,23 +670,16 @@ class RibEntries(Base):
         return self.p
 
 class Bgp4Mp(Base):
-    __slots__ = ['peer_as', 'local_as', 'ifindex', 'af', 'peer_ip', 'local_ip',
-                 'old_state', 'new_state', 'msg']
+    __slots__ = ['peer_as', 'local_as', 'ifindex', 'af', 'peer_ip',
+    'local_ip', 'old_state', 'new_state', 'msg']
 
     def __init__(self):
         Base.__init__(self)
-        self.peer_as = None
-        self.local_as = None
-        self.ifindex = None
-        self.af = None
-        self.peer_ip = None
-        self.local_ip = None
-        self.old_state = None
-        self.new_state = None
-        self.msg = None
+        self.peer_as = self.local_as = self.ifindex = self.af = self.peer_ip = \
+        self.local_ip = self.old_state = self.new_state = self.msg = "None"
 
     def unpack(self, buf, subtype):
-        if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
+        if (subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']):
             as_len(2)
@@ -740,7 +691,7 @@ class Bgp4Mp(Base):
         self.peer_ip = self.val_addr(buf, self.af)
         self.local_ip = self.val_addr(buf, self.af)
 
-        if (   subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
+        if (subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
             or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
             self.old_state = self.val_num(buf, 2)
             self.new_state = self.val_num(buf, 2)
@@ -750,33 +701,17 @@ class Bgp4Mp(Base):
         return self.p
 
 class BgpMessage(Base):
-    __slots__ = ['marker', 'len', 'type', 'ver', 'my_as', 'holdtime', 'bgp_id',
-                 'bgp_id', 'opt_params', 'opt_len', 'wd_len', 'attr',
-                 'attr_len', 'withdrawn', 'nlri', 'err_code', 'err_subcode',
-                 'data', 'afi', 'rsvd', 'safi']
+    __slots__ = ['marker', 'len', 'type', 'ver', 'my_as', 'holdtime',
+    'bgp_id', 'opt_len', 'opt_params', 'wd_len', 'withdrawn', 'attr_len', 'attr',
+    'nlri', 'err_code', 'err_subcode', 'data', 'afi', 'rsvd', 'safi']
 
     def __init__(self):
         Base.__init__(self)
-        self.marker = None
-        self.len = None
-        self.type = None
-        self.ver = None
-        self.my_as = None
-        self.holdtime = None
-        self.bgp_id = None
-        self.opt_params = None
-        self.opt_len = None
-        self.wd_len = None
-        self.attr = None
-        self.attr_len = None
-        self.withdrawn = None
-        self.nlri = None
-        self.err_code = None
-        self.err_subcode = None
-        self.data = None
-        self.afi = None
-        self.rsvd = None
-        self.safi = None
+        self.marker = self.len = self.type = self.ver = self.my_as = \
+        self.holdtime = self.bgp_id = self.opt_len = self.opt_params = \
+        self.wd_len = self.withdrawn = self.attr_len = self.attr = self.nlri = \
+        self.err_code = self.err_subcode = self.data = self.afi = \
+        self.rsvd = self.safi = "None"
 
     def unpack(self, buf, af):
         self.marker = self.val_str(buf, 16)
@@ -843,18 +778,12 @@ class BgpMessage(Base):
 
 class OptParams(Base):
     __slots__ = ['type', 'len', 'cap_type', 'cap_len', 'multi_ext', 'orf',
-                 'graceful_restart', 'support_as4']
+    'graceful_restart', 'support_as4']
 
     def __init__(self):
         Base.__init__(self)
-        self.type = None
-        self.len = None
-        self.cap_type = None
-        self.cap_len = None
-        self.multi_ext = None
-        self.orf = None
-        self.graceful_restart = None
-        self.support_as4 = None
+        self.type = self.len = self.cap_type = self.cap_len = self.multi_ext = \
+        self.orf = self.graceful_restart = self.support_as4 = "None"
 
     def unpack(self, buf):
         self.type = self.val_num(buf, 1)
@@ -920,33 +849,17 @@ class OptParams(Base):
         self.support_as4 = self.val_asn(buf, 4)
 
 class BgpAttr(Base):
-    __slots__ = ['flag', 'type', 'len', 'val', 'origin', 'as_path', 'next_hop',
-                 'med', 'local_pref', 'aggr', 'comm', 'org_id', 'cl_list',
-                 'mp_reach', 'mp_unreach', 'ext_comm', 'as4_path', 'as4_aggr',
-                 'aigp', 'attr_set']
+    __slots__ = ['flag', 'type', 'len', 'origin', 'as_path', 'next_hop',
+    'med', 'local_pref', 'aggr', 'comm', 'org_id', 'cl_list', 'mp_reach',
+    'mp_unreach', 'ext_comm', 'as4_path', 'as4_aggr', 'aigp', 'attr_set', 'val']
 
     def __init__(self):
         Base.__init__(self)
-        self.flag = None
-        self.type = None
-        self.len = None
-        self.val = None
-        self.origin = None
-        self.as_path = None
-        self.next_hop = None
-        self.med = None
-        self.local_pref = None
-        self.aggr = None
-        self.comm = None
-        self.org_id = None
-        self.cl_list = None
-        self.mp_reach = None
-        self.mp_unreach = None
-        self.ext_comm = None
-        self.as4_path = None
-        self.as4_aggr = None
-        self.aigp = None
-        self.attr_set = None
+        self.flag = self.type = self.len = self.origin = self.as_path = \
+        self.next_hop = self.med = self.local_pref = self.aggr = self.comm = \
+        self.org_id = self.cl_list = self.mp_reach = self.mp_unreach = \
+        self.ext_comm = self.as4_path = self.as4_aggr = self.aigp = \
+        self.attr_set = self.val = "None"
 
     def unpack(self, buf):
         self.flag = self.val_num(buf, 1)
@@ -1039,7 +952,7 @@ class BgpAttr(Base):
                 ((val & 0xffff0000) >> 16, val & 0x0000ffff))
 
     def unpack_originator_id(self, buf):
-        self.org_id= self.val_addr(buf, AFI_T['IPv4'])
+        self.org_id = self.val_addr(buf, AFI_T['IPv4'])
 
     def unpack_cluster_list(self, buf):
         attr_len = self.p + self.len
@@ -1054,19 +967,19 @@ class BgpAttr(Base):
         self.mp_reach['safi'] = self.val_num(buf, 1)
         self.mp_reach['nlen'] = nlen = self.val_num(buf, 1)
 
-        if (    self.mp_reach['afi'] != AFI_T['IPv4']
+        if (self.mp_reach['afi'] != AFI_T['IPv4']
             and self.mp_reach['afi'] != AFI_T['IPv6']):
             self.p = attr_len
             return
 
-        if (    self.mp_reach['safi'] != SAFI_T['UNICAST']
+        if (self.mp_reach['safi'] != SAFI_T['UNICAST']
             and self.mp_reach['safi'] != SAFI_T['MULTICAST']
             and self.mp_reach['safi'] != SAFI_T['L3VPN_UNICAST']
             and self.mp_reach['safi'] != SAFI_T['L3VPN_MULTICAST']):
             self.p = attr_len
             return
 
-        if (   self.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
+        if (self.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
             or self.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
             self.mp_reach['rd'] = self.val_rd(buf)
 
@@ -1092,12 +1005,12 @@ class BgpAttr(Base):
         self.mp_unreach['afi'] = self.val_num(buf, 2)
         self.mp_unreach['safi'] = self.val_num(buf, 1)
 
-        if (    self.mp_unreach['afi'] != AFI_T['IPv4']
+        if (self.mp_unreach['afi'] != AFI_T['IPv4']
             and self.mp_unreach['afi'] != AFI_T['IPv6']):
             self.p = attr_len
             return
 
-        if (    self.mp_unreach['safi'] != SAFI_T['UNICAST']
+        if (self.mp_unreach['safi'] != SAFI_T['UNICAST']
             and self.mp_unreach['safi'] != SAFI_T['MULTICAST']
             and self.mp_unreach['safi'] != SAFI_T['L3VPN_UNICAST']
             and self.mp_unreach['safi'] != SAFI_T['L3VPN_MULTICAST']):
@@ -1136,7 +1049,7 @@ class BgpAttr(Base):
         self.as4_aggr['asn'] = self.val_asn(buf, 4)
         self.as4_aggr['id'] = self.val_addr(buf, AFI_T['IPv4'])
 
-    def unpack_aigp(self,buf):
+    def unpack_aigp(self, buf):
         attr_len = self.p + self.len
         self.aigp = []
         while self.p < attr_len:
@@ -1158,21 +1071,18 @@ class BgpAttr(Base):
             self.attr_set['attr'].append(attr)
 
 class Nlri(Base):
-    __slots__ = ['prefix', 'label', 'rd', 'plen']
+    __slots__ = ['plen', 'prefix', 'label', 'rd']
 
     def __init__(self):
         Base.__init__(self)
-        self.prefix = None
-        self.label = None
-        self.rd = None
-        self.plen = None
+        self.plen = self.prefix = self.label = self.rd = "None"
 
     def unpack(self, buf, *args):
         af = args[0]
         saf = args[1] if len(args) > 1 else 0
 
         self.plen = plen = self.val_num(buf, 1)
-        if (   saf == SAFI_T['L3VPN_UNICAST']
+        if (saf == SAFI_T['L3VPN_UNICAST']
             or saf == SAFI_T['L3VPN_MULTICAST']):
             plen = self.unpack_l3vpn(buf, plen)
 
@@ -1182,9 +1092,9 @@ class Nlri(Base):
     def unpack_l3vpn(self, buf, plen):
         self.label = []
         while True:
-            label= self.val_num(buf, 3)
+            label = self.val_num(buf, 3)
             self.label.append(label)
-            if (   label &  LBL_BOTTOM
+            if (label &  LBL_BOTTOM
                 or label == LBL_WITHDRAWN):
                 break
         self.rd = self.val_rd(buf)
