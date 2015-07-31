@@ -1,3 +1,8 @@
+2015-08-01 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
+	* Update - adding "__slots__".
+	* Fix - W0201 and C0326 warnings.
+	Thank you Fabian Raab.
+
 2015-07-05 Tetsumune KISO <t2mune@gmail.com>
 	* Update - replaced global variable "as_rep" with function "as_rep()".
 	* Update - replaced global variable "as_len" with function "as_len()".
