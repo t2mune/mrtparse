@@ -224,7 +224,7 @@ This script displays the summary of a MRT format file.
 
 ###mrt2bgpdump.py
 ####Description
-This script converts to bgpdump[bgpdump][bgpdump] format.
+This script converts to [bgpdump][bgpdump] format.
 [bgpdump]: https://bitbucket.org/ripencc/bgpdump/wiki/Home
 ####Usage
     usage: mrt2bgpdump.py [-h] [-m] [-M] [-O [file]] [-s] [-v] [-t {dump,change}]
