@@ -222,6 +222,45 @@ This script displays the summary of a MRT format file.
             OpenSent:                      4
 
 
+###mrt2bgpdump.py
+####Description
+This script converts to bgpdump[bgpdump][bgpdump] format.
+[bgpdump]: https://bitbucket.org/ripencc/bgpdump/wiki/Home
+####Usage
+    usage: mrt2bgpdump.py [-h] [-m] [-M] [-O [file]] [-s] [-v] [-t {dump,change}]
+                          [-p]
+                          path_to_file
+    
+    This script converts to bgpdump format.
+    
+    positional arguments:
+      path_to_file      specify path to MRT format file
+    
+    optional arguments:
+      -h, --help        show this help message and exit
+      -m                one-line per entry with unix timestamps
+      -M                one-line per entry with human readable timestamps(default
+                        format)
+      -O [file]         output to a specified file
+      -s                output to STDOUT(default output)
+      -v                output to STDERR
+      -t {dump,change}  timestamps for RIB dumps reflect the time of the dump or
+                        the last route modification(default: dump)
+      -p                show packet index at second position
+####Result
+    BGP4MP|0|1438386900|A|193.0.0.56|3333|204.80.242.0/24|3333 1273 7922 33667 54169 54169 54169 54169 54169 54169 54169 54169|IGP|193.0.0.56|0|0|1273:21000|NAG||
+    BGP4MP|1|1438386900|A|2405:fc00::6|37989|2001:4c0:2001::/48|37989 4844 2914 174 855|IGP|2405:fc00::6|0|0||NAG||
+    BGP4MP|1|1438386900|A|2405:fc00::6|37989|2001:4c0:6002::/48|37989 4844 2914 174 855|IGP|2405:fc00::6|0|0||NAG||
+    BGP4MP|2|1438386900|A|146.228.1.3|1836|189.127.0.0/21|1836 174 12956 262589 27693|IGP|146.228.1.3|0|0|1836:110 1836:6000 1836:6031|NAG|27693 189.127.15.253|
+    BGP4MP|4|1438386900|A|2405:fc00::6|37989|2406:e400:1a::/48|37989 4844 7642|INCOMPLETE|2405:fc00::6|0|0||NAG||
+    BGP4MP|5|1438386900|A|2001:8e0:0:ffff::9|8758|2c0f:fe90::/32|8758 174 2914 30844 37105 37105 37105 36943|IGP|2001:8e0:0:ffff::9|0|0|174:21100 174:22005 8758:110 8758:301|NAG||
+    BGP4MP|6|1438386900|A|213.200.87.254|3257|187.110.144.0/20|3257 174 16735 27693 53117|IGP|213.200.87.254|0|10|3257:8093 3257:30235 3257:50002 3257:51100 3257:51102|NAG||
+    BGP4MP|7|1438386900|A|213.200.87.254|3257|187.95.16.0/20|3257 174 16735 27693 53081|IGP|213.200.87.254|0|10|3257:8063 3257:30252 3257:50002 3257:51300 3257:51302|NAG||
+    BGP4MP|8|1438386900|A|213.200.87.254|3257|189.127.208.0/21|3257 174 16735 27693 28235|IGP|213.200.87.254|0|10|3257:8093 3257:30235 3257:50002 3257:51100 3257:51102|NAG||
+    BGP4MP|8|1438386900|A|213.200.87.254|3257|189.127.216.0/21|3257 174 16735 27693 28235|IGP|213.200.87.254|0|10|3257:8093 3257:30235 3257:50002 3257:51100 3257:51102|NAG||
+    ...
+
+
 ##Authors
 Tetsumune KISO <t2mune@gmail.com>  
 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>  
