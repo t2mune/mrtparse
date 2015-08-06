@@ -253,13 +253,13 @@ class BgpDump:
             self.as4_path = []
             for seg in attr.as4_path:
                 if seg['type'] == AS_PATH_SEG_T['AS_SET']:
-                    self.as4_path = ('{%s}' % seg['val']).split()
+                    self.as4_path.append(('{%s}' % seg['val']).replace(' ', ','))
                 elif seg['type'] == AS_PATH_SEG_T['AS_CONFED_SEQUENCE']:
-                    self.as4_path = ('(%s)' % seg['val']).split()
+                    self.as4_path += ('(%s)' % seg['val']).split()
                 elif seg['type'] == AS_PATH_SEG_T['AS_CONFED_SET']:
-                    self.as4_path = ('[%s]' % seg['val']).split()
+                    self.as4_path.append(('[%s]' % seg['val']).replace(' ', ','))
                 else:
-                    self.as4_path = seg['val'].split()
+                    self.as4_path += seg['val'].split()
         elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
             self.as4_aggr = '%d %s' % (attr.as4_aggr['asn'], attr.as4_aggr['ip'])
 

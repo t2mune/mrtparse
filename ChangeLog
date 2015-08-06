@@ -1,3 +1,6 @@
+2015-08-06 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - a wrong AS4_PATH format in "mrt2bgpdump.py".
+
 2015-08-05 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added "mrt2bgpdump.py".
 
