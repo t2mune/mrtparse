@@ -29,8 +29,8 @@ signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # mrtparse information
 __pyname__ = 'mrtparse'
-__version__ = '1.2'
-__descr__ = 'parse a MRT-format data'
+__version__ = '1.3'
+__descr__ = 'MRT format data parser'
 __url__ = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__ = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__ = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
@@ -39,9 +39,6 @@ __license__ = 'Apache License, Version 2.0'
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC = b'\x42\x5a\x68'
-
-# MRT header length
-MRT_HDR_LEN = 12
 
 # reverse the keys and values of dictionaries
 def reverse_defaultdict(d):
@@ -387,10 +384,14 @@ class Base:
     def __init__(self):
         self.p = 0
 
-    def val_num(self, buf, n):
-        if n <= 0 or len(buf) - self.p < n:
-            return None
+    def chk_buf(self, buf, n):
+        if len(buf) - self.p < n:
+            sys.stderr.write('error: insufficient buffer %d < %d\n' \
+                % (len(buf) - self.p, n))
+            raise ValueError
 
+    def val_num(self, buf, n):
+        self.chk_buf(buf, n)
         val = 0
         for i in buf[self.p:self.p+n]:
             val <<= 8
@@ -404,16 +405,26 @@ class Base:
 
         return val
 
-    def val_str(self, buf, n):
-        if n <= 0 or len(buf) - self.p < n:
-            return None
-
+    def val_bytes(self, buf, n):
+        self.chk_buf(buf, n)
         val = buf[self.p:self.p+n]
         self.p += n
 
         return val
 
-    def val_addr(self, buf, af, *args):
+    def val_str(self, buf, n):
+        self.chk_buf(buf, n)
+        val = buf[self.p:self.p+n]
+        self.p += n
+
+        # for python2
+        if isinstance(val, str):
+            return val
+        # for python3
+        else:
+            return val.decode('utf-8')
+
+    def val_addr(self, buf, af, n=-1):
         if af == AFI_T['IPv4']:
             m = 4
             _af = socket.AF_INET
@@ -421,13 +432,12 @@ class Base:
             m = 16
             _af = socket.AF_INET6
         else:
-            n = -1
+            sys.stderr.write('error: unknown address family %d\n' % af)
+            raise ValueError
 
-        n = m if len(args) == 0 else (args[0] + 7) // 8
+        n = m if n < 0 else (n + 7) // 8
 
-        if n < 0 or len(buf) - self.p < n:
-            return None
-
+        self.chk_buf(buf, n)
         addr = socket.inet_ntop(
             _af, buf[self.p:self.p+n] + b'\x00'*(m - n))
         self.p += n
@@ -495,10 +505,10 @@ class Reader(Base):
     next = __next__
 
     def unpack(self):
-        hdr = self.f.read(MRT_HDR_LEN)
+        hdr = self.f.read(12)
         if len(hdr) == 0:
             self.close()
-        elif len(hdr) < MRT_HDR_LEN:
+        elif len(hdr) < 12:
             sys.stderr.write("error: mrt header is too short\n")
             self.close()
         self.mrt.unpack(hdr)
@@ -772,7 +782,7 @@ class BgpMessage(Base):
         self.safi = None
 
     def unpack(self, buf, af):
-        self.marker = self.val_str(buf, 16)
+        self.marker = self.val_bytes(buf, 16)
         self.len = self.val_num(buf, 2)
         self.type = self.val_num(buf, 1)
 
@@ -827,7 +837,7 @@ class BgpMessage(Base):
     def unpack_notification(self, buf):
         self.err_code = self.val_num(buf, 1)
         self.err_subcode = self.val_num(buf, 1)
-        self.data = self.val_str(buf, self.len - self.p)
+        self.data = self.val_bytes(buf, self.len - self.p)
 
     def unpack_route_refresh(self, buf):
         self.afi = self.val_num(buf, 2)
@@ -987,7 +997,7 @@ class BgpAttr(Base):
         elif self.type == BGP_ATTR_T['ATTR_SET']:
             self.unpack_attr_set(buf)
         else:
-            self.val = self.val_str(buf, self.len)
+            self.val = self.val_bytes(buf, self.len)
         return self.p
 
     def unpack_origin(self, buf):
@@ -1164,10 +1174,7 @@ class Nlri(Base):
         self.label = None
         self.rd = None
 
-    def unpack(self, buf, *args):
-        af = args[0]
-        saf = args[1] if len(args) > 1 else 0
-
+    def unpack(self, buf, af, saf=0):
         self.plen = plen = self.val_num(buf, 1)
         if (saf == SAFI_T['L3VPN_UNICAST']
             or saf == SAFI_T['L3VPN_MULTICAST']):
