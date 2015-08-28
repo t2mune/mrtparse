@@ -30,11 +30,7 @@ signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 # mrtparse information
 __pyname__ = 'mrtparse'
 __version__ = '1.3'
-<<<<<<< HEAD
 __descr__ = 'MRT format data parser'
-=======
-__descr__ = 'parse a MRT-format data'
->>>>>>> 8a28c56dce671dab34e0596eb26183b1adbf340d
 __url__ = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__ = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
 __email__ = 't2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com'
