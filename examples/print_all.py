@@ -371,8 +371,8 @@ def main():
     # comment out either line below.
     # default is 'asplain'.
     #
-    # as_repr(['asdot+'])
-    # as_repr(['asdot'])
+    # as_repr(AS_REPR['asdot+'])
+    # as_repr(AS_REPR['asdot'])
     for m in d:
         m = m.mrt
         print_mrt(m)
