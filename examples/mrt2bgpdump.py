@@ -220,13 +220,15 @@ class BgpDump:
             self.as_path = []
             for seg in attr.as_path:
                 if seg['type'] == AS_PATH_SEG_T['AS_SET']:
-                    self.as_path.append(('{%s}' % seg['val']).replace(' ', ','))
+                    self.as_path.append('{%s}' % ','.join(seg['val']))
                 elif seg['type'] == AS_PATH_SEG_T['AS_CONFED_SEQUENCE']:
-                    self.as_path += ('(%s)' % seg['val']).split()
+                    self.as_path.append('(' + seg['val'][0])
+                    self.as_path += seg['val'][1:-1]
+                    self.as_path.append(seg['val'][-1] + ')')
                 elif seg['type'] == AS_PATH_SEG_T['AS_CONFED_SET']:
-                    self.as_path.append(('[%s]' % seg['val']).replace(' ', ','))
+                    self.as_path.append('[%s]' % ','.join(seg['val']))
                 else:
-                    self.as_path += seg['val'].split()
+                    self.as_path += seg['val']
         elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
             self.med = attr.med
         elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
@@ -253,13 +255,15 @@ class BgpDump:
             self.as4_path = []
             for seg in attr.as4_path:
                 if seg['type'] == AS_PATH_SEG_T['AS_SET']:
-                    self.as4_path.append(('{%s}' % seg['val']).replace(' ', ','))
+                    self.as4_path.append('{%s}' % ','.join(seg['val']))
                 elif seg['type'] == AS_PATH_SEG_T['AS_CONFED_SEQUENCE']:
-                    self.as4_path += ('(%s)' % seg['val']).split()
+                    self.as4_path.append('(' + seg['val'][0])
+                    self.as4_path += seg['val'][1:-1]
+                    self.as4_path.append(seg['val'][-1] + ')')
                 elif seg['type'] == AS_PATH_SEG_T['AS_CONFED_SET']:
-                    self.as4_path.append(('[%s]' % seg['val']).replace(' ', ','))
+                    self.as4_path.append('[%s]' % ','.join(seg['val']))
                 else:
-                    self.as4_path += seg['val'].split()
+                    self.as4_path += seg['val']
         elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
             self.as4_aggr = '%d %s' % (attr.as4_aggr['asn'], attr.as4_aggr['ip'])
 

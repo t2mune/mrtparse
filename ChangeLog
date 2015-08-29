@@ -1,12 +1,16 @@
-<<<<<<< HEAD
+2015-08-29 Tetsumune KISO <t2mune@gmail.com>
+	* Update - changed the type of AS_PATH segment value from str to list.
+	* Update - renamed the dictionary "AS_REP" to "AS_REPR".
+	* Update - renamed the function "as_rep()" to "as_repr()".
+	* Update - changed the order of conditions in some if statements.
+
 2015-08-23 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added method "chk_buf" and "val_bytes" of class "Base".
 	* Update - changed arguments in method "val_addr" of class "Base" and
 	method "unpack" of class "Nlri".
-=======
+
 2015-08-09 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
 	* Release - mrtparse 1.3 released. 
->>>>>>> 8a28c56dce671dab34e0596eb26183b1adbf340d
 
 2015-08-06 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - a wrong AS4_PATH format in "mrt2bgpdump.py".

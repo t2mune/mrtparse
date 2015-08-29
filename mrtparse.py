@@ -40,7 +40,7 @@ __license__ = 'Apache License, Version 2.0'
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC = b'\x42\x5a\x68'
 
-# reverse the keys and values of dictionaries
+# Reverse the keys and values of dictionaries
 def reverse_defaultdict(d):
     for k in list(d.keys()):
         d[d[k]] = k
@@ -348,17 +348,17 @@ ORF_SEND_RECV = reverse_defaultdict({
 })
 
 # AS Number Representation
-AS_REP = reverse_defaultdict({
+AS_REPR = reverse_defaultdict({
     1:'asplain',
     2:'asdot+',
     3:'asdot',
 })
 
 # MPLS Label
-LBL_BOTTOM = 0x01     # Defined in RFC3032
+LBL_BOTTOM = 0x01        # Defined in RFC3032
 LBL_WITHDRAWN = 0x800000 # Defined in RFC3107
 
-# AS number length for AS_PATH attribute
+# AS Number Length for AS_PATH attribute
 def as_len(n=None):
     if n is not None:
         as_len.n = n
@@ -367,17 +367,17 @@ def as_len(n=None):
     except AttributeError:
         return 4
 
-# AS Number Notation
-# Default notation is 'asplain'(Defined in RFC5396)
-def as_rep(n=None):
+# AS Number Representation
+# Default is 'asplain'(Defined in RFC5396)
+def as_repr(n=None):
     if n is not None:
-        as_rep.n = n
+        as_repr.n = n
     try:
-        return as_rep.n
+        return as_repr.n
     except AttributeError:
-        return AS_REP['asplain']
+        return AS_REPR['asplain']
 
-# super class for all other classes
+# Super class for all other classes
 class Base:
     __slots__ = ['p']
 
@@ -395,10 +395,10 @@ class Base:
         val = 0
         for i in buf[self.p:self.p+n]:
             val <<= 8
-            # for python3
+            # for Python3
             if isinstance(i, int):
                 val += i
-            # for python2
+            # for Python2
             else:
                 val += struct.unpack('>B', i)[0]
         self.p += n
@@ -417,10 +417,10 @@ class Base:
         val = buf[self.p:self.p+n]
         self.p += n
 
-        # for python2
+        # for Python2
         if isinstance(val, str):
             return val
-        # for python3
+        # for Python3
         else:
             return val.decode('utf-8')
 
@@ -447,19 +447,16 @@ class Base:
     def val_asn(self, buf, n):
         asn = self.val_num(buf, n)
 
-        if (as_rep() == AS_REP['asdot+'] or
-           (as_rep() == AS_REP['asdot'] and asn > 0xffff)):
-            asn = str(asn >> 16) + '.' + str(asn & 0xffff)
+        if (as_repr() == AS_REPR['asplain'] or
+           (as_repr() == AS_REPR['asdot'] and asn < 0x10000)):
+            return str(asn)
         else:
-            asn = str(asn)
-
-        return asn
+            return str(asn >> 16) + '.' + str(asn & 0xffff)
 
     def val_rd(self, buf):
         rd = self.val_num(buf, 8)
-        rd = str(rd >> 32) + ':' + str(rd & 0xffffffff)
 
-        return rd
+        return str(rd >> 32) + ':' + str(rd & 0xffffffff)
 
 class Reader(Base):
     __slots__ = ['mrt', 'buf', 'f']
@@ -501,7 +498,7 @@ class Reader(Base):
         self.unpack()
         return self
 
-    # for python2 compatibility
+    # for Python2 compatibility
     next = __next__
 
     def unpack(self):
@@ -519,15 +516,7 @@ class Reader(Base):
 
         self.buf = hdr + data
 
-        if (self.mrt.type == MSG_T['BGP4MP_ET']
-            or self.mrt.type == MSG_T['ISIS_ET']
-            or self.mrt.type == MSG_T['OSPFv3_ET']):
-            self.mrt.micro_ts = self.val_num(data, 4)
-
-        if self.mrt.type == MSG_T['TABLE_DUMP']:
-            self.mrt.td = TableDump()
-            self.mrt.td.unpack(data, self.mrt.subtype)
-        elif self.mrt.type == MSG_T['TABLE_DUMP_V2']:
+        if self.mrt.type == MSG_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
         elif (self.mrt.type == MSG_T['BGP4MP']
             or self.mrt.type == MSG_T['BGP4MP_ET']):
@@ -535,20 +524,20 @@ class Reader(Base):
                 or self.mrt.subtype == BGP4MP_ST['BGP4MP_SNAPSHOT']):
                 self.p += self.mrt.len
             else:
+                if self.mrt.type == MSG_T['BGP4MP_ET']:
+                    self.mrt.micro_ts = self.val_num(data, 4)
                 self.mrt.bgp = Bgp4Mp()
                 self.mrt.bgp.unpack(data, self.mrt.subtype)
-        elif (self.mrt.type == MSG_T['ISIS_ET']
-            or self.mrt.type == MSG_T['OSPFv3_ET']):
-            self.p += self.mrt.len - 4
+        elif self.mrt.type == MSG_T['TABLE_DUMP']:
+            self.mrt.td = TableDump()
+            self.mrt.td.unpack(data, self.mrt.subtype)
         else:
             self.p += self.mrt.len
+
         return self.p
 
     def unpack_td_v2(self, data):
-        if self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
-            self.mrt.peer = PeerIndexTable()
-            self.mrt.peer.unpack(data)
-        elif (self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+        if (self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
             or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']):
             self.mrt.rib = AfiSpecRib()
             self.mrt.rib.unpack(data, AFI_T['IPv4'])
@@ -556,6 +545,9 @@ class Reader(Base):
             or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
             self.mrt.rib = AfiSpecRib()
             self.mrt.rib.unpack(data, AFI_T['IPv6'])
+        elif self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
+            self.mrt.peer = PeerIndexTable()
+            self.mrt.peer.unpack(data)
         else:
             self.p += self.mrt.len
 
@@ -1007,13 +999,12 @@ class BgpAttr(Base):
         attr_len = self.p + self.len
         self.as_path = []
         while self.p < attr_len:
-            l = []
             path_seg = {}
             path_seg['type'] = self.val_num(buf, 1)
             path_seg['len'] = self.val_num(buf, 1)
+            path_seg['val'] = []
             for i in range(path_seg['len']):
-                l.append(self.val_asn(buf, as_len()))
-            path_seg['val'] = ' '.join(l)
+                path_seg['val'].append(self.val_asn(buf, as_len()))
             self.as_path.append(path_seg)
 
     def unpack_next_hop(self, buf):
@@ -1129,13 +1120,12 @@ class BgpAttr(Base):
         attr_len = self.p + self.len
         self.as4_path = []
         while self.p < attr_len:
-            l = []
             path_seg = {}
             path_seg['type'] = self.val_num(buf, 1)
             path_seg['len'] = self.val_num(buf, 1)
+            path_seg['val'] = []
             for i in range(path_seg['len']):
-                l.append(self.val_asn(buf, 4))
-            path_seg['val'] = ' '.join(l)
+                path_seg['val'].append(self.val_asn(buf, 4))
             self.as4_path.append(path_seg)
 
     def unpack_as4_aggregator(self, buf):

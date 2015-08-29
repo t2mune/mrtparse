@@ -254,7 +254,7 @@ def print_bgp_attr(attr, n):
             prline('Path Segment Type: %d(%s)' %
                 (path_seg['type'], AS_PATH_SEG_T[path_seg['type']]))
             prline('Path Segment Length: %d' % path_seg['len'])
-            prline('Path Segment Value: %s' % path_seg['val'])
+            prline('Path Segment Value: %s' % ' '.join(path_seg['val']))
     elif attr.type == BGP_ATTR_T['NEXT_HOP']:
         prline(line + ': %s' % attr.next_hop)
     elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
@@ -315,7 +315,7 @@ def print_bgp_attr(attr, n):
             prline('Path Segment Type: %d(%s)' %
                 (path_seg['type'], AS_PATH_SEG_T[path_seg['type']]))
             prline('Path Segment Length: %d' % path_seg['len'])
-            prline('Path Segment Value: %s' % path_seg['val'])
+            prline('Path Segment Value: %s' % ' '.join(path_seg['val']))
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
         prline(line + ': %s %s' % (attr.as4_aggr['asn'], attr.as4_aggr['id']))
     elif attr.type == BGP_ATTR_T['AIGP']:
@@ -371,8 +371,8 @@ def main():
     # comment out either line below.
     # default is 'asplain'.
     #
-    # as_rep(AS_REP['asdot+'])
-    # as_rep(AS_REP['asdot'])
+    # as_repr(['asdot+'])
+    # as_repr(['asdot'])
     for m in d:
         m = m.mrt
         print_mrt(m)

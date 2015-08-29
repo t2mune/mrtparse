@@ -208,9 +208,9 @@ def get_bgp_attr(args, subtype, attr):
         as_path = ''
         for path_seg in attr.as_path:
             if path_seg['type'] == AS_PATH_SEG_T['AS_SET']:
-                as_path += '(%s) ' % path_seg['val']
+                as_path += '(%s) ' % ' '.join(path_seg['val'])
             else:
-                as_path += '%s ' % path_seg['val']
+                as_path += '%s ' % ' '.join(path_seg['val'])
         line += ' as-path [%s]' % as_path
 
     elif attr.type == BGP_ATTR_T['NEXT_HOP']:
@@ -256,9 +256,9 @@ def get_bgp_attr(args, subtype, attr):
         as4_path = ''
         for path_seg in attr.as4_path:
             if path_seg['type'] == AS_PATH_SEG_T['AS_SET']:
-                as4_path += '(%s) ' % path_seg['val']
+                as4_path += '(%s) ' % ' '.join(path_seg['val'])
             else:
-                as4_path += '%s ' % path_seg['val']
+                as4_path += '%s ' % ' '.join(path_seg['val'])
         line += ' as4-path [%s]' % as4_path
 
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
