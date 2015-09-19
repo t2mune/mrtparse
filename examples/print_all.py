@@ -237,6 +237,16 @@ def print_bgp_opt_params(opt):
     elif opt.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
         prline('AS Number: %s' % opt.support_as4)
 
+    elif opt.cap_type == BGP_CAP_C['ADD-PATH Capability']:
+        for entry in opt.add_path:
+            prline('AFI: %d(%s)' %
+                (entry['afi'], AFI_T[entry['afi']]))
+            prline('SAFI: %d(%s)' %
+                (entry['safi'], SAFI_T[entry['safi']]))
+            prline('Send Receive: %d(%s)' %
+                (entry['send_recv'],
+                ADD_PATH_SEND_RECV[entry['send_recv']]))
+
 def print_bgp_attr(attr, n):
     global indt
     indt = n
@@ -343,6 +353,8 @@ def print_nlri(nlri, title, *args):
     global indt
     safi = args[0] if len(args) > 0 else 0
 
+    if nlri.path_id is not None:
+        prline('Path Identifier: %d' % nlri.path_id)
     if (   safi == SAFI_T['L3VPN_UNICAST']
         or safi == SAFI_T['L3VPN_MULTICAST']):
         prline('%s' % title)

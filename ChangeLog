@@ -1,3 +1,7 @@
+2015-09-20 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added a support for "ADD-PATH Capability".
+	* Fix - a wrong BGP-ID format.
+
 2015-08-29 Tetsumune KISO <t2mune@gmail.com>
 	* Update - changed the type of AS_PATH segment value from str to list.
 	* Update - renamed the dictionary "AS_REP" to "AS_REPR".
