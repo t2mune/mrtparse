@@ -52,6 +52,7 @@ def reverse_defaultdict(d):
 AFI_T = reverse_defaultdict({
     1:'IPv4',
     2:'IPv6',
+    25: 'L2VPN',
 })
 
 # SAFI Types
@@ -59,6 +60,8 @@ AFI_T = reverse_defaultdict({
 SAFI_T = reverse_defaultdict({
     1:'UNICAST',
     2:'MULTICAST',
+    65:'VPLS',
+    70:'EVPN',
     128:'L3VPN_UNICAST',
     129:'L3VPN_MULTICAST',
 })
