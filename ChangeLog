@@ -1,4 +1,6 @@
 2015-09-22 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added function "prerror" to print invalid data in byte in
+	"print_all.py".
 	* Update - divided function "unpack" in class "Reader" into "unpack_hdr" 
 	and "unpack_data".
 	* Update - added attributes "err" and "err_msg" in class "Mrt".
