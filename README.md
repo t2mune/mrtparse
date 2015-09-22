@@ -6,10 +6,10 @@ The MRT format data can be used to export routing protocol messages, state chang
 Programs like Quagga / Zebra, BIRD, OpenBGPD and PyRT can dump the MRT fotmat data.
 [rfc6396]: https://tools.ietf.org/html/rfc6396
 
-##Currently supported MRT types
+##Supported MRT types
 Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 
-##Currently supported BGP attributes
+##Supported BGP attributes
 ORIGIN(1), AS_PATH(2), NEXT_HOP(3), MULTI_EXIT_DISC(4), LOCAL_PREF(5), ATOMIC_AGGREGATE(6), AGGREGATOR(7), COMMUNITY(8), ORIGINATOR_ID(9), CLUSTER_LIST(10), MP_REACH_NLRI(14), MP_UNREACH_NLRI(15), EXTENDED_COMMUNITIES(16), AS4_PATH(17), AS4_AGGREGATOR(18), AIGP(26), ATTR_SET(128)
 
 ##Requirements
@@ -90,6 +90,17 @@ This script displays the contents of a MRT format file.
         Type: 16(BGP4MP)
         Subtype: 4(BGP4MP_MESSAGE_AS4)
         ...
+
+If error occurred, it displays data in byte as below.
+
+    ---------------------------------------------------------------
+    MRT Header
+        Timestamp: 1442843462(2015-09-21 22:51:02)
+        Type: 16(BGP4MP)
+        Subtype: 5(BGP4MP_STATE_CHANGE_AS4)
+        Length: 12
+    MRT Data Error: Unknown AFI 8
+        00 00 00 00 00 00 00 00  00 01 00 08
         
 
 ###mrt2exabgp.py (formerly exabgp_conf.py)

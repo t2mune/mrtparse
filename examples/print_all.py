@@ -29,6 +29,27 @@ from mrtparse import *
 
 indt = 0
 
+def prerror(m):
+    print('%s: %s' % (MRT_ERR_C[m.err], m.err_msg))
+    if m.err == MRT_ERR_C['MRT Header Error']:
+        buf = m.buf
+    else:
+        buf = m.buf[12:]
+    s = ''
+    for i in range(len(buf)):
+        if isinstance(buf[i], str):
+            s += '%02x ' % ord(buf[i])
+        else:
+            s += '%02x ' % buf[i]
+
+        if (i + 1) % 16 == 0:
+            print('    %s' % s)
+            s = ''
+        elif (i + 1) % 8 == 0:
+            s += ' '
+    if len(s):
+        print('    %s' % s)
+
 def prline(line):
     global indt
     print('    ' * indt + line)
@@ -36,7 +57,6 @@ def prline(line):
 def print_mrt(m):
     global indt
     indt = 0
-    prline('---------------------------------------------------------------')
     prline('MRT Header')
 
     indt += 1
@@ -387,7 +407,15 @@ def main():
     # as_repr(AS_REPR['asdot'])
     for m in d:
         m = m.mrt
+        print('---------------------------------------------------------------')
+        if m.err == MRT_ERR_C['MRT Header Error']:
+            prerror(m)
+            continue
         print_mrt(m)
+
+        if m.err == MRT_ERR_C['MRT Data Error']:
+            prerror(m)
+            continue
         if m.type == MSG_T['TABLE_DUMP']:
             print_td(m)
         elif m.type == MSG_T['TABLE_DUMP_V2']:
