@@ -61,6 +61,9 @@ def get_summary(f):
     for m in d:
         m = m.mrt
 
+        if m.err:
+            continue
+
         if m.ts < start_time:
             start_time = m.ts
         elif m.ts > end_time:

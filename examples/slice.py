@@ -81,11 +81,12 @@ def slice_mrt(args):
     f = file_open(args.path_to_file, t, args.compress_type)
     d = Reader(args.path_to_file)
     for m in d:
-        if start_time and (m.mrt.ts < start_time):
+        m = m.mrt
+        if start_time and (m.ts < start_time):
             continue
-        if end_time and (m.mrt.ts >= end_time):
+        if end_time and (m.ts >= end_time):
             break
-        if interval and (m.mrt.ts >= t + interval):
+        if interval and (m.ts >= t + interval):
             f.close()
             t += interval
             f = file_open(args.path_to_file, t, args.compress_type)

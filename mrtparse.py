@@ -47,6 +47,12 @@ def reverse_defaultdict(d):
     d = collections.defaultdict(lambda: "Unknown", d)
     return d
 
+# Error codes for MrtFormatError exception
+MRT_ERR_C = reverse_defaultdict({
+    1:'MRT Header Error',
+    2:'MRT Data Error',
+})
+
 # AFI Types
 # Assigend by IANA
 AFI_T = reverse_defaultdict({
@@ -388,6 +394,11 @@ def as_repr(n=None):
     except AttributeError:
         return AS_REPR['asplain']
 
+# Exception for invalid MRT formatted data
+class MrtFormatError(Exception):
+    def __init__(self, msg=''):
+        self.msg = msg
+
 # Super class for all other classes
 class Base:
     __slots__ = ['p']
@@ -397,9 +408,9 @@ class Base:
 
     def chk_buf(self, buf, n):
         if len(buf) - self.p < n:
-            sys.stderr.write('error: insufficient buffer %d < %d\n' \
+            raise MrtFormatError(
+                'Insufficient buffer %d < %d\n'
                 % (len(buf) - self.p, n))
-            raise ValueError
 
     def val_num(self, buf, n):
         self.chk_buf(buf, n)
@@ -440,8 +451,7 @@ class Base:
             m = 16
             _af = socket.AF_INET6
         else:
-            sys.stderr.write('error: unknown address family %d\n' % af)
-            raise ValueError
+            raise MrtFormatError('Unknown AFI %d' % af)
         n = m if n < 0 else (n + 7) // 8
         self.chk_buf(buf, n)
         addr = socket.inet_ntop(
@@ -469,10 +479,10 @@ class Base:
                 nlri = Nlri()
                 p += nlri.unpack(buf[p:], af, saf)
                 if nlri.chk_dup(l):
-                    raise ValueError
+                    raise MrtFormatError
                 l.append(nlri)
             self.p = p
-        except ValueError:
+        except MrtFormatError:
             l = []
             while self.p < n:
                 nlri = Nlri()
@@ -482,12 +492,11 @@ class Base:
             return l
 
 class Reader(Base):
-    __slots__ = ['mrt', 'buf', 'f']
+    __slots__ = ['mrt', 'f']
 
     def __init__(self, arg):
         Base.__init__(self)
         self.mrt = None
-        self.buf = None
         self.f = None
 
         # for file instance
@@ -506,7 +515,7 @@ class Reader(Base):
             else:
                 self.f = open(arg, 'rb')
         else:
-            sys.stderr.write("error: unsupported instance type\n")
+            sys.stderr.write("Error: Unsupported instance type\n")
 
     def close(self):
         self.f.close()
@@ -518,26 +527,43 @@ class Reader(Base):
     def __next__(self):
         as_len(4)
         self.mrt = Mrt()
-        self.unpack()
+
+        try:
+            self.unpack_hdr()
+        except MrtFormatError as e:
+            self.mrt.err = MRT_ERR_C['MRT Header Error']
+            self.mrt.err_msg = e.msg
+            return self
+
+        try:
+            self.unpack_data()
+        except MrtFormatError as e:
+            self.mrt.err = MRT_ERR_C['MRT Data Error']
+            self.mrt.err_msg = e.msg
+            return self
+
         return self
 
     # for Python2 compatibility
     next = __next__
 
-    def unpack(self):
+    def unpack_hdr(self):
         hdr = self.f.read(12)
+        self.mrt.buf = hdr
         if len(hdr) == 0:
             self.close()
         elif len(hdr) < 12:
-            sys.stderr.write("error: mrt header is too short\n")
-            self.close()
+            raise MrtFormatError(
+                'Invalid MRT header length %d < 12' % len(hdr))
+            return
         self.mrt.unpack(hdr)
-        data = self.f.read(self.mrt.len)
-        if len(data) < self.mrt.len:
-            sys.stderr.write("error: mrt data is too short\n")
-            self.close()
 
-        self.buf = hdr + data
+    def unpack_data(self):
+        data = self.f.read(self.mrt.len)
+        self.mrt.buf += data
+        if len(data) < self.mrt.len:
+            raise MrtFormatError(
+                'Invalid MRT data length %d < %d' % (len(data), self.mrt.len))
 
         if self.mrt.type == MSG_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
@@ -576,7 +602,8 @@ class Reader(Base):
 
 class Mrt(Base):
     __slots__ = [
-        'ts', 'type', 'subtype', 'len', 'micro_ts', 'bgp', 'peer', 'td', 'rib'
+        'ts', 'type', 'subtype', 'len', 'micro_ts', 'bgp', 'peer', 'td', 'rib',
+        'buf', 'err', 'err_msg'
     ]
 
     def __init__(self):
@@ -590,6 +617,9 @@ class Mrt(Base):
         self.peer = None
         self.td = None
         self.rib = None
+        self.buf = None
+        self.err = None
+        self.err_msg = None
 
     def unpack(self, buf):
         self.ts = self.val_num(buf, 4)
@@ -1191,7 +1221,9 @@ class Nlri(Base):
             plen = self.unpack_l3vpn(buf, plen)
         if (af == AFI_T['IPv4'] and plen > 32
             or af == AFI_T['IPv6'] and plen > 128):
-            raise ValueError
+            raise MrtFormatError(
+                'Invalid prefix length %d (%s)'
+                % (self.plen, AFI_T[af]))
         self.prefix = self.val_addr(buf, af, plen)
         return self.p
 

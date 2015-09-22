@@ -286,6 +286,8 @@ def main():
     count = 0
     for m in d:
         m = m.mrt
+        if m.err:
+            continue
         b = BgpDump(args)
         if m.type == MSG_T['TABLE_DUMP']:
             b.td(m, count)

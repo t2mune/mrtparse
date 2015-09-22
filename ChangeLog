@@ -1,3 +1,9 @@
+2015-09-22 Tetsumune KISO <t2mune@gmail.com>
+	* Update - divided function "unpack" in class "Reader" into "unpack_hdr" 
+	and "unpack_data".
+	* Update - added attributes "err" and "err_msg" in class "Mrt".
+	* Update - added class "MrtFormatError".
+
 2015-09-21 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added some AFI/SAFI numbers for L2VPN.
 

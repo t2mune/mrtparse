@@ -148,6 +148,9 @@ def conv_format(args, d):
     for m in d:
         m = m.mrt
 
+        if m.err:
+            continue
+
         if mrt_type_check(m):
             continue
 
