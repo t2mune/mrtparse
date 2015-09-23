@@ -1140,7 +1140,7 @@ class BgpAttr(Base):
             self.mp_reach['safi'] = self.val_num(buf, 1)
             self.mp_reach['nlen'] = self.val_num(buf, 1)
 
-            if (af != AFI_T['IPv4'] and af != AFI_T['IPv6']):
+            if af != AFI_T['IPv4'] and af != AFI_T['IPv6']:
                 self.p = attr_len
                 return
 
@@ -1161,7 +1161,7 @@ class BgpAttr(Base):
 
         self.mp_reach['next_hop'] = []
         self.mp_reach['next_hop'].append(self.val_addr(buf, af))
-        if (self.mp_reach['nlen'] == 32 and af == AFI_T['IPv6']):
+        if self.mp_reach['nlen'] == 32 and af == AFI_T['IPv6']:
             self.mp_reach['next_hop'].append(self.val_addr(buf, af))
 
         if 'afi' in self.mp_reach:
