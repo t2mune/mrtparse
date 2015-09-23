@@ -17,7 +17,7 @@
 	* Update - added some AFI/SAFI numbers for L2VPN.
 
 2015-09-20 Tetsumune KISO <t2mune@gmail.com>
-	* Update - added a support for "ADD-PATH Capability".
+	* Update - added a support for "ADD-PATH Capability". Thank you Dazul.
 	* Fix - a wrong BGP-ID format.
 
 2015-08-29 Tetsumune KISO <t2mune@gmail.com>
