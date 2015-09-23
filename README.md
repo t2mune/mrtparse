@@ -9,6 +9,9 @@ Programs like Quagga / Zebra, BIRD, OpenBGPD and PyRT can dump the MRT fotmat da
 ##Supported MRT types
 Table_Dump(12), Table_Dump_V2(13), BGP4MP(16), BGP4MP_ET(17)
 
+##Supported BGP capabilities
+Multiprotocol Extensions for BGP-4(1), Route Refresh Capability for BGP-4(2), Outbound Route Filtering Capability(3), Graceful Restart Capability(64), Support for 4-octet AS number capability, ADD-PATH Capability(69)
+
 ##Supported BGP attributes
 ORIGIN(1), AS_PATH(2), NEXT_HOP(3), MULTI_EXIT_DISC(4), LOCAL_PREF(5), ATOMIC_AGGREGATE(6), AGGREGATOR(7), COMMUNITY(8), ORIGINATOR_ID(9), CLUSTER_LIST(10), MP_REACH_NLRI(14), MP_UNREACH_NLRI(15), EXTENDED_COMMUNITIES(16), AS4_PATH(17), AS4_AGGREGATOR(18), AIGP(26), ATTR_SET(128)
 
