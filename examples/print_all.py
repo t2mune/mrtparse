@@ -304,25 +304,27 @@ def print_bgp_attr(attr, n):
     elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
         prline(line)
         indt += 1
-        prline('AFI: %d(%s)' %
-            (attr.mp_reach['afi'], AFI_T[attr.mp_reach['afi']]))
-        prline('SAFI: %d(%s)' %
-            (attr.mp_reach['safi'], SAFI_T[attr.mp_reach['safi']]))
+        if 'afi' in attr.mp_reach:
+            prline('AFI: %d(%s)' %
+                (attr.mp_reach['afi'], AFI_T[attr.mp_reach['afi']]))
 
-        if (   attr.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
-            or attr.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
-            prline('Route Distinguisher: %s' % attr.mp_reach['rd'])
+        if 'safi' in attr.mp_reach:
+            prline('SAFI: %d(%s)' %
+                (attr.mp_reach['safi'], SAFI_T[attr.mp_reach['safi']]))
+
+            if (   attr.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
+                or attr.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
+                prline('Route Distinguisher: %s' % attr.mp_reach['rd'])
 
         prline('Length: %d' % attr.mp_reach['nlen'])
-
         if 'next_hop' not in attr.mp_reach:
             return
-
         next_hop = " ".join(attr.mp_reach['next_hop'])
         prline('Next-Hop: %s' % next_hop)
 
-        for nlri in attr.mp_reach['nlri']:
-            print_nlri(nlri, 'NLRI', attr.mp_reach['safi'])
+        if 'nlri' in attr.mp_reach:
+            for nlri in attr.mp_reach['nlri']:
+                print_nlri(nlri, 'NLRI', attr.mp_reach['safi'])
     elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
         prline(line)
         indt += 1

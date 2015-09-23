@@ -1,3 +1,8 @@
+2015-09-23 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - can't parse path attribute "MP_REACH_NLRI" properly when included 
+	only the Next Hop Address Length and Next Hop Address fields.
+	(see RFC6396 section 4.3.4)
+
 2015-09-22 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added function "prerror" to print invalid data in byte in
 	"print_all.py".

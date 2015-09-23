@@ -729,7 +729,7 @@ class AfiSpecRib(Base):
         self.entry = []
         for i in range(self.count):
             entry = RibEntries()
-            self.p += entry.unpack(buf[self.p:])
+            self.p += entry.unpack(buf[self.p:], af)
             self.entry.append(entry)
         return self.p
 
@@ -743,14 +743,14 @@ class RibEntries(Base):
         self.attr_len = None
         self.attr = None
 
-    def unpack(self, buf):
+    def unpack(self, buf, af):
         self.peer_index = self.val_num(buf, 2)
         self.org_time = self.val_num(buf, 4)
         attr_len = self.attr_len = self.val_num(buf, 2)
         self.attr = []
         while attr_len > 0:
             attr = BgpAttr()
-            self.p += attr.unpack(buf[self.p:])
+            self.p += attr.unpack(buf[self.p:], af)
             self.attr.append(attr)
             attr_len -= attr.p
         return self.p
@@ -1002,7 +1002,7 @@ class BgpAttr(Base):
         self.attr_set = None
         self.val = None
 
-    def unpack(self, buf):
+    def unpack(self, buf, af=0):
         self.flag = self.val_num(buf, 1)
         self.type = self.val_num(buf, 1)
 
@@ -1030,7 +1030,7 @@ class BgpAttr(Base):
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
             self.unpack_cluster_list(buf)
         elif self.type == BGP_ATTR_T['MP_REACH_NLRI']:
-            self.unpack_mp_reach_nlri(buf)
+            self.unpack_mp_reach_nlri(buf, af)
         elif self.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
             self.unpack_mp_unreach_nlri(buf)
         elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
@@ -1100,40 +1100,44 @@ class BgpAttr(Base):
         while self.p < attr_len:
             self.cl_list.append(self.val_addr(buf, AFI_T['IPv4']))
 
-    def unpack_mp_reach_nlri(self, buf):
+    def unpack_mp_reach_nlri(self, buf, af):
         attr_len = self.p + self.len
         self.mp_reach = {}
         self.mp_reach['afi'] = self.val_num(buf, 2)
-        self.mp_reach['safi'] = self.val_num(buf, 1)
-        self.mp_reach['nlen'] = self.val_num(buf, 1)
 
-        if (self.mp_reach['afi'] != AFI_T['IPv4']
-            and self.mp_reach['afi'] != AFI_T['IPv6']):
-            self.p = attr_len
-            return
+        if AFI_T[self.mp_reach['afi']] != 'Unknown':
+            af = self.mp_reach['afi']
+            self.mp_reach['safi'] = self.val_num(buf, 1)
+            self.mp_reach['nlen'] = self.val_num(buf, 1)
 
-        if (self.mp_reach['safi'] != SAFI_T['UNICAST']
-            and self.mp_reach['safi'] != SAFI_T['MULTICAST']
-            and self.mp_reach['safi'] != SAFI_T['L3VPN_UNICAST']
-            and self.mp_reach['safi'] != SAFI_T['L3VPN_MULTICAST']):
-            self.p = attr_len
-            return
+            if (af != AFI_T['IPv4'] and af != AFI_T['IPv6']):
+                self.p = attr_len
+                return
 
-        if (self.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
-            or self.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
-            self.mp_reach['rd'] = self.val_rd(buf)
+            if (self.mp_reach['safi'] != SAFI_T['UNICAST']
+                and self.mp_reach['safi'] != SAFI_T['MULTICAST']
+                and self.mp_reach['safi'] != SAFI_T['L3VPN_UNICAST']
+                and self.mp_reach['safi'] != SAFI_T['L3VPN_MULTICAST']):
+                self.p = attr_len
+                return
+
+            if (self.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
+                or self.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
+                self.mp_reach['rd'] = self.val_rd(buf)
+        else:
+            self.p -= 2
+            self.mp_reach = {}
+            self.mp_reach['nlen'] = self.val_num(buf, 1)
 
         self.mp_reach['next_hop'] = []
-        self.mp_reach['next_hop'].append(
-            self.val_addr(buf, self.mp_reach['afi']))
-        if (self.mp_reach['nlen'] == 32
-            and self.mp_reach['afi'] == AFI_T['IPv6']):
-            self.mp_reach['next_hop'].append(
-                self.val_addr(buf, self.mp_reach['afi']))
+        self.mp_reach['next_hop'].append(self.val_addr(buf, af))
+        if (self.mp_reach['nlen'] == 32 and af == AFI_T['IPv6']):
+            self.mp_reach['next_hop'].append(self.val_addr(buf, af))
 
-        self.mp_reach['rsvd'] = self.val_num(buf, 1)
-        self.mp_reach['nlri'] = self.val_nlri(
-            buf, attr_len, self.mp_reach['afi'], self.mp_reach['safi'])
+        if 'afi' in self.mp_reach:
+            self.mp_reach['rsvd'] = self.val_num(buf, 1)
+            self.mp_reach['nlri'] = self.val_nlri(
+                buf, attr_len, af, self.mp_reach['safi'])
 
     def unpack_mp_unreach_nlri(self, buf):
         attr_len = self.p + self.len
