@@ -597,6 +597,9 @@ class Reader(Base):
         elif self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
             self.mrt.peer = PeerIndexTable()
             self.mrt.peer.unpack(data)
+        elif self.mrt.subtype == TD_V2_ST['RIB_GENERIC']:
+            self.mrt.rib = RibGeneric()
+            self.mrt.rib.unpack(data)
         else:
             self.p += self.mrt.len
 
@@ -708,6 +711,33 @@ class PeerEntries(Base):
         self.ip = self.val_addr(buf, af)
         n = 4 if self.type & (0x01 << 1) else 2
         self.asn = self.val_asn(buf, n)
+        return self.p
+
+class RibGeneric(Base):
+    __slots__ = ['seq', 'afi', 'safi', 'nlri', 'count', 'entry']
+
+    def __init__(self):
+        Base.__init__(self)
+        self.seq = None
+        self.afi = None
+        self.safi = None
+        self.nlri = None
+        self.count = None
+        self.entry = None
+
+    def unpack(self, buf):
+        self.seq = self.val_num(buf, 4)
+        self.afi = self.val_num(buf, 2)
+        self.safi = self.val_num(buf, 1)
+        n = self.val_num(buf, 1)
+        self.p -= 1
+        self.nlri = self.val_nlri(buf, (n+7)//8, self.afi, self.safi)
+        self.count = self.val_num(buf, 2)
+        self.entry = []
+        for i in range(self.count):
+            entry = RibEntries()
+            self.p += entry.unpack(buf[self.p:], self.afi)
+            self.entry.append(entry)
         return self.p
 
 class AfiSpecRib(Base):

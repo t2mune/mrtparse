@@ -129,6 +129,24 @@ def print_td_v2(m):
             for attr in entry.attr:
                 print_bgp_attr(attr, 1)
 
+    elif m.subtype == TD_V2_ST['RIB_GENERIC']:
+        prline('Sequence Number: %d' % m.rib.seq)
+        prline('AFI: %d(%s)' % (m.rib.afi, AFI_T[m.rib.afi]))
+        prline('SAFI: %d(%s)' % (m.rib.safi, SAFI_T[m.rib.safi]))
+        for nlri in m.rib.nlri:
+            print_nlri(nlri, 'NLRI', m.rib.safi)
+        prline('Entry Count: %d' % m.rib.count)
+
+        for entry in m.rib.entry:
+            indt = 1
+            prline('Peer Index: %d' % entry.peer_index)
+            prline('Originated Time: %d(%s)' %
+                (entry.org_time,
+                 datetime.fromtimestamp(entry.org_time)))
+            prline('Attribute Length: %d' % entry.attr_len)
+            for attr in entry.attr:
+                print_bgp_attr(attr, 1)
+
 def print_bgp4mp(m):
     global indt
     indt = 0
