@@ -393,8 +393,6 @@ def print_nlri(nlri, title, *args):
     global indt
     safi = args[0] if len(args) > 0 else 0
 
-    if nlri.path_id is not None:
-        prline('Path Identifier: %d' % nlri.path_id)
     if (   safi == SAFI_T['L3VPN_UNICAST']
         or safi == SAFI_T['L3VPN_MULTICAST']):
         prline('%s' % title)
@@ -405,12 +403,21 @@ def print_nlri(nlri, title, *args):
         for label in nlri.label:
             l_all.append('0x%06x' % label)
             l_val.append(str(label >> 4))
+        if nlri.path_id is not None:
+            prline('Path Identifier: %d' % nlri.path_id)
         prline('Label: %s(%s)' % (' '.join(l_all), ' '.join(l_val)))
         prline('Route Distinguisher: %s' % nlri.rd)
         prline('Prefix: %s/%d' % (nlri.prefix, plen))
         indt -= 1
     else:
-        prline('%s: %s/%d' % (title, nlri.prefix, nlri.plen))
+        if nlri.path_id is not None:
+            prline('%s' % title)
+            indt += 1
+            prline('Path Identifier: %d' % nlri.path_id)
+            prline('Prefix: %s/%d' % (nlri.prefix, nlri.plen))
+            indt -= 1
+        else:
+            prline('%s: %s/%d' % (title, nlri.prefix, nlri.plen))
 
 def main():
     if len(sys.argv) != 2:
