@@ -450,7 +450,7 @@ class Base:
             m = 16
             _af = socket.AF_INET6
         else:
-            raise MrtFormatError('Unknown AFI %d' % af)
+            raise MrtFormatError('Unsupported AFI %d(%s)' % (af, AFI_T[af]))
         n = m if n < 0 else (n + 7) // 8
         self.chk_buf(buf, n)
         addr = socket.inet_ntop(
