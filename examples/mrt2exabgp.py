@@ -96,7 +96,7 @@ def parse_args():
     return r
 
 def mrt_type_check(m):
-    if m.type != MSG_T['TABLE_DUMP_V2']:
+    if m.type != MRT_T['TABLE_DUMP_V2']:
         return 1
 
     if (    m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']

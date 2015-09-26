@@ -62,20 +62,20 @@ def print_mrt(m):
     indt += 1
     prline('Timestamp: %d(%s)' %
         (m.ts, datetime.fromtimestamp(m.ts)))
-    prline('Type: %d(%s)' % (m.type, MSG_T[m.type]))
+    prline('Type: %d(%s)' % (m.type, MRT_T[m.type]))
     prline('Subtype: %d(%s)' %
         (m.subtype, MSG_ST[m.type][m.subtype]))
     prline('Length: %d' % m.len)
 
-    if (   m.type == MSG_T['BGP4MP_ET']
-        or m.type == MSG_T['ISIS_ET']
-        or m.type == MSG_T['OSPFv3_ET']):
+    if (   m.type == MRT_T['BGP4MP_ET']
+        or m.type == MRT_T['ISIS_ET']
+        or m.type == MRT_T['OSPFv3_ET']):
         prline('Microsecond Timestamp: %d' % m.micro_ts)
 
 def print_td(m):
     global indt
     indt = 0
-    prline('%s' % MSG_T[m.type])
+    prline('%s' % MRT_T[m.type])
 
     indt += 1
     prline('View Number: %d' % m.td.view)
@@ -443,12 +443,12 @@ def main():
         if m.err == MRT_ERR_C['MRT Data Error']:
             prerror(m)
             continue
-        if m.type == MSG_T['TABLE_DUMP']:
+        if m.type == MRT_T['TABLE_DUMP']:
             print_td(m)
-        elif m.type == MSG_T['TABLE_DUMP_V2']:
+        elif m.type == MRT_T['TABLE_DUMP_V2']:
             print_td_v2(m)
-        elif ( m.type == MSG_T['BGP4MP']
-            or m.type == MSG_T['BGP4MP_ET']):
+        elif ( m.type == MRT_T['BGP4MP']
+            or m.type == MRT_T['BGP4MP_ET']):
             print_bgp4mp(m)
 
 if __name__ == '__main__':

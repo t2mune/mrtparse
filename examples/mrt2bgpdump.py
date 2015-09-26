@@ -289,11 +289,11 @@ def main():
         if m.err:
             continue
         b = BgpDump(args)
-        if m.type == MSG_T['TABLE_DUMP']:
+        if m.type == MRT_T['TABLE_DUMP']:
             b.td(m, count)
-        elif m.type == MSG_T['TABLE_DUMP_V2']:
+        elif m.type == MRT_T['TABLE_DUMP_V2']:
             b.td_v2(m)
-        elif m.type == MSG_T['BGP4MP']:
+        elif m.type == MRT_T['BGP4MP']:
             b.bgp4mp(m, count)
         count += 1
 

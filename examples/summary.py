@@ -69,8 +69,8 @@ def get_summary(f):
         elif m.ts > end_time:
             end_time = m.ts
 
-        if (   m.type == MSG_T['BGP4MP']
-            or m.type == MSG_T['BGP4MP_ET']):
+        if (   m.type == MRT_T['BGP4MP']
+            or m.type == MRT_T['BGP4MP_ET']):
             if not m.type in summary:
                 summary[m.type] = {}
 
@@ -106,18 +106,18 @@ def print_summary():
         datetime.fromtimestamp(end_time).strftime('%Y-%m-%d %H:%M:%S')))
 
     for k1 in sorted(summary.keys()):
-        print_line(0, MSG_T[k1], total(summary[k1]))
+        print_line(0, MRT_T[k1], total(summary[k1]))
 
-        if k1 == MSG_T['TABLE_DUMP']:
+        if k1 == MRT_T['TABLE_DUMP']:
             for k2 in sorted(summary[k1].keys()):
                 print_line(1, TD_ST[k2], total(summary[k1][k2]))
 
-        elif k1 == MSG_T['TABLE_DUMP_V2']:
+        elif k1 == MRT_T['TABLE_DUMP_V2']:
             for k2 in sorted(summary[k1].keys()):
                 print_line(1, TD_V2_ST[k2], total(summary[k1][k2]))
 
-        elif ( k1 == MSG_T['BGP4MP']
-            or k1 == MSG_T['BGP4MP_ET']):
+        elif ( k1 == MRT_T['BGP4MP']
+            or k1 == MRT_T['BGP4MP_ET']):
 
             for k2 in sorted(summary[k1].keys()):
                 print_line(1, BGP4MP_ST[k2], total(summary[k1][k2]))
