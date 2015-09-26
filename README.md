@@ -104,7 +104,7 @@ If error occurred, it displays data in byte as below.
         Length: 12
     MRT Data Error: Unknown AFI 8
         00 00 00 00 00 00 00 00  00 01 00 08
-
+    ...
     ---------------------------------------------------------------
     MRT Header
         Timestamp: 1443251615(2015-09-26 16:13:35)
