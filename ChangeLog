@@ -1,3 +1,6 @@
+2015-09-26 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added some error messages.
+
 2015-09-23 Tetsumune KISO <t2mune@gmail.com>
 	* Update - changed output format of "Path Identifier" in "print_all.py".
 	* Update - added support for "RIB_GENERIC".

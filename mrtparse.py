@@ -408,8 +408,7 @@ class Base:
 
     def chk_buf(self, buf, n):
         if len(buf) - self.p < n:
-            raise MrtFormatError(
-                'Insufficient buffer %d < %d\n'
+            raise MrtFormatError('Insufficient buffer %d < %d\n'
                 % (len(buf) - self.p, n))
 
     def val_num(self, buf, n):
@@ -553,8 +552,8 @@ class Reader(Base):
         if len(hdr) == 0:
             self.close()
         elif len(hdr) < 12:
-            raise MrtFormatError(
-                'Invalid MRT header length %d < 12' % len(hdr))
+            raise MrtFormatError('Invalid MRT header length %d < 12'
+                % len(hdr))
             return
         self.mrt.unpack(hdr)
 
@@ -562,8 +561,8 @@ class Reader(Base):
         data = self.f.read(self.mrt.len)
         self.mrt.buf += data
         if len(data) < self.mrt.len:
-            raise MrtFormatError(
-                'Invalid MRT data length %d < %d' % (len(data), self.mrt.len))
+            raise MrtFormatError('Invalid MRT data length %d < %d'
+                % (len(data), self.mrt.len))
 
         if self.mrt.type == MSG_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
@@ -572,6 +571,9 @@ class Reader(Base):
             if (self.mrt.subtype == BGP4MP_ST['BGP4MP_ENTRY']
                 or self.mrt.subtype == BGP4MP_ST['BGP4MP_SNAPSHOT']):
                 self.p += self.mrt.len
+                raise MrtFormatError('Unsupported %s Subtype %d(%s)'
+                    % (MRT_T[self.mrt.type], self.mrt.subtype,
+                    BGP4MP_ST[self.mrt.subtype]))
             else:
                 if self.mrt.type == MSG_T['BGP4MP_ET']:
                     self.mrt.micro_ts = self.val_num(data, 4)
@@ -582,6 +584,8 @@ class Reader(Base):
             self.mrt.td.unpack(data, self.mrt.subtype)
         else:
             self.p += self.mrt.len
+            raise MrtFormatError('Unsupported MRT type %d(%s)'
+                % (self.mrt.type, MRT_T[self.mrt.type]))
 
         return self.p
 
@@ -1255,8 +1259,7 @@ class Nlri(Base):
             plen = self.unpack_l3vpn(buf, plen)
         if (af == AFI_T['IPv4'] and plen > 32
             or af == AFI_T['IPv6'] and plen > 128):
-            raise MrtFormatError(
-                'Invalid prefix length %d (%s)'
+            raise MrtFormatError('Invalid prefix length %d (%s)'
                 % (self.plen, AFI_T[af]))
         self.prefix = self.val_addr(buf, af, plen)
         return self.p
