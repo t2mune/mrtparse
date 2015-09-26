@@ -111,7 +111,7 @@ If error occurred, it displays data in byte as below.
         Type: 16(BGP4MP)
         Subtype: 2(BGP4MP_ENTRY)
         Length: 80
-    MRT Data Error: Unsupported BGP4MP Subtype 2(BGP4MP_ENTRY)
+    MRT Data Error: Unsupported BGP4MP subtype 2(BGP4MP_ENTRY)
         fd e8 fd e8 00 00 00 01  c0 a8 01 66 c0 a8 01 0a 
         00 00 00 01 56 06 43 5f  00 01 01 04 c0 a8 00 0b 
         10 c0 a8 00 2b 40 01 01  00 40 02 04 02 01 fd f3 

@@ -571,7 +571,7 @@ class Reader(Base):
             if (self.mrt.subtype == BGP4MP_ST['BGP4MP_ENTRY']
                 or self.mrt.subtype == BGP4MP_ST['BGP4MP_SNAPSHOT']):
                 self.p += self.mrt.len
-                raise MrtFormatError('Unsupported %s Subtype %d(%s)'
+                raise MrtFormatError('Unsupported %s subtype %d(%s)'
                     % (MRT_T[self.mrt.type], self.mrt.subtype,
                     BGP4MP_ST[self.mrt.subtype]))
             else:
