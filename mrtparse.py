@@ -74,7 +74,7 @@ SAFI_T = reverse_defaultdict({
 
 # MRT Message Types
 # Defined in RFC6396
-MSG_T = reverse_defaultdict({
+MRT_T = reverse_defaultdict({
     0:'NULL',           # Deprecated in RFC6396
     1:'START',          # Deprecated in RFC6396
     2:'DIE',            # Deprecated in RFC6396
@@ -564,10 +564,10 @@ class Reader(Base):
             raise MrtFormatError('Invalid MRT data length %d < %d'
                 % (len(data), self.mrt.len))
 
-        if self.mrt.type == MSG_T['TABLE_DUMP_V2']:
+        if self.mrt.type == MRT_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
-        elif (self.mrt.type == MSG_T['BGP4MP']
-            or self.mrt.type == MSG_T['BGP4MP_ET']):
+        elif (self.mrt.type == MRT_T['BGP4MP']
+            or self.mrt.type == MRT_T['BGP4MP_ET']):
             if (self.mrt.subtype == BGP4MP_ST['BGP4MP_ENTRY']
                 or self.mrt.subtype == BGP4MP_ST['BGP4MP_SNAPSHOT']):
                 self.p += self.mrt.len
@@ -575,11 +575,11 @@ class Reader(Base):
                     % (MRT_T[self.mrt.type], self.mrt.subtype,
                     BGP4MP_ST[self.mrt.subtype]))
             else:
-                if self.mrt.type == MSG_T['BGP4MP_ET']:
+                if self.mrt.type == MRT_T['BGP4MP_ET']:
                     self.mrt.micro_ts = self.val_num(data, 4)
                 self.mrt.bgp = Bgp4Mp()
                 self.mrt.bgp.unpack(data, self.mrt.subtype)
-        elif self.mrt.type == MSG_T['TABLE_DUMP']:
+        elif self.mrt.type == MRT_T['TABLE_DUMP']:
             self.mrt.td = TableDump()
             self.mrt.td.unpack(data, self.mrt.subtype)
         else:
