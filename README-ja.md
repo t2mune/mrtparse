@@ -100,7 +100,7 @@ MRT形式のファイルの内容を出力する
         Type: 16(BGP4MP)
         Subtype: 5(BGP4MP_STATE_CHANGE_AS4)
         Length: 12
-    MRT Data Error: Unknown AFI 8
+    MRT Data Error: Unsupported AFI 8(Unknown)
         00 00 00 00 00 00 00 00  00 01 00 08
     ...
     ---------------------------------------------------------------
