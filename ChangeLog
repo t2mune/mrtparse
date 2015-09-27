@@ -1,3 +1,7 @@
+2015-09-27 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - can't parse "PEER IP Address" in "TABLE_DUMP" properly when
+	subtype is "AFI_IPv6" and "PEER IP Address" is IPv4.
+
 2015-09-26 Tetsumune KISO <t2mune@gmail.com>
 	* Update - changed dictionary name from "MSG_T" to "MRT_T".
 	* Update - added some error messages.

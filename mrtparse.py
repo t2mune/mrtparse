@@ -661,7 +661,13 @@ class TableDump(Base):
         self.plen = self.val_num(buf, 1)
         self.status = self.val_num(buf, 1)
         self.org_time = self.val_num(buf, 4)
-        self.peer_ip = self.val_addr(buf, subtype)
+        if subtype == AFI_T['IPv6']:
+            self.peer_ip = self.val_addr(buf, AFI_T['IPv4'])
+            if self.val_num(buf, 12):
+                self.p -= 16
+                self.peer_ip = self.val_addr(buf, subtype)
+        else:
+            self.peer_ip = self.val_addr(buf, subtype)
         self.peer_as = self.val_asn(buf, as_len(2))
         attr_len = self.attr_len = self.val_num(buf, 2)
         self.attr = []
