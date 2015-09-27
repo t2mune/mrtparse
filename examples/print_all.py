@@ -64,7 +64,7 @@ def print_mrt(m):
         (m.ts, datetime.fromtimestamp(m.ts)))
     prline('Type: %d(%s)' % (m.type, MRT_T[m.type]))
     prline('Subtype: %d(%s)' %
-        (m.subtype, MSG_ST[m.type][m.subtype]))
+        (m.subtype, MRT_ST[m.type][m.subtype]))
     prline('Length: %d' % m.len)
 
     if (   m.type == MRT_T['BGP4MP_ET']

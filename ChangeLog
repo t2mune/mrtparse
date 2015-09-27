@@ -1,4 +1,5 @@
 2015-09-27 Tetsumune KISO <t2mune@gmail.com>
+	* Update - changed dictionary name from "MSG_ST" to "MRT_ST".
 	* Fix - can't parse "PEER IP Address" in "TABLE_DUMP" properly when
 	subtype is "AFI_IPv6" and "PEER IP Address" is IPv4.
 

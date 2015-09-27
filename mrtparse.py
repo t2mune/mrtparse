@@ -143,7 +143,7 @@ BGP4MP_ST = reverse_defaultdict({
 
 # MRT Message Subtypes
 # Defined in RFC6396
-MSG_ST = collections.defaultdict(lambda: dict(), {
+MRT_ST = collections.defaultdict(lambda: dict(), {
     9:BGP_ST,
     10:BGP_ST,
     12:AFI_T,
