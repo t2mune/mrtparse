@@ -401,20 +401,21 @@ class MrtFormatError(Exception):
 
 # Super class for all other classes
 class Base:
-    __slots__ = ['p']
+    __slots__ = ['buf', 'p']
 
     def __init__(self):
+        self.buf = None
         self.p = 0
 
-    def chk_buf(self, buf, n):
-        if len(buf) - self.p < n:
-            raise MrtFormatError('Insufficient buffer %d < %d\n'
-                % (len(buf) - self.p, n))
+    def chk_buf(self, n):
+        if len(self.buf) - self.p < n:
+            raise MrtFormatError('Insufficient buffer %d < %d'
+                % (len(self.buf) - self.p, n))
 
-    def val_num(self, buf, n):
-        self.chk_buf(buf, n)
+    def val_num(self, n):
+        self.chk_buf(n)
         val = 0
-        for i in buf[self.p:self.p+n]:
+        for i in self.buf[self.p:self.p+n]:
             val <<= 8
             # for Python3
             if isinstance(i, int):
@@ -425,15 +426,15 @@ class Base:
         self.p += n
         return val
 
-    def val_bytes(self, buf, n):
-        self.chk_buf(buf, n)
-        val = buf[self.p:self.p+n]
+    def val_bytes(self, n):
+        self.chk_buf(n)
+        val = self.buf[self.p:self.p+n]
         self.p += n
         return val
 
-    def val_str(self, buf, n):
-        self.chk_buf(buf, n)
-        val = buf[self.p:self.p+n]
+    def val_str(self, n):
+        self.chk_buf(n)
+        val = self.buf[self.p:self.p+n]
         self.p += n
         # for Python2
         if isinstance(val, str):
@@ -442,7 +443,7 @@ class Base:
         else:
             return val.decode('utf-8')
 
-    def val_addr(self, buf, af, n=-1):
+    def val_addr(self, af, n=-1):
         if af == AFI_T['IPv4']:
             m = 4
             _af = socket.AF_INET
@@ -452,31 +453,31 @@ class Base:
         else:
             raise MrtFormatError('Unsupported AFI %d(%s)' % (af, AFI_T[af]))
         n = m if n < 0 else (n + 7) // 8
-        self.chk_buf(buf, n)
+        self.chk_buf(n)
         addr = socket.inet_ntop(
-            _af, buf[self.p:self.p+n] + b'\x00'*(m - n))
+            _af, self.buf[self.p:self.p+n] + b'\x00'*(m - n))
         self.p += n
         return addr
 
-    def val_asn(self, buf, n):
-        asn = self.val_num(buf, n)
+    def val_asn(self, n):
+        asn = self.val_num(n)
         if (as_repr() == AS_REPR['asplain'] or
            (as_repr() == AS_REPR['asdot'] and asn < 0x10000)):
             return str(asn)
         else:
             return str(asn >> 16) + '.' + str(asn & 0xffff)
 
-    def val_rd(self, buf):
-        rd = self.val_num(buf, 8)
+    def val_rd(self):
+        rd = self.val_num(8)
         return str(rd >> 32) + ':' + str(rd & 0xffffffff)
 
-    def val_nlri(self, buf, n, af, saf=0):
+    def val_nlri(self, n, af, saf=0):
         try:
             p = self.p
             l = []
             while p < n:
-                nlri = Nlri()
-                p += nlri.unpack(buf[p:], af, saf)
+                nlri = Nlri(self.buf[p:])
+                p += nlri.unpack(af, saf)
                 if nlri.chk_dup(l):
                     raise MrtFormatError
                 l.append(nlri)
@@ -484,11 +485,10 @@ class Base:
         except MrtFormatError:
             l = []
             while self.p < n:
-                nlri = Nlri()
-                self.p += nlri.unpack(buf[self.p:], af, saf, add_path=1)
+                nlri = Nlri(self.buf[self.p:])
+                self.p += nlri.unpack(af, saf, add_path=1)
                 l.append(nlri)
-        finally:
-            return l
+        return l
 
 class Reader(Base):
     __slots__ = ['mrt', 'f']
@@ -524,9 +524,6 @@ class Reader(Base):
         return self
 
     def __next__(self):
-        as_len(4)
-        self.mrt = Mrt()
-
         try:
             self.unpack_hdr()
         except MrtFormatError as e:
@@ -547,15 +544,15 @@ class Reader(Base):
     next = __next__
 
     def unpack_hdr(self):
-        hdr = self.f.read(12)
-        self.mrt.buf = hdr
-        if len(hdr) == 0:
+        as_len(4)
+        self.mrt = Mrt(self.f.read(12))
+        if len(self.mrt.buf) == 0:
             self.close()
-        elif len(hdr) < 12:
+        elif len(self.mrt.buf) < 12:
             raise MrtFormatError('Invalid MRT header length %d < 12'
-                % len(hdr))
+                % len(self.mrt.buf))
             return
-        self.mrt.unpack(hdr)
+        self.mrt.unpack()
 
     def unpack_data(self):
         data = self.f.read(self.mrt.len)
@@ -577,11 +574,11 @@ class Reader(Base):
             else:
                 if self.mrt.type == MRT_T['BGP4MP_ET']:
                     self.mrt.micro_ts = self.val_num(data, 4)
-                self.mrt.bgp = Bgp4Mp()
-                self.mrt.bgp.unpack(data, self.mrt.subtype)
+                self.mrt.bgp = Bgp4Mp(data)
+                self.mrt.bgp.unpack(self.mrt.subtype)
         elif self.mrt.type == MRT_T['TABLE_DUMP']:
-            self.mrt.td = TableDump()
-            self.mrt.td.unpack(data, self.mrt.subtype)
+            self.mrt.td = TableDump(data)
+            self.mrt.td.unpack(self.mrt.subtype)
         else:
             self.p += self.mrt.len
             raise MrtFormatError('Unsupported MRT type %d(%s)'
@@ -592,29 +589,30 @@ class Reader(Base):
     def unpack_td_v2(self, data):
         if (self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
             or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']):
-            self.mrt.rib = AfiSpecRib()
-            self.mrt.rib.unpack(data, AFI_T['IPv4'])
+            self.mrt.rib = AfiSpecRib(data)
+            self.mrt.rib.unpack(AFI_T['IPv4'])
         elif (self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
             or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
-            self.mrt.rib = AfiSpecRib()
-            self.mrt.rib.unpack(data, AFI_T['IPv6'])
+            self.mrt.rib = AfiSpecRib(data)
+            self.mrt.rib.unpack(AFI_T['IPv6'])
         elif self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
-            self.mrt.peer = PeerIndexTable()
-            self.mrt.peer.unpack(data)
+            self.mrt.peer = PeerIndexTable(data)
+            self.mrt.peer.unpack()
         elif self.mrt.subtype == TD_V2_ST['RIB_GENERIC']:
-            self.mrt.rib = RibGeneric()
-            self.mrt.rib.unpack(data)
+            self.mrt.rib = RibGeneric(data)
+            self.mrt.rib.unpack()
         else:
             self.p += self.mrt.len
 
 class Mrt(Base):
     __slots__ = [
         'ts', 'type', 'subtype', 'len', 'micro_ts', 'bgp', 'peer', 'td', 'rib',
-        'buf', 'err', 'err_msg'
+        'err', 'err_msg'
     ]
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.ts = None
         self.type = None
         self.subtype = None
@@ -624,15 +622,14 @@ class Mrt(Base):
         self.peer = None
         self.td = None
         self.rib = None
-        self.buf = None
         self.err = None
         self.err_msg = None
 
-    def unpack(self, buf):
-        self.ts = self.val_num(buf, 4)
-        self.type = self.val_num(buf, 2)
-        self.subtype = self.val_num(buf, 2)
-        self.len = self.val_num(buf, 4)
+    def unpack(self):
+        self.ts = self.val_num(4)
+        self.type = self.val_num(2)
+        self.subtype = self.val_num(2)
+        self.len = self.val_num(4)
         return self.p
 
 class TableDump(Base):
@@ -641,8 +638,9 @@ class TableDump(Base):
         'peer_as', 'attr_len', 'attr'
     ]
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.view = None
         self.seq = None
         self.prefix = None
@@ -654,23 +652,23 @@ class TableDump(Base):
         self.attr_len = None
         self.attr = None
 
-    def unpack(self, buf, subtype):
-        self.view = self.val_num(buf, 2)
-        self.seq = self.val_num(buf, 2)
-        self.prefix = self.val_addr(buf, subtype)
-        self.plen = self.val_num(buf, 1)
-        self.status = self.val_num(buf, 1)
-        self.org_time = self.val_num(buf, 4)
-        self.peer_ip = self.val_addr(buf, AFI_T['IPv4'])
-        if subtype == AFI_T['IPv6'] and self.val_num(buf, 12):
+    def unpack(self, subtype):
+        self.view = self.val_num(2)
+        self.seq = self.val_num(2)
+        self.prefix = self.val_addr(subtype)
+        self.plen = self.val_num(1)
+        self.status = self.val_num(1)
+        self.org_time = self.val_num(4)
+        self.peer_ip = self.val_addr(AFI_T['IPv4'])
+        if subtype == AFI_T['IPv6'] and self.val_num(12):
             self.p -= 16
-            self.peer_ip = self.val_addr(buf, subtype)
-        self.peer_as = self.val_asn(buf, as_len(2))
-        attr_len = self.attr_len = self.val_num(buf, 2)
+            self.peer_ip = self.val_addr(subtype)
+        self.peer_as = self.val_asn(as_len(2))
+        attr_len = self.attr_len = self.val_num(2)
         self.attr = []
         while attr_len > 0:
-            attr = BgpAttr()
-            self.p += attr.unpack(buf[self.p:])
+            attr = BgpAttr(self.buf[self.p:])
+            self.p += attr.unpack()
             self.attr.append(attr)
             attr_len -= attr.p
         return self.p
@@ -678,53 +676,56 @@ class TableDump(Base):
 class PeerIndexTable(Base):
     __slots__ = ['collector', 'view_len', 'view', 'count', 'entry']
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.collector = None
         self.view_len = None
         self.view = None
         self.count = None
         self.entry = None
 
-    def unpack(self, buf):
-        self.collector = self.val_addr(buf, AFI_T['IPv4'])
-        self.view_len = self.val_num(buf, 2)
-        self.view = self.val_str(buf, self.view_len)
-        self.count = self.val_num(buf, 2)
+    def unpack(self):
+        self.collector = self.val_addr(AFI_T['IPv4'])
+        self.view_len = self.val_num(2)
+        self.view = self.val_str(self.view_len)
+        self.count = self.val_num(2)
         self.entry = []
         for i in range(self.count):
-            entry = PeerEntries()
-            self.p += entry.unpack(buf[self.p:])
+            entry = PeerEntries(self.buf[self.p:])
+            self.p += entry.unpack()
             self.entry.append(entry)
         return self.p
 
 class PeerEntries(Base):
     __slots__ = ['type', 'bgp_id', 'ip', 'asn']
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.type = None
         self.bgp_id = None
         self.ip = None
         self.asn = None
 
-    def unpack(self, buf):
-        self.type = self.val_num(buf, 1)
-        self.bgp_id = self.val_addr(buf, AFI_T['IPv4'])
+    def unpack(self):
+        self.type = self.val_num(1)
+        self.bgp_id = self.val_addr(AFI_T['IPv4'])
         if self.type & 0x01:
             af = AFI_T['IPv6']
         else:
             af = AFI_T['IPv4']
-        self.ip = self.val_addr(buf, af)
+        self.ip = self.val_addr(af)
         n = 4 if self.type & (0x01 << 1) else 2
-        self.asn = self.val_asn(buf, n)
+        self.asn = self.val_asn(n)
         return self.p
 
 class RibGeneric(Base):
     __slots__ = ['seq', 'afi', 'safi', 'nlri', 'count', 'entry']
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.seq = None
         self.afi = None
         self.safi = None
@@ -732,62 +733,64 @@ class RibGeneric(Base):
         self.count = None
         self.entry = None
 
-    def unpack(self, buf):
-        self.seq = self.val_num(buf, 4)
-        self.afi = self.val_num(buf, 2)
-        self.safi = self.val_num(buf, 1)
-        n = self.val_num(buf, 1)
+    def unpack(self):
+        self.seq = self.val_num(4)
+        self.afi = self.val_num(2)
+        self.safi = self.val_num(1)
+        n = self.val_num(1)
         self.p -= 1
-        self.nlri = self.val_nlri(buf, (n+7)//8, self.afi, self.safi)
-        self.count = self.val_num(buf, 2)
+        self.nlri = self.val_nlri(self.p + (n + 7) // 8, self.afi, self.safi)
+        self.count = self.val_num(2)
         self.entry = []
         for i in range(self.count):
-            entry = RibEntries()
-            self.p += entry.unpack(buf[self.p:], self.afi)
+            entry = RibEntries(self.buf[self.p:])
+            self.p += entry.unpack(self.afi)
             self.entry.append(entry)
         return self.p
 
 class AfiSpecRib(Base):
     __slots__ = ['seq', 'plen', 'prefix', 'count', 'entry']
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.seq = None
         self.plen = None
         self.prefix = None
         self.count = None
         self.entry = None
 
-    def unpack(self, buf, af):
-        self.seq = self.val_num(buf, 4)
-        self.plen = self.val_num(buf, 1)
-        self.prefix = self.val_addr(buf, af, self.plen)
-        self.count = self.val_num(buf, 2)
+    def unpack(self, af):
+        self.seq = self.val_num(4)
+        self.plen = self.val_num(1)
+        self.prefix = self.val_addr(af, self.plen)
+        self.count = self.val_num(2)
         self.entry = []
         for i in range(self.count):
-            entry = RibEntries()
-            self.p += entry.unpack(buf[self.p:], af)
+            entry = RibEntries(self.buf[self.p:])
+            self.p += entry.unpack(af)
             self.entry.append(entry)
         return self.p
 
 class RibEntries(Base):
     __slots__ = ['peer_index', 'org_time', 'attr_len', 'attr']
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.peer_index = None
         self.org_time = None
         self.attr_len = None
         self.attr = None
 
-    def unpack(self, buf, af):
-        self.peer_index = self.val_num(buf, 2)
-        self.org_time = self.val_num(buf, 4)
-        attr_len = self.attr_len = self.val_num(buf, 2)
+    def unpack(self, af):
+        self.peer_index = self.val_num(2)
+        self.org_time = self.val_num(4)
+        attr_len = self.attr_len = self.val_num(2)
         self.attr = []
         while attr_len > 0:
-            attr = BgpAttr()
-            self.p += attr.unpack(buf[self.p:], af)
+            attr = BgpAttr(self.buf[self.p:])
+            self.p += attr.unpack(af)
             self.attr.append(attr)
             attr_len -= attr.p
         return self.p
@@ -798,8 +801,9 @@ class Bgp4Mp(Base):
         'old_state', 'new_state', 'msg'
     ]
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.peer_as = None
         self.local_as = None
         self.ifindex = None
@@ -810,26 +814,26 @@ class Bgp4Mp(Base):
         self.new_state = None
         self.msg = None
 
-    def unpack(self, buf, subtype):
+    def unpack(self, subtype):
         if (subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE']
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']):
             as_len(2)
 
-        self.peer_as = self.val_asn(buf, as_len())
-        self.local_as = self.val_asn(buf, as_len())
-        self.ifindex = self.val_num(buf, 2)
-        self.af = self.val_num(buf, 2)
-        self.peer_ip = self.val_addr(buf, self.af)
-        self.local_ip = self.val_addr(buf, self.af)
+        self.peer_as = self.val_asn(as_len())
+        self.local_as = self.val_asn(as_len())
+        self.ifindex = self.val_num(2)
+        self.af = self.val_num(2)
+        self.peer_ip = self.val_addr(self.af)
+        self.local_ip = self.val_addr(self.af)
 
         if (subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
             or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
-            self.old_state = self.val_num(buf, 2)
-            self.new_state = self.val_num(buf, 2)
+            self.old_state = self.val_num(2)
+            self.new_state = self.val_num(2)
         else:
-            self.msg = BgpMessage()
-            self.p += self.msg.unpack(buf[self.p:], self.af)
+            self.msg = BgpMessage(self.buf[self.p:])
+            self.p += self.msg.unpack(self.af)
         return self.p
 
 class BgpMessage(Base):
@@ -839,8 +843,9 @@ class BgpMessage(Base):
         'nlri', 'err_code', 'err_subcode', 'data', 'afi', 'rsvd', 'safi'
     ]
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.marker = None
         self.len = None
         self.type = None
@@ -862,57 +867,57 @@ class BgpMessage(Base):
         self.rsvd = None
         self.safi = None
 
-    def unpack(self, buf, af):
-        self.marker = self.val_bytes(buf, 16)
-        self.len = self.val_num(buf, 2)
-        self.type = self.val_num(buf, 1)
+    def unpack(self, af):
+        self.marker = self.val_bytes(16)
+        self.len = self.val_num(2)
+        self.type = self.val_num(1)
 
         if self.type == BGP_MSG_T['OPEN']:
-            self.unpack_open(buf, af)
+            self.unpack_open(af)
         elif self.type == BGP_MSG_T['UPDATE']:
-            self.unpack_update(buf, af)
+            self.unpack_update(af)
         elif self.type == BGP_MSG_T['NOTIFICATION']:
-            self.unpack_notification(buf)
+            self.unpack_notification()
         elif self.type == BGP_MSG_T['ROUTE-REFRESH']:
-            self.unpack_route_refresh(buf)
+            self.unpack_route_refresh()
 
         self.p += self.len - self.p
         return self.p
 
-    def unpack_open(self, buf, af):
-        self.ver = self.val_num(buf, 1)
-        self.my_as = self.val_num(buf, 2)
-        self.holdtime = self.val_num(buf, 2)
-        self.bgp_id = self.val_addr(buf, AFI_T['IPv4'])
-        opt_len = self.opt_len = self.val_num(buf, 1)
+    def unpack_open(self, af):
+        self.ver = self.val_num(1)
+        self.my_as = self.val_num(2)
+        self.holdtime = self.val_num(2)
+        self.bgp_id = self.val_addr(AFI_T['IPv4'])
+        opt_len = self.opt_len = self.val_num(1)
         self.opt_params = []
         while opt_len > 0:
-            opt_params = OptParams()
-            self.p += opt_params.unpack(buf[self.p:])
+            opt_params = OptParams(self.buf[self.p:])
+            self.p += opt_params.unpack()
             self.opt_params.append(opt_params)
             opt_len -= opt_params.p
 
-    def unpack_update(self, buf, af):
-        self.wd_len = self.val_num(buf, 2)
-        self.withdrawn = self.val_nlri(buf, self.p + self.wd_len, af)
-        self.attr_len = self.val_num(buf, 2)
+    def unpack_update(self, af):
+        self.wd_len = self.val_num(2)
+        self.withdrawn = self.val_nlri(self.p + self.wd_len, af)
+        self.attr_len = self.val_num(2)
         attr_len = self.p + self.attr_len
         self.attr = []
         while self.p < attr_len:
-            attr = BgpAttr()
-            self.p += attr.unpack(buf[self.p:])
+            attr = BgpAttr(self.buf[self.p:])
+            self.p += attr.unpack()
             self.attr.append(attr)
-        self.nlri = self.val_nlri(buf, self.len, af)
+        self.nlri = self.val_nlri(self.len, af)
 
-    def unpack_notification(self, buf):
-        self.err_code = self.val_num(buf, 1)
-        self.err_subcode = self.val_num(buf, 1)
-        self.data = self.val_bytes(buf, self.len - self.p)
+    def unpack_notification(self):
+        self.err_code = self.val_num(1)
+        self.err_subcode = self.val_num(1)
+        self.data = self.val_bytes(self.len - self.p)
 
-    def unpack_route_refresh(self, buf):
-        self.afi = self.val_num(buf, 2)
-        self.rsvd = self.val_num(buf, 1)
-        self.safi = self.val_num(buf, 1)
+    def unpack_route_refresh(self):
+        self.afi = self.val_num(2)
+        self.rsvd = self.val_num(1)
+        self.safi = self.val_num(1)
 
 class OptParams(Base):
     __slots__ = [
@@ -920,8 +925,9 @@ class OptParams(Base):
         'graceful_restart', 'support_as4', 'add_path'
     ]
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.type = None
         self.len = None
         self.cap_type = None
@@ -932,79 +938,79 @@ class OptParams(Base):
         self.support_as4 = None
         self.add_path = None
 
-    def unpack(self, buf):
-        self.type = self.val_num(buf, 1)
-        self.len = self.val_num(buf, 1)
+    def unpack(self):
+        self.type = self.val_num(1)
+        self.len = self.val_num(1)
         if self.type == BGP_OPT_PARAMS_T['Capabilities']:
-            self.unpack_capabilities(buf)
+            self.unpack_capabilities()
         else:
             self.p += self.len
         return self.p
 
-    def unpack_capabilities(self, buf):
-        self.cap_type = self.val_num(buf, 1)
-        self.cap_len = self.val_num(buf, 1)
+    def unpack_capabilities(self):
+        self.cap_type = self.val_num(1)
+        self.cap_len = self.val_num(1)
 
         if self.cap_type == BGP_CAP_C['Multiprotocol Extensions for BGP-4']:
-            self.unpack_multi_ext(buf)
+            self.unpack_multi_ext()
         elif self.cap_type == BGP_CAP_C['Route Refresh Capability for BGP-4']:
             self.p += self.len - 2
         elif self.cap_type == BGP_CAP_C['Outbound Route Filtering Capability']:
-            self.unpack_orf(buf)
+            self.unpack_orf()
         elif self.cap_type == BGP_CAP_C['Graceful Restart Capability']:
-            self.unpack_graceful_restart(buf)
+            self.unpack_graceful_restart()
         elif self.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
-            self.unpack_support_as4(buf)
+            self.unpack_support_as4()
         elif self.cap_type == BGP_CAP_C['ADD-PATH Capability']:
-            self.unpack_add_path(buf)
+            self.unpack_add_path()
         else:
             self.p += self.len - 2
 
-    def unpack_multi_ext(self, buf):
+    def unpack_multi_ext(self):
         self.multi_ext = {}
-        self.multi_ext['afi'] = self.val_num(buf, 2)
-        self.multi_ext['rsvd'] = self.val_num(buf, 1)
-        self.multi_ext['safi'] = self.val_num(buf, 1)
+        self.multi_ext['afi'] = self.val_num(2)
+        self.multi_ext['rsvd'] = self.val_num(1)
+        self.multi_ext['safi'] = self.val_num(1)
 
-    def unpack_orf(self, buf):
+    def unpack_orf(self):
         self.orf = {}
-        self.orf['afi'] = self.val_num(buf, 2)
-        self.orf['rsvd'] = self.val_num(buf, 1)
-        self.orf['safi'] = self.val_num(buf, 1)
-        self.orf['number'] = self.val_num(buf, 1)
+        self.orf['afi'] = self.val_num(2)
+        self.orf['rsvd'] = self.val_num(1)
+        self.orf['safi'] = self.val_num(1)
+        self.orf['number'] = self.val_num(1)
         self.orf['entry'] = []
         for i in range(self.orf['number']):
             entry = {}
-            entry['type'] = self.val_num(buf, 1)
-            entry['send_recv'] = self.val_num(buf, 1)
+            entry['type'] = self.val_num(1)
+            entry['send_recv'] = self.val_num(1)
             self.orf['entry'].append(entry)
 
-    def unpack_graceful_restart(self, buf):
+    def unpack_graceful_restart(self):
         self.graceful_restart = {}
-        n = self.val_num(buf, 2)
+        n = self.val_num(2)
         self.graceful_restart['flag'] = n & 0xf000
         self.graceful_restart['sec'] = n & 0x0fff
         self.graceful_restart['entry'] = []
         cap_len = self.cap_len
         while cap_len > 2:
             entry = {}
-            entry['afi'] = self.val_num(buf, 2)
-            entry['safi'] = self.val_num(buf, 1)
-            entry['flag'] = self.val_num(buf, 1)
+            entry['afi'] = self.val_num(2)
+            entry['safi'] = self.val_num(1)
+            entry['flag'] = self.val_num(1)
             self.graceful_restart['entry'].append(entry)
             cap_len -= 4
 
-    def unpack_support_as4(self, buf):
-        self.support_as4 = self.val_asn(buf, 4)
+    def unpack_support_as4(self):
+        self.support_as4 = self.val_asn(4)
 
-    def unpack_add_path(self, buf):
+    def unpack_add_path(self):
         self.add_path = []
         cap_len = self.cap_len
         while cap_len > 2:
             entry = {}
-            entry['afi'] = self.val_num(buf, 2)
-            entry['safi'] = self.val_num(buf, 1)
-            entry['send_recv'] = self.val_num(buf, 1)
+            entry['afi'] = self.val_num(2)
+            entry['safi'] = self.val_num(1)
+            entry['send_recv'] = self.val_num(1)
             self.add_path.append(entry)
             cap_len -= 4
 
@@ -1016,8 +1022,9 @@ class BgpAttr(Base):
         'val'
     ]
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.flag = None
         self.type = None
         self.len = None
@@ -1039,113 +1046,113 @@ class BgpAttr(Base):
         self.attr_set = None
         self.val = None
 
-    def unpack(self, buf, af=0):
-        self.flag = self.val_num(buf, 1)
-        self.type = self.val_num(buf, 1)
+    def unpack(self, af=0):
+        self.flag = self.val_num(1)
+        self.type = self.val_num(1)
 
         if self.flag & 0x01 << 4:
-            self.len = self.val_num(buf, 2)
+            self.len = self.val_num(2)
         else:
-            self.len = self.val_num(buf, 1)
+            self.len = self.val_num(1)
 
         if self.type == BGP_ATTR_T['ORIGIN']:
-            self.unpack_origin(buf)
+            self.unpack_origin()
         elif self.type == BGP_ATTR_T['AS_PATH']:
-            self.unpack_as_path(buf)
+            self.unpack_as_path()
         elif self.type == BGP_ATTR_T['NEXT_HOP']:
-            self.unpack_next_hop(buf)
+            self.unpack_next_hop()
         elif self.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
-            self.unpack_multi_exit_disc(buf)
+            self.unpack_multi_exit_disc()
         elif self.type == BGP_ATTR_T['LOCAL_PREF']:
-            self.unpack_local_pref(buf)
+            self.unpack_local_pref()
         elif self.type == BGP_ATTR_T['AGGREGATOR']:
-            self.unpack_aggregator(buf)
+            self.unpack_aggregator()
         elif self.type == BGP_ATTR_T['COMMUNITY']:
-            self.unpack_community(buf)
+            self.unpack_community()
         elif self.type == BGP_ATTR_T['ORIGINATOR_ID']:
-            self.unpack_originator_id(buf)
+            self.unpack_originator_id()
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
-            self.unpack_cluster_list(buf)
+            self.unpack_cluster_list()
         elif self.type == BGP_ATTR_T['MP_REACH_NLRI']:
-            self.unpack_mp_reach_nlri(buf, af)
+            self.unpack_mp_reach_nlri(af)
         elif self.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
-            self.unpack_mp_unreach_nlri(buf)
+            self.unpack_mp_unreach_nlri()
         elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
-            self.unpack_extended_communities(buf)
+            self.unpack_extended_communities()
         elif self.type == BGP_ATTR_T['AS4_PATH']:
-            self.unpack_as4_path(buf)
+            self.unpack_as4_path()
         elif self.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-            self.unpack_as4_aggregator(buf)
+            self.unpack_as4_aggregator()
         elif self.type == BGP_ATTR_T['AIGP']:
-            self.unpack_aigp(buf)
+            self.unpack_aigp()
         elif self.type == BGP_ATTR_T['ATTR_SET']:
-            self.unpack_attr_set(buf)
+            self.unpack_attr_set()
         else:
-            self.val = self.val_bytes(buf, self.len)
+            self.val = self.val_bytes(self.len)
         return self.p
 
-    def unpack_origin(self, buf):
-        self.origin = self.val_num(buf, 1)
+    def unpack_origin(self):
+        self.origin = self.val_num(1)
 
-    def unpack_as_path(self, buf):
+    def unpack_as_path(self):
         attr_len = self.p + self.len
         self.as_path = []
         while self.p < attr_len:
             path_seg = {}
-            path_seg['type'] = self.val_num(buf, 1)
-            path_seg['len'] = self.val_num(buf, 1)
+            path_seg['type'] = self.val_num(1)
+            path_seg['len'] = self.val_num(1)
             path_seg['val'] = []
             for i in range(path_seg['len']):
-                path_seg['val'].append(self.val_asn(buf, as_len()))
+                path_seg['val'].append(self.val_asn(as_len()))
             self.as_path.append(path_seg)
 
-    def unpack_next_hop(self, buf):
+    def unpack_next_hop(self):
         if self.len == 4:
-            self.next_hop = self.val_addr(buf, AFI_T['IPv4'])
+            self.next_hop = self.val_addr(AFI_T['IPv4'])
         elif self.len == 16:
-            self.next_hop = self.val_addr(buf, AFI_T['IPv6'])
+            self.next_hop = self.val_addr(AFI_T['IPv6'])
         else:
             self.p += self.len
             self.next_hop = None
 
-    def unpack_multi_exit_disc(self, buf):
-        self.med = self.val_num(buf, 4)
+    def unpack_multi_exit_disc(self):
+        self.med = self.val_num(4)
 
-    def unpack_local_pref(self, buf):
-        self.local_pref = self.val_num(buf, 4)
+    def unpack_local_pref(self):
+        self.local_pref = self.val_num(4)
 
-    def unpack_aggregator(self, buf):
+    def unpack_aggregator(self):
         self.aggr = {}
         n = 2 if self.len < 8 else 4
-        self.aggr['asn'] = self.val_asn(buf, n)
-        self.aggr['id'] = self.val_addr(buf, AFI_T['IPv4'])
+        self.aggr['asn'] = self.val_asn(n)
+        self.aggr['id'] = self.val_addr(AFI_T['IPv4'])
 
-    def unpack_community(self, buf):
+    def unpack_community(self):
         attr_len = self.p + self.len
         self.comm = []
         while self.p < attr_len:
-            val = self.val_num(buf, 4)
+            val = self.val_num(4)
             self.comm.append('%d:%d' %
                 ((val & 0xffff0000) >> 16, val & 0x0000ffff))
 
-    def unpack_originator_id(self, buf):
-        self.org_id = self.val_addr(buf, AFI_T['IPv4'])
+    def unpack_originator_id(self):
+        self.org_id = self.val_addr(AFI_T['IPv4'])
 
-    def unpack_cluster_list(self, buf):
+    def unpack_cluster_list(self):
         attr_len = self.p + self.len
         self.cl_list = []
         while self.p < attr_len:
-            self.cl_list.append(self.val_addr(buf, AFI_T['IPv4']))
+            self.cl_list.append(self.val_addr(AFI_T['IPv4']))
 
-    def unpack_mp_reach_nlri(self, buf, af):
+    def unpack_mp_reach_nlri(self, af):
         attr_len = self.p + self.len
         self.mp_reach = {}
-        self.mp_reach['afi'] = self.val_num(buf, 2)
+        self.mp_reach['afi'] = self.val_num(2)
 
         if AFI_T[self.mp_reach['afi']] != 'Unknown':
             af = self.mp_reach['afi']
-            self.mp_reach['safi'] = self.val_num(buf, 1)
-            self.mp_reach['nlen'] = self.val_num(buf, 1)
+            self.mp_reach['safi'] = self.val_num(1)
+            self.mp_reach['nlen'] = self.val_num(1)
 
             if af != AFI_T['IPv4'] and af != AFI_T['IPv6']:
                 self.p = attr_len
@@ -1160,27 +1167,27 @@ class BgpAttr(Base):
 
             if (self.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
                 or self.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
-                self.mp_reach['rd'] = self.val_rd(buf)
+                self.mp_reach['rd'] = self.val_rd()
         else:
             self.p -= 2
             self.mp_reach = {}
-            self.mp_reach['nlen'] = self.val_num(buf, 1)
+            self.mp_reach['nlen'] = self.val_num(1)
 
         self.mp_reach['next_hop'] = []
-        self.mp_reach['next_hop'].append(self.val_addr(buf, af))
+        self.mp_reach['next_hop'].append(self.val_addr(af))
         if self.mp_reach['nlen'] == 32 and af == AFI_T['IPv6']:
-            self.mp_reach['next_hop'].append(self.val_addr(buf, af))
+            self.mp_reach['next_hop'].append(self.val_addr(af))
 
         if 'afi' in self.mp_reach:
-            self.mp_reach['rsvd'] = self.val_num(buf, 1)
+            self.mp_reach['rsvd'] = self.val_num(1)
             self.mp_reach['nlri'] = self.val_nlri(
-                buf, attr_len, af, self.mp_reach['safi'])
+                attr_len, af, self.mp_reach['safi'])
 
-    def unpack_mp_unreach_nlri(self, buf):
+    def unpack_mp_unreach_nlri(self):
         attr_len = self.p + self.len
         self.mp_unreach = {}
-        self.mp_unreach['afi'] = self.val_num(buf, 2)
-        self.mp_unreach['safi'] = self.val_num(buf, 1)
+        self.mp_unreach['afi'] = self.val_num(2)
+        self.mp_unreach['safi'] = self.val_num(1)
 
         if (self.mp_unreach['afi'] != AFI_T['IPv4']
             and self.mp_unreach['afi'] != AFI_T['IPv6']):
@@ -1195,86 +1202,87 @@ class BgpAttr(Base):
             return
 
         self.mp_unreach['withdrawn'] = self.val_nlri(
-            buf, attr_len, self.mp_unreach['afi'], self.mp_unreach['safi'])
+            attr_len, self.mp_unreach['afi'], self.mp_unreach['safi'])
 
-    def unpack_extended_communities(self, buf):
+    def unpack_extended_communities(self):
         attr_len = self.p + self.len
         self.ext_comm = []
         while self.p < attr_len:
-            ext_comm = self.val_num(buf, 8)
+            ext_comm = self.val_num(8)
             self.ext_comm.append(ext_comm)
 
-    def unpack_as4_path(self, buf):
+    def unpack_as4_path(self):
         attr_len = self.p + self.len
         self.as4_path = []
         while self.p < attr_len:
             path_seg = {}
-            path_seg['type'] = self.val_num(buf, 1)
-            path_seg['len'] = self.val_num(buf, 1)
+            path_seg['type'] = self.val_num(1)
+            path_seg['len'] = self.val_num(1)
             path_seg['val'] = []
             for i in range(path_seg['len']):
-                path_seg['val'].append(self.val_asn(buf, 4))
+                path_seg['val'].append(self.val_asn(4))
             self.as4_path.append(path_seg)
 
-    def unpack_as4_aggregator(self, buf):
+    def unpack_as4_aggregator(self):
         self.as4_aggr = {}
-        self.as4_aggr['asn'] = self.val_asn(buf, 4)
-        self.as4_aggr['id'] = self.val_addr(buf, AFI_T['IPv4'])
+        self.as4_aggr['asn'] = self.val_asn(4)
+        self.as4_aggr['id'] = self.val_addr(AFI_T['IPv4'])
 
-    def unpack_aigp(self, buf):
+    def unpack_aigp(self):
         attr_len = self.p + self.len
         self.aigp = []
         while self.p < attr_len:
             aigp = {}
-            aigp['type'] = self.val_num(buf, 1)
-            aigp['len'] = self.val_num(buf, 2)
-            aigp['val'] = self.val_num(buf, aigp['len'] - 3)
+            aigp['type'] = self.val_num(1)
+            aigp['len'] = self.val_num(2)
+            aigp['val'] = self.val_num(aigp['len'] - 3)
             self.aigp.append(aigp)
 
-    def unpack_attr_set(self, buf):
+    def unpack_attr_set(self):
         attr_len = self.p + self.len
         self.attr_set = {}
-        self.attr_set['origin_as'] = self.val_asn(buf, 4)
+        self.attr_set['origin_as'] = self.val_asn(4)
         attr_len -= 4
         self.attr_set['attr'] = []
         while self.p < attr_len:
-            attr = BgpAttr()
-            self.p += attr.unpack(buf[self.p:])
+            attr = BgpAttr(buf[self.p:])
+            self.p += attr.unpack()
             self.attr_set['attr'].append(attr)
 
 class Nlri(Base):
     __slots__ = ['path_id', 'label', 'rd', 'plen', 'prefix']
 
-    def __init__(self):
+    def __init__(self, buf):
         Base.__init__(self)
+        self.buf = buf
         self.path_id = None
         self.label = None
         self.rd = None
         self.plen = None
         self.prefix = None
 
-    def unpack(self, buf, af, saf=0, add_path=0):
+    def unpack(self, af, saf=0, add_path=0):
         if add_path:
-            self.path_id = self.val_num(buf, 4)
-        self.plen = plen = self.val_num(buf, 1)
+            self.path_id = self.val_num(4)
+        self.plen = plen = self.val_num(1)
         if (saf == SAFI_T['L3VPN_UNICAST']
             or saf == SAFI_T['L3VPN_MULTICAST']):
-            plen = self.unpack_l3vpn(buf, plen)
+            plen = self.unpack_l3vpn(plen)
         if (af == AFI_T['IPv4'] and plen > 32
             or af == AFI_T['IPv6'] and plen > 128):
             raise MrtFormatError('Invalid prefix length %d (%s)'
                 % (self.plen, AFI_T[af]))
-        self.prefix = self.val_addr(buf, af, plen)
+        self.prefix = self.val_addr(af, plen)
         return self.p
 
-    def unpack_l3vpn(self, buf, plen):
+    def unpack_l3vpn(self, plen):
         self.label = []
         while True:
-            label = self.val_num(buf, 3)
+            label = self.val_num(3)
             self.label.append(label)
             if label &  LBL_BOTTOM or label == LBL_WITHDRAWN:
                 break
-        self.rd = self.val_rd(buf)
+        self.rd = self.val_rd()
         plen -= (3 * len(self.label) + 8) * 8
         return plen
 
