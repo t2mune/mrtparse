@@ -478,8 +478,8 @@ class Base:
             while p < n:
                 nlri = Nlri(self.buf[p:])
                 p += nlri.unpack(af, saf)
-                if nlri.chk_dup(l):
-                    raise MrtFormatError
+                nlri.validate()
+                nlri.chk_dup(l)
                 l.append(nlri)
             self.p = p
         except MrtFormatError:
@@ -487,6 +487,7 @@ class Base:
             while self.p < n:
                 nlri = Nlri(self.buf[self.p:])
                 self.p += nlri.unpack(af, saf, add_path=1)
+                nlri.validate()
                 l.append(nlri)
         return l
 
@@ -1290,5 +1291,23 @@ class Nlri(Base):
         for e in l:
             if (self.plen == e.plen and self.prefix == e.prefix
                 and self.label == e.label and self.rd == e.rd):
-                return 1
-        return 0
+                raise MrtFormatError('Duplicate prefix %s/%d'
+                    % (self.prefix, self.plen))
+
+    def validate(self):
+        if self.label is not None:
+            plen = self.plen - (len(self.label) * 3 + 8) * 8
+        else:
+            plen = self.plen
+        if ':' in self.prefix:
+            b = socket.inet_pton(socket.AF_INET6, self.prefix)
+            t = struct.unpack("!QQ", b)
+            n = t[0] << 64 | t[1]
+            plen_max = 128
+        else:
+            b = socket.inet_pton(socket.AF_INET, self.prefix)
+            n = struct.unpack("!L", b)[0]
+            plen_max = 32
+        if n & ~(-1 << (plen_max - plen)):
+            raise MrtFormatError('Invalid prefix %s/%d'
+                % (self.prefix, self.plen))
