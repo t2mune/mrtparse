@@ -4,7 +4,7 @@ mrtparse
 MRT形式のデータを読み込み、解析するためのモジュール。  
 MRT形式とは、ルーティング情報（メッセージ、状態遷移、経路情報）を保存するためのフォーマットで、[RFC6396][rfc6396]で標準化されている。  
 [Quagga / Zebra][quagga], [BIRD][bird], [OpenBGPD][openbgpd], [PyRT][pyrt]などでMRT形式のデータを出力することができる。
-また、アーカイブを[the Route Views Project][route views]や[RIPE NCC][ripe ncc]からダウンロードすることもできる。
+また、アーカイブを[Route Views Project][route views]や[RIPE NCC][ripe ncc]からダウンロードすることもできる。
 [rfc6396]: https://tools.ietf.org/html/rfc6396
 [quagga]: http://www.nongnu.org/quagga/
 [bird]: http://bird.network.cz/
