@@ -33,7 +33,7 @@ MRT形式とは、ルーティング情報（メッセージ、状態遷移、�
 | Support for 4-octet AS number capability | 65  |
 | ADD-PATH Capability                      | 69  |
 
-##対応しているBGPアトリビュート
+##対応しているBGP属性
 
 | 名前                 | 値  |
 | -------------------- | --- |
