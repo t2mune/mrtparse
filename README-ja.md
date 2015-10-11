@@ -15,23 +15,23 @@ MRT形式とは、ルーティング情報（メッセージ、状態遷移、�
 
 ##対応しているMRT形式
 
-| 名前          | 値 |
-| ------------- | -- |
-| Table_Dump    | 12 |
-| Table_Dump_V2 | 13 |
-| BGP4MP        | 16 |
-| BGP4MP_ET     | 17 |
+| 名前          | 値  |
+| ------------- | --- |
+| Table_Dump    | 12  |
+| Table_Dump_V2 | 13  |
+| BGP4MP        | 16  |
+| BGP4MP_ET     | 17  |
 
 ##対応しているBGP機能
 
-| 名前                                     | 値 |
-| ---------------------------------------- | -- |
-| Multiprotocol Extensions for BGP-4       | 1  |
-| Route Refresh Capability for BGP-4       | 2  |
-| Outbound Route Filtering Capability      | 3  |
-| Graceful Restart Capability              | 64 |
-| Support for 4-octet AS number capability | 65 |
-| ADD-PATH Capability                      | 69 |
+| 名前                                     | 値  |
+| ---------------------------------------- | --- |
+| Multiprotocol Extensions for BGP-4       | 1   |
+| Route Refresh Capability for BGP-4       | 2   |
+| Outbound Route Filtering Capability      | 3   |
+| Graceful Restart Capability              | 64  |
+| Support for 4-octet AS number capability | 65  |
+| ADD-PATH Capability                      | 69  |
 
 ##対応しているBGPアトリビュート
 
