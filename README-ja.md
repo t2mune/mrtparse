@@ -15,45 +15,45 @@ MRT形式とは、ルーティング情報（メッセージ、状態遷移、�
 
 ##対応しているMRT形式
 
-| 名前          | 値  |
-| ------------- | --- |
-| Table_Dump    | 12  |
-| Table_Dump_V2 | 13  |
-| BGP4MP        | 16  |
-| BGP4MP_ET     | 17  |
+|名前         |値 |
+|:------------|:-:|
+|Table_Dump   |12 |
+|Table_Dump_V2|13 |
+|BGP4MP       |16 |
+|BGP4MP_ET    |17 |
 
 ##対応しているBGP機能
 
-| 名前                                     | 値  |
-| ---------------------------------------- | --- |
-| Multiprotocol Extensions for BGP-4       | 1   |
-| Route Refresh Capability for BGP-4       | 2   |
-| Outbound Route Filtering Capability      | 3   |
-| Graceful Restart Capability              | 64  |
-| Support for 4-octet AS number capability | 65  |
-| ADD-PATH Capability                      | 69  |
+|名前                                    |値 |
+|:---------------------------------------|:-:|
+|Multiprotocol Extensions for BGP-4      |1  |
+|Route Refresh Capability for BGP-4      |2  |
+|Outbound Route Filtering Capability     |3  |
+|Graceful Restart Capability             |64 |
+|Support for 4-octet AS number capability|65 |
+|ADD-PATH Capability                     |69 |
 
 ##対応しているBGP属性
 
-| 名前                 | 値  |
-| -------------------- | --- |
-| ORIGIN               | 1   |
-| AS_PATH              | 2   |
-| NEXT_HOP             | 3   |
-| MULTI_EXIT_DISC      | 4   |
-| LOCAL_PREF           | 5   |
-| ATOMIC_AGGREGATE     | 6   |
-| AGGREGATOR           | 7   |
-| COMMUNITY            | 8   |
-| ORIGINATOR_ID        | 9   |
-| CLUSTER_LIST         | 10  |
-| MP_REACH_NLRI        | 14  |
-| MP_UNREACH_NLRI      | 15  |
-| EXTENDED_COMMUNITIES | 16  |
-| AS4_PATH             | 17  |
-| AS4_AGGREGATOR       | 18  |
-| AIGP                 | 26  |
-| ATTR_SET             | 128 |
+|名前                |値 |
+|:-------------------|:-:|
+|ORIGIN              |1  |
+|AS_PATH             |2  |
+|NEXT_HOP            |3  |
+|MULTI_EXIT_DISC     |4  |
+|LOCAL_PREF          |5  |
+|ATOMIC_AGGREGATE    |6  |
+|AGGREGATOR          |7  |
+|COMMUNITY           |8  |
+|ORIGINATOR_ID       |9  |
+|CLUSTER_LIST        |10 |
+|MP_REACH_NLRI       |14 |
+|MP_UNREACH_NLRI     |15 |
+|EXTENDED_COMMUNITIES|16 |
+|AS4_PATH            |17 |
+|AS4_AGGREGATOR      |18 |
+|AIGP                |26 |
+|ATTR_SET            |128|
 
 ##動作環境
 Python2 または Python3 または PyPy または PyPy3

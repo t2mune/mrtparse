@@ -15,45 +15,45 @@ You can also download archives from [the Route Views Project][route views], [RIP
 
 ##Supported MRT types
 
-| Name          | Value |
-| ------------- | ----- |
-| Table_Dump    | 12    |
-| Table_Dump_V2 | 13    |
-| BGP4MP        | 16    |
-| BGP4MP_ET     | 17    |
+|Name         |Value|
+|:------------|:---:|
+|Table_Dump   |12   |
+|Table_Dump_V2|13   |
+|BGP4MP       |16   |
+|BGP4MP_ET    |17   |
 
 ##Supported BGP capabilities
 
-| Name                                     | Value |
-| ---------------------------------------- | ----- |
-| Multiprotocol Extensions for BGP-4       | 1     |
-| Route Refresh Capability for BGP-4       | 2     |
-| Outbound Route Filtering Capability      | 3     |
-| Graceful Restart Capability              | 64    |
-| Support for 4-octet AS number capability | 65    |
-| ADD-PATH Capability                      | 69    |
+|Name                                    |Value|
+|:---------------------------------------|:---:|
+|Multiprotocol Extensions for BGP-4      |1    |
+|Route Refresh Capability for BGP-4      |2    |
+|Outbound Route Filtering Capability     |3    |
+|Graceful Restart Capability             |64   |
+|Support for 4-octet AS number capability|65   |
+|ADD-PATH Capability                     |69   |
 
 ##Supported BGP attributes
 
-| Name                 | Value |
-| -------------------- | ----- |
-| ORIGIN               | 1     |
-| AS_PATH              | 2     |
-| NEXT_HOP             | 3     |
-| MULTI_EXIT_DISC      | 4     |
-| LOCAL_PREF           | 5     |
-| ATOMIC_AGGREGATE     | 6     |
-| AGGREGATOR           | 7     |
-| COMMUNITY            | 8     |
-| ORIGINATOR_ID        | 9     |
-| CLUSTER_LIST         | 10    |
-| MP_REACH_NLRI        | 14    |
-| MP_UNREACH_NLRI      | 15    |
-| EXTENDED_COMMUNITIES | 16    |
-| AS4_PATH             | 17    |
-| AS4_AGGREGATOR       | 18    |
-| AIGP                 | 26    |
-| ATTR_SET             | 128   |
+|Name                |Value|
+|:-------------------|:---:|
+|ORIGIN              |1    |
+|AS_PATH             |2    |
+|NEXT_HOP            |3    |
+|MULTI_EXIT_DISC     |4    |
+|LOCAL_PREF          |5    |
+|ATOMIC_AGGREGATE    |6    |
+|AGGREGATOR          |7    |
+|COMMUNITY           |8    |
+|ORIGINATOR_ID       |9    |
+|CLUSTER_LIST        |10   |
+|MP_REACH_NLRI       |14   |
+|MP_UNREACH_NLRI     |15   |
+|EXTENDED_COMMUNITIES|16   |
+|AS4_PATH            |17   |
+|AS4_AGGREGATOR      |18   |
+|AIGP                |26   |
+|ATTR_SET            |128  |
 
 ##Requirements
 Python2 or Python3 or PyPy or PyPy3 
