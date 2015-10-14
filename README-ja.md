@@ -103,8 +103,9 @@ MRT形式のファイル（gzip、bzip2にも対応）を文字列（ファイ�
     for m in d:
         処理内容を記述する
 
-["examples" ディレクトリ][examples]に作成例があります。
+["examples" ディレクトリ][examples]にスクリプト作成例と["samples" ディレクトリ][samples]にサンプルデータがあります。
 [examples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/examples
+[samples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/samples
 
 ##作者
 Tetsumune KISO <t2mune@gmail.com>  

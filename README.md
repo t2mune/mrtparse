@@ -103,8 +103,9 @@ You can retrieve each entry from the returned object using a loop and then proce
     for m in d:
         <statements>
 
-We have prepared some example scripts in ["examples" directory][examples].
+We have prepared some example scripts and sample data in ["examples"][examples] and ["samples"][samples] directory.
 [examples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/examples
+[samples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/samples
     
 
 ##Authors
