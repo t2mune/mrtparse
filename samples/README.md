@@ -9,7 +9,7 @@
 |openbgpd_rib_table-mp|BGP4MP|BGP4MP_ENTRY|Unsupported Subtype|
 |openbgpd_rib_table-v2|TABLE_DUMP_V2|PEER_INDEX_TABLE<br>RIB_IPV4_UNICAST<br>RIB_IPV6_UNICAST<br>RIB_GENERIC|IPv4/IPv6 Peer<br>IPv4/IPv6/VPNv4 Prefix|
 |quagga_bgp|BGP4MP|BGP4MP_MESSAGE<br>BGP4MP_MESSAGE_AS4<br>BGP4MP_STATE_CHANGE_AS4|IPv4/IPv6 Peer<br>IPv4/IPv6/VPNv4 Prefix<br>All BGP Message Types|
-|quagga_rib|TABLE_DUMP_V2|PEER_INDEX_TABLE<br>RIB_IPV4_UNICAST<br>RIB_IPV6_UNICAST|IPv4/IPv6 Peer<br>IPv4/IPv6/VPNv4 Prefix| 
+|quagga_rib|TABLE_DUMP_V2|PEER_INDEX_TABLE<br>RIB_IPV4_UNICAST<br>RIB_IPV6_UNICAST|IPv4/IPv6 Peer<br>IPv4/IPv6 Prefix| 
 
 
 ##Authors
