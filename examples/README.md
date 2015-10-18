@@ -1,4 +1,4 @@
-##Example
+##Example Scripts
 ###print_all.py
 ####Description
 This script displays the contents of a MRT format file.
