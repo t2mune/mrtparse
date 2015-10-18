@@ -1,8 +1,8 @@
 ##Sample MRT format Data
 ###
-|File Name
-|Type
-|Subtype
+|File Name\
+|Type\
+|Subtype\
 |Description|
 |:--|:--:|:--:|:--|
 |bird6_bgp|BGP4MP|BGP4MP_MESSAGE  BGP4MP_MESSAGE_AS4  BGP4MP_STATE_CHANGE_AS4|IPv6 Peer  IPv6 Prefix  All BGP Message Types  ADD-PATH Capability|
