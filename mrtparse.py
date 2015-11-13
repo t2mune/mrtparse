@@ -238,6 +238,7 @@ BGP_ERR_C = reverse_defaultdict({
     4:'Hold Timer Expired',
     5:'Finite State Machine Error',
     6:'Cease',
+    7:'ROUTE-REFRESH Message Error', # Defined in RFC7313
 })
 
 # BGP Message Header Error Subcodes
@@ -302,6 +303,13 @@ BGP_CEASE_ERR_SC = reverse_defaultdict({
     8:'Out of Resources',
 })
 
+# BGP ROUTE-REFRESH Message Error subcodes
+# Defined in RFC7313
+BGP_ROUTE_REFRESH_ERR_SC = reverse_defaultdict({
+    0:'Reserved',
+    1:'Invalid Message Length',
+})
+
 # BGP Error Subcodes
 BGP_ERR_SC = collections.defaultdict(lambda: dict(), {
     1:BGP_HDR_ERR_SC,
@@ -310,6 +318,7 @@ BGP_ERR_SC = collections.defaultdict(lambda: dict(), {
     4:BGP_UPDATE_ERR_SC,
     5:BGP_FSM_ERR_SC,
     6:BGP_CEASE_ERR_SC,
+    7:BGP_ROUTE_REFRESH_ERR_SC,
 })
 
 # BGP OPEN Optional Parameter Types
