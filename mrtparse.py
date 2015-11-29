@@ -487,8 +487,8 @@ class Base:
             while p < n:
                 nlri = Nlri(self.buf[p:])
                 p += nlri.unpack(af, saf)
-                nlri.validate()
-                nlri.chk_dup(l)
+                nlri.is_valid()
+                nlri.is_dup(l)
                 l.append(nlri)
             self.p = p
         except MrtFormatError:
@@ -496,7 +496,7 @@ class Base:
             while self.p < n:
                 nlri = Nlri(self.buf[self.p:])
                 self.p += nlri.unpack(af, saf, add_path=1)
-                nlri.validate()
+                nlri.is_valid()
                 l.append(nlri)
         return l
 
@@ -1296,14 +1296,14 @@ class Nlri(Base):
         plen -= (3 * len(self.label) + 8) * 8
         return plen
 
-    def chk_dup(self, l):
+    def is_dup(self, l):
         for e in l:
             if (self.plen == e.plen and self.prefix == e.prefix
                 and self.label == e.label and self.rd == e.rd):
                 raise MrtFormatError('Duplicate prefix %s/%d'
                     % (self.prefix, self.plen))
 
-    def validate(self):
+    def is_valid(self):
         if self.label is not None:
             plen = self.plen - (len(self.label) * 3 + 8) * 8
         else:
