@@ -29,7 +29,7 @@ signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # mrtparse information
 __pyname__ = 'mrtparse'
-__version__ = '1.3'
+__version__ = '1.4'
 __descr__ = 'MRT format data parser'
 __url__ = 'https://github.com/YoshiyukiYamauchi/mrtparse'
 __author__ = 'Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU'
