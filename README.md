@@ -68,7 +68,14 @@ Access [https://github.com/YoshiyukiYamauchi/mrtparse.git][mrtparse_git], and cl
 [mrtparse_git]: https://github.com/YoshiyukiYamauchi/mrtparse.git
     
 
-##Install
+##Installation
+### Automatic installation
+
+    $ pip install mrtparse
+
+### Manual installation: Download the latest source from [GitHub][github]
+[github]: https://github.com/YoshiyukiYamauchi/mrtparse
+
     $ cd <Clone Directory>
     $ python setup.py install
     running install
@@ -104,8 +111,8 @@ You can retrieve each entry from the returned object using a loop and then proce
         <statements>
 
 We have prepared some example scripts and sample data in ["examples"][examples] and ["samples"][samples] directory.
-[examples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/examples
-[samples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/samples
+[examples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/mrtparse/examples
+[samples]: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/mrtparse/samples
     
 
 ##Authors

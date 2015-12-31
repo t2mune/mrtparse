@@ -69,6 +69,13 @@ Python2 または Python3 または PyPy または PyPy3
     
 
 ##インストール方法
+### pipによるインストール
+
+    $ pip install mrtparse
+
+### 手動インストール: [GitHub][github]から最新版をダウンロードしてください。
+[github]: https://github.com/YoshiyukiYamauchi/mrtparse
+
     $ cd クローンディレクトリ
     $ python setup.py install
     running install
