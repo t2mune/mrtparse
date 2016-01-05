@@ -1,4 +1,5 @@
 2016-01-06 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - too many arguments for method "val_num" of class "Base".
 	* Update - removed "Reserved" in some dictionaries.
 
 2015-12-31 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>
