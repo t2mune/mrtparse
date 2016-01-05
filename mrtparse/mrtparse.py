@@ -168,7 +168,6 @@ BGP_FSM = reverse_defaultdict({
 # BGP Attribute Types
 # Defined in RFC4271
 BGP_ATTR_T = reverse_defaultdict({
-    0:'Reserved',
     1:'ORIGIN',
     2:'AS_PATH',
     3:'NEXT_HOP',
@@ -220,7 +219,6 @@ COMM_T = reverse_defaultdict({
 # BGP Message Types
 # Defined in RFC4271
 BGP_MSG_T = reverse_defaultdict({
-    0:'Reserved',
     1:'OPEN',
     2:'UPDATE',
     3:'NOTIFICATION',
@@ -231,7 +229,6 @@ BGP_MSG_T = reverse_defaultdict({
 # BGP Error Codes
 # Defined in RFC4271
 BGP_ERR_C = reverse_defaultdict({
-    0:'Reserved',
     1:'Message Header Error',
     2:'OPEN Message Error',
     3:'UPDATE Message Error',
@@ -244,7 +241,6 @@ BGP_ERR_C = reverse_defaultdict({
 # BGP Message Header Error Subcodes
 # Defined in RFC4271
 BGP_HDR_ERR_SC = reverse_defaultdict({
-    0:'Reserved',
     1:'Connection Not Synchronized',
     2:'Bad Message Length',
     3:'Bad Message Type',
@@ -253,7 +249,6 @@ BGP_HDR_ERR_SC = reverse_defaultdict({
 # OPEN Message Error Subcodes
 # Defined in RFC4271
 BGP_OPEN_ERR_SC = reverse_defaultdict({
-    0:'Reserved',
     1:'Unsupported Version Number',
     2:'Bad Peer AS',
     3:'Bad BGP Identifier',
@@ -266,7 +261,6 @@ BGP_OPEN_ERR_SC = reverse_defaultdict({
 # UPDATE Message Error Subcodes
 # Defined in RFC4271
 BGP_UPDATE_ERR_SC = reverse_defaultdict({
-    0:'Reserved',
     1:'Malformed Attribute List',
     2:'Unrecognized Well-known Attribute',
     3:'Missing Well-known Attribute',
@@ -292,7 +286,6 @@ BGP_FSM_ERR_SC = reverse_defaultdict({
 # BGP Cease NOTIFICATION Message Subcodes
 # Defined in RFC4486
 BGP_CEASE_ERR_SC = reverse_defaultdict({
-    0:'Reserved',
     1:'Maximum Number of Prefixes Reached',
     2:'Administrative Shutdown',
     3:'Peer De-configured',
@@ -306,7 +299,6 @@ BGP_CEASE_ERR_SC = reverse_defaultdict({
 # BGP ROUTE-REFRESH Message Error subcodes
 # Defined in RFC7313
 BGP_ROUTE_REFRESH_ERR_SC = reverse_defaultdict({
-    0:'Reserved',
     1:'Invalid Message Length',
 })
 
@@ -324,7 +316,6 @@ BGP_ERR_SC = collections.defaultdict(lambda: dict(), {
 # BGP OPEN Optional Parameter Types
 # Defined in RFC5492
 BGP_OPT_PARAMS_T = reverse_defaultdict({
-    0:'Reserved',
     1:'Authentication', # Deprecated
     2:'Capabilities',
 })
@@ -332,7 +323,6 @@ BGP_OPT_PARAMS_T = reverse_defaultdict({
 # Capability Codes
 # Defined in RFC5492
 BGP_CAP_C = reverse_defaultdict({
-    0:'Reserved',
     1:'Multiprotocol Extensions for BGP-4',          # Defined in RFC2858
     2:'Route Refresh Capability for BGP-4',          # Defined in RFC2918
     3:'Outbound Route Filtering Capability',         # Defined in RFC5291
