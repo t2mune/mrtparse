@@ -1245,7 +1245,7 @@ class BgpAttr(Base):
         attr_len -= 4
         self.attr_set['attr'] = []
         while self.p < attr_len:
-            attr = BgpAttr(buf[self.p:])
+            attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
             self.attr_set['attr'].append(attr)
 
