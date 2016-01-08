@@ -1,3 +1,6 @@
+2016-01-08 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - can't install with distutils.
+
 2016-01-06 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - undefined variable "buf" in method "unpack_attr_set" of class
 	"BgpAttr".
