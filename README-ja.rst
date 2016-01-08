@@ -151,8 +151,8 @@ or
 
 `"examples"`_ にスクリプト作成例と `"samples"`_ にサンプルデータがある。
 
-.. _`"examples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/mrtparse/examples
-.. _`"samples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/mrtparse/samples
+.. _`"examples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/examples
+.. _`"samples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/samples
 
 作者
 -------
