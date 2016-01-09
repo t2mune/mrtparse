@@ -27,6 +27,7 @@ except ImportError:
     from distutils.core import setup
 
 import os
+import sys
 from codecs import open
 import mrtparse
 
@@ -34,9 +35,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_descr = f.read()
 
+examples = 'mrtparse/examples'
+samples = 'mrtparse/samples'
+
 try:
-    os.symlink('../examples', 'mrtparse/examples')
-    os.symlink('../samples', 'mrtparse/samples')
+    if 'install' in sys.argv:
+        os.symlink('../examples', examples)
+        os.symlink('../samples', samples)
     setup(
         name=mrtparse.__name__,
         version=mrtparse.__version__,
@@ -70,10 +75,9 @@ try:
                 'samples/quagga*'
             ]
         },
-        include_package_data=True,
-        use_2to3=True,
         zip_safe=False,
     )
 finally:
-    os.unlink('mrtparse/examples')
-    os.unlink('mrtparse/samples')
+    if 'install' in sys.argv:
+        os.unlink(examples)
+        os.unlink(samples)
