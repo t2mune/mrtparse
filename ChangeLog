@@ -1,4 +1,8 @@
 2016-01-10 Tetsumune KISO <t2mune@gmail.com>
+	* Update - replaced "announce attribute" with "announce attributes" in
+	"mrt2exabgp.py". Thank you danielseide.
+
+2016-01-10 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't install with pip command.
 
 2016-01-08 Tetsumune KISO <t2mune@gmail.com>

@@ -132,7 +132,7 @@ def print_conf_footer():
 
 def print_api_grp(d):
     for k in d:
-        sys.stdout.write('announce attribute%s nlri %s\n' \
+        sys.stdout.write('announce attributes%s nlri %s\n' \
             % (k, ' '.join(d[k])))
         sys.stdout.flush()
 
