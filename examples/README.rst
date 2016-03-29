@@ -116,7 +116,7 @@ Usage
 Result (Config format)
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Without "-A"/"-G"/"-w" options, it outputs a ExaBGP config.
+Without "-A"/"-G"/"-P" options, it outputs a ExaBGP config.
 
 ::
 
@@ -175,7 +175,7 @@ This option is possible to improve the performance, especially when advertising 
     announce attribute origin IGP as-path [57821 12586 13101 15412 17408 58730 ] community [12586:147 12586:13000 64587:13101] next-hop 192.168.1.254 nlri 1.1.32.0/24 1.2.1.0/24 1.10.8.0/24 14.0.7.0/24 27.34.239.0/24 27.109.63.0/24 36.37.0.0/24 42.0.8.0/24 49.128.2.0/24 49.246.249.0/24 101.102.104.0/24 106.3.174.0/24 118.91.255.0/24 123.108.143.0/24 180.200.252.0/24 183.182.9.0/24 202.6.6.0/24 202.12.98.0/24 202.85.202.0/24 202.131.63.0/24 211.155.79.0/24 211.156.109.0/24 218.98.224.0/24 218.246.137.0/24
     ...
 
-Result in "-w" option (API program format)
+Result in "-P" option (API program format)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 | This option is useful when using the same MRT data repeatedly.
