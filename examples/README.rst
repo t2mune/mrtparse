@@ -7,7 +7,7 @@ print\_all.py
 Description
 ~~~~~~~~~~~
 
-This script displays the contents of a MRT format file.
+This script displays the contents of a MRT format data.
 
 Usage
 ~~~~~
@@ -86,9 +86,12 @@ Usage
 
 ::
 
-    usage: mrt2exabgp.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS] [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]][-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]] path_to_file
+    usage: mrt2exabgp.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
+                         [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
+                         [-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]] [-P]
+                         path_to_file
 
-    This script converts to ExaBGP format config.
+    This script converts to ExaBGP format.
 
     positional arguments:
       path_to_file   specify path to MRT format file
@@ -108,9 +111,12 @@ Usage
       -G [NUM]       convert to ExaBGP API format and group updates with the same
                      attributes for each spceified the number of prefixes
                      (default: 1000000)
+      -P             convert to ExaBGP API program
 
 Result (Config format)
 ~~~~~~~~~~~~~~~~~~~~~~
+
+Without "-A"/"-G"/"-w" options, it outputs a ExaBGP config.
 
 ::
 
@@ -135,8 +141,10 @@ Result (Config format)
         }
     }
 
-Result (API format)
+Result in "-A" option (API format)
 ~~~~~~~~~~~~~~~~~~~
+
+This option is possible to improve the performance in most cases.
 
 ::
 
@@ -150,8 +158,10 @@ Result (API format)
     announce route 1.0.128.0/18 origin IGP as-path [57821 12586 3257 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254
     ...
 
-Result (API grouping format)
+Result in "-G" option (API grouping format)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This option is possible to improve the performance, especialy when advertising huge prefixes like full internet routes.
 
 ::
 
@@ -164,6 +174,39 @@ Result (API grouping format)
     announce attribute origin IGP as-path [57821 12586 3257 4134 ] community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.1.8.0/24 36.106.0.0/16 36.108.0.0/16 36.109.0.0/16 101.248.0.0/16 106.0.4.0/22 106.7.0.0/16 118.85.204.0/24 118.85.215.0/24 120.88.8.0/21 122.198.64.0/18 171.44.0.0/16 183.91.56.0/24 183.91.57.0/24 202.80.192.0/22 221.231.151.0/24
     announce attribute origin IGP as-path [57821 12586 13101 15412 17408 58730 ] community [12586:147 12586:13000 64587:13101] next-hop 192.168.1.254 nlri 1.1.32.0/24 1.2.1.0/24 1.10.8.0/24 14.0.7.0/24 27.34.239.0/24 27.109.63.0/24 36.37.0.0/24 42.0.8.0/24 49.128.2.0/24 49.246.249.0/24 101.102.104.0/24 106.3.174.0/24 118.91.255.0/24 123.108.143.0/24 180.200.252.0/24 183.182.9.0/24 202.6.6.0/24 202.12.98.0/24 202.85.202.0/24 202.131.63.0/24 211.155.79.0/24 211.156.109.0/24 218.98.224.0/24 218.246.137.0/24
     ...
+
+Result in "-w" option (API program format)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+| This option is useful when using the same MRT data repeatedly.
+| It can be used together with "-G" option.
+
+::
+
+    #!/usr/bin/env python
+    
+    import sys
+    import time
+    
+    msgs = [
+    'announce route 0.0.0.0/0 origin IGP as-path [8758 6830 ] community [8758:110 8758:300] next-hop 192.168.1.254',
+    'announce route 1.0.4.0/24 origin IGP as-path [50304 174 4637 1221 38803 56203 ] next-hop 192.168.1.254',
+    'announce route 1.0.5.0/24 origin IGP as-path [50304 174 4637 1221 38803 56203 ] next-hop 192.168.1.254',
+    'announce route 1.0.6.0/24 origin IGP as-path [50304 174 4637 1221 38803 56203 56203 56203 ] next-hop 192.168.1.254',
+    'announce route 1.0.38.0/24 origin IGP as-path [50304 10026 24155 ] next-hop 192.168.1.254',
+    'announce route 1.0.64.0/18 origin IGP as-path [50304 174 209 2516 7670 18144 ] atomic-aggregate aggregator (18144:219.118.225.188) next-hop 192.168.1.254',
+    'announce route 1.0.128.0/17 origin IGP as-path [50304 24482 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) next-hop 192.168.1.254',
+    'announce route 1.0.128.0/18 origin IGP as-path [50304 24482 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) next-hop 192.168.1.254',
+    ...
+    ]
+    
+    while msgs:
+        msg = msgs.pop(0)
+        sys.stdout.write(msg + '\n')
+        sys.stdout.flush()
+    
+    while True:
+        time.sleep(1)
 
 slice.py
 --------

@@ -1,3 +1,6 @@
+2016-03-29 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added "-P" option in "mrt2exabgp.py". Thank you danielseide.
+
 2016-03-28 Tetsumune KISO <t2mune@gmail.com>
 	* Update - replaced "announce attribute" with "announce attributes" in
 	"mrt2exabgp.py". Thank you danielseide.

@@ -32,6 +32,7 @@ FLAG_T = {
     'ALL' : 0x04,
     'API' : 0x08,
     'API-GROUP' : 0x10,
+    'API_PROG' : 0x20,
 }
 
 def parse_args():
@@ -49,9 +50,11 @@ def parse_args():
         flags |= FLAG_T['API']
     if '-G' in sys.argv:
         flags |= FLAG_T['API'] | FLAG_T['API-GROUP']
+    if '-P' in sys.argv:
+        flags |= FLAG_T['API'] | FLAG_T['API_PROG']
 
     p = argparse.ArgumentParser(
-        description='This script converts to ExaBGP format config.')
+        description='This script converts to ExaBGP format.')
     p.add_argument(
         'path_to_file',
         help='specify path to MRT format file')
@@ -86,6 +89,9 @@ def parse_args():
     p.add_argument(
         '-G', type=int, default=1000000, nargs='?', metavar='NUM', dest='api_grp_num',
         help='convert to ExaBGP API format and group updates with the same attributes for each spceified the number of prefixes (default: 1000000)')
+    p.add_argument(
+        '-P', action='store_false',
+        help='convert to ExaBGP API program')
 
     if re.search('^-', sys.argv[-1]): 
         r = p.parse_args()
@@ -96,22 +102,20 @@ def parse_args():
     return r
 
 def mrt_type_check(m):
-    if m.type != MRT_T['TABLE_DUMP_V2']:
-        return 1
+    if m.type == MRT_T['TABLE_DUMP_V2']:
+        if (    m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']
+            and m.subtype != TD_V2_ST['RIB_IPV6_UNICAST']):
+            return 1
 
-    if (    m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']
-        and m.subtype != TD_V2_ST['RIB_IPV6_UNICAST']):
-        return 1
+        if (m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
+            and not (flags & FLAG_T['IPv4'])):
+            return 1
 
-    if (m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-        and not (flags & FLAG_T['IPv4'])):
+        if (m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
+            and not (flags & FLAG_T['IPv6'])):
+            return 1
+    else:
         return 1
-
-    if (m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
-        and not (flags & FLAG_T['IPv6'])):
-        return 1
-
-    return 0
 
 def print_conf_header(args):
     print('''\
@@ -130,10 +134,32 @@ neighbor %s {
 def print_conf_footer():
     print('    }\n}')
 
-def print_api_grp(d):
+def print_api_prog_header():
+    print('''\
+#!/usr/bin/env python
+
+import sys
+import time
+
+msgs = [''')
+
+def print_api_prog_footer():
+    print('''\
+]
+
+while msgs:
+    msg = msgs.pop(0)
+    sys.stdout.write(msg + '\\n')
+    sys.stdout.flush()
+
+while True:
+    time.sleep(1)
+''')
+
+def print_api_grp(d, p, s):
     for k in d:
-        sys.stdout.write('announce attributes%s nlri %s\n' \
-            % (k, ' '.join(d[k])))
+        sys.stdout.write('%sannounce attributes%s nlri %s%s\n' \
+            % (p, k, ' '.join(d[k]), s))
         sys.stdout.flush()
 
 def conv_format(args, d):
@@ -144,6 +170,8 @@ def conv_format(args, d):
 
     if flags & FLAG_T['API'] == 0:
         print_conf_header(args)
+    elif flags & FLAG_T['API_PROG']:
+        print_api_prog_header()
 
     for m in d:
         m = m.mrt
@@ -160,6 +188,12 @@ def conv_format(args, d):
         else:
             entry.append(m.rib.entry[0])
 
+        if flags & FLAG_T['API_PROG']:
+            prefix = '\''
+            suffix = '\','
+        else:
+            prefix = suffix = ''
+
         line = ''
         for e in entry:
             next_hop = ''
@@ -167,30 +201,36 @@ def conv_format(args, d):
                 line += get_bgp_attr(args, m.subtype, a)
             
             if flags & FLAG_T['API-GROUP']:
-                attr_grp.setdefault('%s next-hop %s' % (line, next_hop), [])\
+                attr_grp.setdefault('%s next-hop %s' \
+                    % (line, next_hop), [])\
                     .append('%s/%d' % (m.rib.prefix, m.rib.plen))
             elif flags & FLAG_T['API']:
-                sys.stdout.write('announce route %s/%d%s next-hop %s\n' \
-                    % (m.rib.prefix, m.rib.plen, line, next_hop))
+                sys.stdout.write('%sannounce route %s/%d%s next-hop %s%s\n' \
+                    % (prefix, m.rib.prefix, m.rib.plen, line, next_hop, suffix))
                 sys.stdout.flush()
             else:
                 print('        route %s/%d%s next-hop %s;' \
                     % (m.rib.prefix, m.rib.plen, line, next_hop))
 
         if flags & FLAG_T['API-GROUP'] and n == args.api_grp_num:
-            print_api_grp(attr_grp)
+            print_api_grp(attr_grp, prefix, suffix)
             attr_grp = {}
             n = 0
         n += 1
 
-    if flags & FLAG_T['API-GROUP']:
-        print_api_grp(attr_grp)
-
-    if flags & FLAG_T['API']:
-        while True:
-            time.sleep(1)
-    else:
+    if flags & FLAG_T['API'] == 0:
         print_conf_footer()
+    else:
+        if flags & FLAG_T['API-GROUP']:
+            print_api_grp(attr_grp, prefix, suffix)
+
+        if flags & FLAG_T['API_PROG']:
+            print_api_prog_footer()
+        else:
+            while True:
+                time.sleep(1)
+
+    return 0
 
 def get_bgp_attr(args, subtype, attr):
     global next_hop
