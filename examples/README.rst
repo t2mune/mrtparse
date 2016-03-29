@@ -161,7 +161,7 @@ This option is possible to improve the performance in most cases.
 Result in "-G" option (API grouping format)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This option is possible to improve the performance, especialy when advertising huge prefixes like full internet routes.
+This option is possible to improve the performance, especially when advertising huge prefixes like full internet routes.
 
 ::
 
