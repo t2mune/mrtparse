@@ -31,27 +31,12 @@ FLAG_T = {
     'IPv6': 0x02,
     'ALL' : 0x04,
     'API' : 0x08,
-    'API-GROUP' : 0x10,
+    'API_GROUP' : 0x10,
     'API_PROG' : 0x20,
 }
 
 def parse_args():
     global flags
-
-    if '-4' in sys.argv:
-        flags |= FLAG_T['IPv4']
-    if '-6' in sys.argv:
-        flags |= FLAG_T['IPv6']
-    if '-4' not in sys.argv and '-6' not in sys.argv:
-        flags = FLAG_T['IPv4'] | FLAG_T['IPv6']
-    if '-a' in sys.argv:
-        flags |= FLAG_T['ALL']
-    if '-A' in sys.argv:
-        flags |= FLAG_T['API']
-    if '-G' in sys.argv:
-        flags |= FLAG_T['API'] | FLAG_T['API-GROUP']
-    if '-P' in sys.argv:
-        flags |= FLAG_T['API'] | FLAG_T['API_PROG']
 
     p = argparse.ArgumentParser(
         description='This script converts to ExaBGP format.')
@@ -99,23 +84,40 @@ def parse_args():
         r = p.parse_args(sys.argv[:-1])
         r.path_to_file=sys.argv[-1]
 
+    if '-4' in sys.argv:
+        flags |= FLAG_T['IPv4']
+    if '-6' in sys.argv:
+        flags |= FLAG_T['IPv6']
+    if '-4' not in sys.argv and '-6' not in sys.argv:
+        flags = FLAG_T['IPv4'] | FLAG_T['IPv6']
+    if '-a' in sys.argv:
+        flags |= FLAG_T['ALL']
+    if '-A' in sys.argv:
+        flags |= FLAG_T['API']
+    if '-G' in sys.argv:
+        flags |= FLAG_T['API'] | FLAG_T['API_GROUP']
+    if '-P' in sys.argv:
+        flags |= FLAG_T['API'] | FLAG_T['API_PROG']
+
     return r
 
 def mrt_type_check(m):
     if m.type == MRT_T['TABLE_DUMP_V2']:
-        if (    m.subtype != TD_V2_ST['RIB_IPV4_UNICAST']
-            and m.subtype != TD_V2_ST['RIB_IPV6_UNICAST']):
-            return 1
+        if m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']:
+            if flags & FLAG_T['IPv4']:
+                return 0
+        elif m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
+            if flags & FLAG_T['IPv6']:
+                return 0
+    elif m.type == MRT_T['TABLE_DUMP']:
+        if m.subtype == TD_ST['AFI_IPv4']:
+            if flags & FLAG_T['IPv4']:
+                return 0
+        elif m.subtype == TD_ST['AFI_IPv6']:
+            if flags & FLAG_T['IPv6']:
+                return 0
 
-        if (m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-            and not (flags & FLAG_T['IPv4'])):
-            return 1
-
-        if (m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
-            and not (flags & FLAG_T['IPv6'])):
-            return 1
-    else:
-        return 1
+    return 1
 
 def print_conf_header(args):
     print('''\
@@ -173,6 +175,7 @@ def conv_format(args, d):
     elif flags & FLAG_T['API_PROG']:
         print_api_prog_header()
 
+    prefix_before = ''
     for m in d:
         m = m.mrt
 
@@ -182,38 +185,49 @@ def conv_format(args, d):
         if mrt_type_check(m):
             continue
 
-        entry = []
-        if flags & FLAG_T['ALL']:
-            entry = m.rib.entry
-        else:
-            entry.append(m.rib.entry[0])
-
         if flags & FLAG_T['API_PROG']:
-            prefix = '\''
-            suffix = '\','
+            pre_line = '\''
+            post_line = '\','
         else:
-            prefix = suffix = ''
+            pre_line = post_line = ''
+
+        entry = []
+        if m.type == MRT_T['TABLE_DUMP_V2']:
+            prefix = '%s/%d' % (m.rib.prefix, m.rib.plen)
+            if flags & FLAG_T['ALL']:
+                entry = m.rib.entry
+            else:
+                entry.append(m.rib.entry[0])
+        elif m.type == MRT_T['TABLE_DUMP']:
+            prefix = '%s/%d' % (m.td.prefix, m.td.plen)
+            if flags & FLAG_T['ALL'] == 0:
+                if prefix == prefix_before:
+                    continue
+                else:
+                    entry.append(m.td)
+                    prefix_before = prefix
+            else:
+                entry.append(m.td)
 
         line = ''
         for e in entry:
             next_hop = ''
             for a in e.attr:
-                line += get_bgp_attr(args, m.subtype, a)
-            
-            if flags & FLAG_T['API-GROUP']:
+                line += get_bgp_attr(args, m, a)
+
+            if flags & FLAG_T['API_GROUP']:
                 attr_grp.setdefault('%s next-hop %s' \
-                    % (line, next_hop), [])\
-                    .append('%s/%d' % (m.rib.prefix, m.rib.plen))
+                    % (line, next_hop), []).append('%s' % prefix)
             elif flags & FLAG_T['API']:
-                sys.stdout.write('%sannounce route %s/%d%s next-hop %s%s\n' \
-                    % (prefix, m.rib.prefix, m.rib.plen, line, next_hop, suffix))
+                sys.stdout.write('%sannounce route %s%s next-hop %s%s\n'
+                    % (pre_line, prefix, line, next_hop, post_line))
                 sys.stdout.flush()
             else:
-                print('        route %s/%d%s next-hop %s;' \
-                    % (m.rib.prefix, m.rib.plen, line, next_hop))
+                print('        route %s%s next-hop %s;' \
+                    % (prefix, line, next_hop))
 
-        if flags & FLAG_T['API-GROUP'] and n == args.api_grp_num:
-            print_api_grp(attr_grp, prefix, suffix)
+        if flags & FLAG_T['API_GROUP'] and n == args.api_grp_num:
+            print_api_grp(attr_grp, pre_line, post_line)
             attr_grp = {}
             n = 0
         n += 1
@@ -221,8 +235,8 @@ def conv_format(args, d):
     if flags & FLAG_T['API'] == 0:
         print_conf_footer()
     else:
-        if flags & FLAG_T['API-GROUP']:
-            print_api_grp(attr_grp, prefix, suffix)
+        if flags & FLAG_T['API_GROUP']:
+            print_api_grp(attr_grp, pre_line, post_line)
 
         if flags & FLAG_T['API_PROG']:
             print_api_prog_footer()
@@ -232,7 +246,7 @@ def conv_format(args, d):
 
     return 0
 
-def get_bgp_attr(args, subtype, attr):
+def get_bgp_attr(args, m, attr):
     global next_hop
 
     line = ''
@@ -284,10 +298,16 @@ def get_bgp_attr(args, subtype, attr):
 
     elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
         next_hop = attr.mp_reach['next_hop'][0]
-        if subtype == TD_V2_ST['RIB_IPV4_UNICAST'] and args.next_hop:
-            next_hop = args.next_hop
-        elif subtype == TD_V2_ST['RIB_IPV6_UNICAST'] and args.next_hop6:
-            next_hop = args.next_hop6
+        if m.type == MRT_T['TABLE_DUMP_V2']:
+            if m.subtype == TD_V2_ST['RIB_IPV4_UNICAST'] and args.next_hop:
+                next_hop = args.next_hop
+            elif subtype == TD_V2_ST['RIB_IPV6_UNICAST'] and args.next_hop6:
+                next_hop = args.next_hop6
+        elif m.type == MRT_T['TABLE_DUMP']:
+            if m.subtype == TD_ST['AFI_IPv4'] and args.next_hop:
+                next_hop = args.next_hop
+            elif m.subtype == TD_ST['AFI_IPv6'] and args.next_hop6:
+                next_hop = args.next_hop6
 
     elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
         ext_comm_list = []
@@ -323,4 +343,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
