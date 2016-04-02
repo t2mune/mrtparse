@@ -88,7 +88,7 @@ Usage
 
     usage: mrt2exabgp.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
                          [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
-                         [-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]] [-P]
+                         [-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]] [-g [NUM]] [-P]
                          path_to_file
 
     This script converts to ExaBGP format.
@@ -109,14 +109,17 @@ Usage
                      one prefix)
       -A             convert to ExaBGP API format
       -G [NUM]       convert to ExaBGP API format and group updates with the same
-                     attributes for each spceified the number of prefixes
-                     (default: 1000000)
+                     attributes for each spceified the number of prefixes using
+                     "annouce attributes ..." syntax (default: 1000000)
+      -g [NUM]       convert to ExaBGP API format and group updates with the same
+                     attributes for each spceified the number of prefixes using
+                     "annouce attribute ..." syntax (default: 1000000)
       -P             convert to ExaBGP API program
 
 Result (Config format)
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Without "-A"/"-G"/"-P" options, it outputs a ExaBGP config.
+Without "-A"/"-G"/"-g"/"-P" options, it outputs a ExaBGP config.
 
 ::
 
@@ -161,7 +164,10 @@ This option is possible to improve the performance in most cases.
 Result in "-G" option (API grouping format)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This option is possible to improve the performance, especially when advertising huge prefixes like full internet routes.
+| This option is possible to improve the performance, especially when advertising huge prefixes like full internet routes.
+| It outputs with "announce attributes ..." syntax.
+| If you use MRT format data included "BGP4MP" or "BGP4MP_ET", you must use this or "-g" option.
+| In that case "NUM" argument is ignored even if specified it.
 
 ::
 
@@ -173,6 +179,26 @@ This option is possible to improve the performance, especially when advertising 
     announce attributes origin IGP as-path [57821 12586 3257 1299 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.0.160.0/19 1.0.224.0/19 118.173.64.0/19 118.173.192.0/19 118.174.128.0/19 118.174.192.0/19 118.175.160.0/19 125.25.0.0/19 125.25.128.0/19 182.53.0.0/19 203.113.0.0/19 203.113.96.0/19
     announce attributes origin IGP as-path [57821 12586 3257 4134 ] community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.1.8.0/24 36.106.0.0/16 36.108.0.0/16 36.109.0.0/16 101.248.0.0/16 106.0.4.0/22 106.7.0.0/16 118.85.204.0/24 118.85.215.0/24 120.88.8.0/21 122.198.64.0/18 171.44.0.0/16 183.91.56.0/24 183.91.57.0/24 202.80.192.0/22 221.231.151.0/24
     announce attributes origin IGP as-path [57821 12586 13101 15412 17408 58730 ] community [12586:147 12586:13000 64587:13101] next-hop 192.168.1.254 nlri 1.1.32.0/24 1.2.1.0/24 1.10.8.0/24 14.0.7.0/24 27.34.239.0/24 27.109.63.0/24 36.37.0.0/24 42.0.8.0/24 49.128.2.0/24 49.246.249.0/24 101.102.104.0/24 106.3.174.0/24 118.91.255.0/24 123.108.143.0/24 180.200.252.0/24 183.182.9.0/24 202.6.6.0/24 202.12.98.0/24 202.85.202.0/24 202.131.63.0/24 211.155.79.0/24 211.156.109.0/24 218.98.224.0/24 218.246.137.0/24
+    ...
+
+Result in "-g" option (API grouping format)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+| This option is possible to improve the performance, especially when advertising huge prefixes like full internet routes.
+| It outputs with "announce attribute ..." old syntax.
+| If you use MRT format data included "BGP4MP" or "BGP4MP_ET", you must use this or "-G" option.
+| In that case "NUM" argument is ignored even if specified it.
+
+::
+
+    announce attribute origin IGP as-path [57821 6939 4826 56203 ] next-hop 192.168.1.254 nlri 1.0.4.0/24 1.0.5.0/24 1.0.6.0/24 103.2.176.0/24 103.2.177.0/24 103.2.178.0/24 103.2.179.0/24
+    announce attribute origin IGP as-path [57821 6939 4826 56203 56203 56203 ] next-hop 192.168.1.254 nlri 1.0.7.0/24
+    announce attribute origin IGP as-path [57821 6939 4725 4725 7670 7670 7670 18144 ] atomic-aggregate aggregator (18144:219.118.225.189) next-hop 192.168.1.254 nlri 1.0.64.0/18 58.183.0.0/16 222.231.64.0/18
+    announce attribute origin IGP as-path [57821 12586 3257 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.0.128.0/17 1.0.128.0/18 1.0.192.0/18 1.2.128.0/17 1.4.128.0/17 1.4.128.0/18 1.179.128.0/17 101.51.0.0/16 101.51.64.0/18 113.53.0.0/16 113.53.0.0/18 118.172.0.0/16 118.173.0.0/16 118.173.192.0/18 118.174.0.0/16 118.175.0.0/16 118.175.0.0/18 125.25.0.0/16 125.25.128.0/18 180.180.0.0/16 182.52.0.0/16 182.52.0.0/17 182.52.128.0/18 182.53.0.0/16 182.53.0.0/18 182.53.192.0/18
+    announce attribute origin IGP as-path [4608 1221 4637 4651 9737 23969 ] next-hop 192.168.1.254 nlri 1.0.128.0/24
+    announce attribute origin IGP as-path [57821 12586 3257 1299 38040 9737 ] atomic-aggregate aggregator (9737:203.113.12.254) community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.0.160.0/19 1.0.224.0/19 118.173.64.0/19 118.173.192.0/19 118.174.128.0/19 118.174.192.0/19 118.175.160.0/19 125.25.0.0/19 125.25.128.0/19 182.53.0.0/19 203.113.0.0/19 203.113.96.0/19
+    announce attribute origin IGP as-path [57821 12586 3257 4134 ] community [12586:145 12586:12000 64587:3257] next-hop 192.168.1.254 nlri 1.1.8.0/24 36.106.0.0/16 36.108.0.0/16 36.109.0.0/16 101.248.0.0/16 106.0.4.0/22 106.7.0.0/16 118.85.204.0/24 118.85.215.0/24 120.88.8.0/21 122.198.64.0/18 171.44.0.0/16 183.91.56.0/24 183.91.57.0/24 202.80.192.0/22 221.231.151.0/24
+    announce attribute origin IGP as-path [57821 12586 13101 15412 17408 58730 ] community [12586:147 12586:13000 64587:13101] next-hop 192.168.1.254 nlri 1.1.32.0/24 1.2.1.0/24 1.10.8.0/24 14.0.7.0/24 27.34.239.0/24 27.109.63.0/24 36.37.0.0/24 42.0.8.0/24 49.128.2.0/24 49.246.249.0/24 101.102.104.0/24 106.3.174.0/24 118.91.255.0/24 123.108.143.0/24 180.200.252.0/24 183.182.9.0/24 202.6.6.0/24 202.12.98.0/24 202.85.202.0/24 202.131.63.0/24 211.155.79.0/24 211.156.109.0/24 218.98.224.0/24 218.246.137.0/24
     ...
 
 Result in "-P" option (API program format)
@@ -202,8 +228,11 @@ Result in "-P" option (API program format)
     
     while msgs:
         msg = msgs.pop(0)
-        sys.stdout.write(msg + '\n')
-        sys.stdout.flush()
+        if isinstance(msg, str):
+            sys.stdout.write(msg + '\n')
+            sys.stdout.flush()
+        else:
+            time.sleep(msg)
     
     while True:
         time.sleep(1)

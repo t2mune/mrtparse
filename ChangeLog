@@ -1,3 +1,8 @@
+2016-04-03 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added "-g" option in "mrt2exabgp.py". Thank you danielseide.
+	* Update - added a support for "BGP4MP" and "BGP4MP_ET". Thank you
+	danielseide.
+
 2016-04-01 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added a support for "TABLE_DUMP" in "mrt2exabgp.py". Thank you
 	danielseide.
