@@ -213,12 +213,12 @@ def print_route_td(args, params, m):
     if m.type == MRT_T['TABLE_DUMP_V2']:
         if m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']:
             if not params['flags'] & FLAG_T['IPv4']:
-                return 1
+                return
         elif m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']:
             if not params['flags'] & FLAG_T['IPv6']:
-                return 1
+                return
         else:
-            return 1
+            return
 
         prefix = '%s/%d' % (m.rib.prefix, m.rib.plen)
         if flags & FLAG_T['ALL']:
@@ -229,17 +229,17 @@ def print_route_td(args, params, m):
     elif m.type == MRT_T['TABLE_DUMP']:
         if m.subtype == TD_ST['AFI_IPv4']:
             if not params['flags'] & FLAG_T['IPv4']:
-                return 1
+                return
         elif m.subtype == TD_ST['AFI_IPv6']:
             if not params['flags'] & FLAG_T['IPv6']:
-                return 1
+                return
         else:
-            return 1
+            return
 
         prefix = '%s/%d' % (m.td.prefix, m.td.plen)
         if params['flags'] & FLAG_T['ALL'] == 0:
             if prefix == params['prefix_before']:
-                return 1
+                return
             else:
                 entry.append(m.td)
                 params['prefix_before'] = prefix
@@ -281,8 +281,8 @@ def print_api_grp(args, params):
 
 def print_route_bgp4mp(args, params, m):
     params['next_hop'] = ''
-    params['mp_withdrawn'] = None
-    params['mp_nlri'] = None
+    params['mp_withdrawn'] = []
+    params['mp_nlri'] = []
 
     if flags & FLAG_T['API_GROUP'] == 0:
         sys.stderr.write('Error: BGP4MP/BGP4MP_ET is only suuported ' \
@@ -292,10 +292,10 @@ def print_route_bgp4mp(args, params, m):
 
     if m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
         or m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:
-        return 1
+        return
 
     if m.bgp.msg.type != BGP_MSG_T['UPDATE']:
-        return 1
+        return
 
     msg = m.bgp.msg
 
@@ -304,27 +304,29 @@ def print_route_bgp4mp(args, params, m):
         attr_line += get_bgp_attr(args, params, m, attr)
 
     wd_line = ''
-    if params['mp_withdrawn']:
-        msg.withdrawn += params['mp_withdrawn']
-
-    for wd in msg.withdrawn:
+    for wd in params['mp_withdrawn']:
         wd_line += ' %s/%s' % (wd.prefix, wd.plen)
 
-    if len(msg.withdrawn):
+    if len(msg.withdrawn) and params['flags'] & FLAG_T['IPv4']:
+        for wd in msg.withdrawn:
+            wd_line += ' %s/%s' % (wd.prefix, wd.plen)
+
+    if len(wd_line):
         if params['next_hop']:
-            attr_line = '%s next-hop %s' % (attr_line, params['next_hop'])
+            attr_line += ' next-hop %s' % params['next_hop']
         sys.stdout.write('%swithdrawn %s%s nlri%s%s\n' \
             % (params['pre_line'], params['api_grp_syntax'], attr_line, wd_line,
             params['post_line']))
 
     nlri_line = ''
-    if params['mp_nlri']:
-        msg.nlri += params['mp_nlri']
-
-    for nlri in msg.nlri:
+    for nlri in params['mp_nlri']:
         nlri_line += ' %s/%s' % (nlri.prefix, nlri.plen)
 
-    if len(msg.nlri):
+    if len(msg.nlri) and params['flags'] & FLAG_T['IPv4']:
+        for nlri in msg.nlri:
+            nlri_line += ' %s/%s' % (nlri.prefix, nlri.plen)
+
+    if len(nlri_line):
         sys.stdout.write('%sannounce %s%s next-hop %s nlri%s%s\n' \
             % (params['pre_line'], params['api_grp_syntax'], attr_line,
             params['next_hop'], nlri_line, params['post_line']))
@@ -406,13 +408,29 @@ def get_bgp_attr(args, params, m, attr):
             elif m.subtype == TD_ST['AFI_IPv6'] and args.next_hop6:
                 params['next_hop'] = args.next_hop6
         elif m.type == MRT_T['BGP4MP'] or m.type == MRT_T['BGP4MP_ET']:
-            if 'nlri' in attr.mp_reach:
-                params['mp_nlri'] = attr.mp_reach['nlri']
-    
-    elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
+            if attr.mp_reach['afi'] == AFI_T['IPv4'] \
+                and params['flags'] & FLAG_T['IPv4']:
+                if args.next_hop:
+                    params['next_hop'] = args.next_hop
+                if 'nlri' in attr.mp_reach:
+                    params['mp_nlri'] = attr.mp_reach['nlri']
+            elif attr.mp_reach['afi'] == AFI_T['IPv6'] \
+                and params['flags'] & FLAG_T['IPv6']:
+                if args.next_hop6:
+                    params['next_hop'] = args.next_hop6
+                if 'nlri' in attr.mp_reach:
+                    params['mp_nlri'] = attr.mp_reach['nlri']
+
+    elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
         if m.type == MRT_T['BGP4MP'] or m.type == MRT_T['BGP4MP_ET']:
-            if 'withdrawn' in attr.mp_unreach:
-                params['mp_withdrawn'] = attr.mp_unreach['withdrawn']
+            if attr.mp_unreach['afi'] == AFI_T['IPv4'] \
+                and params['flags'] & FLAG_T['IPv4']:
+                if 'withdrawn' in attr.mp_unreach:
+                    params['mp_withdrawn'] = attr.mp_unreach['withdrawn']
+            elif attr.mp_unreach['afi'] == AFI_T['IPv6'] \
+                and params['flags'] & FLAG_T['IPv6']:
+                if 'withdrawn' in attr.mp_unreach:
+                    params['mp_withdrawn'] = attr.mp_unreach['withdrawn']
 
     elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
         ext_comm_list = []
