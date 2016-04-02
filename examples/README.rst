@@ -103,8 +103,8 @@ Usage
       -p PEER_AS     specify peer AS number (default: 65000)
       -L LOCAL_ADDR  specify local address (default: 192.168.1.1)
       -n NEIGHBOR    specify neighbor address (default: 192.168.1.100)
-      -4 [NEXT_HOP]  convert IPv4 entries and use IPv4 next-hop if specified
-      -6 [NEXT_HOP]  convert IPv6 entries and use IPv6 next-hop if specified
+      -4 [NEXT_HOP]  convert IPv4 entries and change IPv4 next-hop if specified
+      -6 [NEXT_HOP]  convert IPv6 entries and change IPv6 next-hop if specified
       -a             convert all entries (default: convert only first entry per
                      one prefix)
       -A             convert to ExaBGP API format

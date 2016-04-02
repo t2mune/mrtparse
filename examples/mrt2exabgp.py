@@ -102,10 +102,10 @@ def parse_args():
         help='specify neighbor address (default: 192.168.1.100)')
     p.add_argument(
         '-4', type=str, nargs='?', metavar='NEXT_HOP', dest='next_hop',
-        help='convert IPv4 entries and use IPv4 next-hop if specified')
+        help='convert IPv4 entries and change IPv4 next-hop if specified')
     p.add_argument(
         '-6', type=str, nargs='?', metavar='NEXT_HOP', dest='next_hop6',
-        help='convert IPv6 entries and use IPv6 next-hop if specified''')
+        help='convert IPv6 entries and change IPv6 next-hop if specified''')
     p.add_argument(
         '-a', default=False, action='store_true',
         help='convert all entries \
