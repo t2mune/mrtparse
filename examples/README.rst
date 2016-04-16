@@ -205,7 +205,7 @@ Result in "-P" option (API program format)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 | This option is useful when using the same MRT data repeatedly.
-| It can be used together with "-G" option.
+| It can be used together with "-G" or "-g" option.
 
 ::
 
