@@ -1,3 +1,6 @@
+2016-05-07 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - fixed typo.
+
 2016-04-03 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added "-g" option in "mrt2exabgp.py". Thank you danielseide.
 	* Update - added a support for "BGP4MP" and "BGP4MP_ET" in

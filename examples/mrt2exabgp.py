@@ -118,13 +118,13 @@ def parse_args():
         dest='api_grp_num', help='convert to ExaBGP API format '
         + 'and group updates with the same attributes '
         + 'for each spceified the number of prefixes '
-        + 'using "annouce attributes ..." syntax (default: 1000000)')
+        + 'using "announce attributes ..." syntax (default: 1000000)')
     p.add_argument(
         '-g', type=int, default=1000000, nargs='?', metavar='NUM',
         dest='api_grp_num', help='convert to ExaBGP API format '
         + 'and group updates with the same attributes '
         + 'for each spceified the number of prefixes '
-        + 'using "annouce attribute ..." syntax (default: 1000000)')
+        + 'using "announce attribute ..." old syntax (default: 1000000)')
     p.add_argument(
         '-P', action='store_false',
         help='convert to ExaBGP API program')

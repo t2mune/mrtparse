@@ -2,8 +2,8 @@ mrtparse
 ========
 
 | mrtparse is a module to read and analyze the MRT format data.
-| The MRT format can be used to export routing protocol messages, state changes, and routing information base contents, and was standardized in RFC6396_.
-| Programs like Quagga_ / Zebra_, BIRD_, OpenBGPD_ and PyRT_ can dump the MRT fotmat data.
+| The MRT format can be used to export routing protocol messages, state changes, and routing information base contents, and is defined in RFC6396_.
+| Programs like Quagga_ / Zebra_, BIRD_, OpenBGPD_ and PyRT_ can dump the MRT format data.
 | You can also download archives from `the Route Views Projects`_, `RIPE NCC`_.
 
 .. _RFC6396: https://tools.ietf.org/html/rfc6396

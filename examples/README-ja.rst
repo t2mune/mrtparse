@@ -27,7 +27,7 @@ MRT形式のファイルの内容を出力する
         Type: 16(BGP4MP)
         Subtype: 5(BGP4MP_STATE_CHANGE_AS4)
         Length: 24
-    BGP4MP_STATE\CHANGE_AS4
+    BGP4MP_STATE_CHANGE_AS4
         Peer AS Number: 100
         Local AS Number: 64512
         Interface Index: 0

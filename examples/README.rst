@@ -27,7 +27,7 @@ Result
         Type: 16(BGP4MP)
         Subtype: 5(BGP4MP_STATE_CHANGE_AS4)
         Length: 24
-    BGP4MP_STATE\CHANGE_AS4
+    BGP4MP_STATE_CHANGE_AS4
         Peer AS Number: 100
         Local AS Number: 64512
         Interface Index: 0
@@ -110,10 +110,10 @@ Usage
       -A             convert to ExaBGP API format
       -G [NUM]       convert to ExaBGP API format and group updates with the same
                      attributes for each spceified the number of prefixes using
-                     "annouce attributes ..." syntax (default: 1000000)
+                     "announce attributes ..." syntax (default: 1000000)
       -g [NUM]       convert to ExaBGP API format and group updates with the same
                      attributes for each spceified the number of prefixes using
-                     "annouce attribute ..." syntax (default: 1000000)
+                     "announce attribute ..." old syntax (default: 1000000)
       -P             convert to ExaBGP API program
 
 Result (Config format)
