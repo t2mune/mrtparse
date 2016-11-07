@@ -185,6 +185,7 @@ BGP_ATTR_T = reverse_defaultdict({
     17:'AS4_PATH',             # Defined in RFC6793
     18:'AS4_AGGREGATOR',       # Defined in RFC6793
     26:'AIGP',                 # Defined in RFC7311
+    32:'LARGE_COMMUNITY',      # Defined in draft-ietf-idr-large-community
     128:'ATTR_SET',            # Defined in RFC6368
 })
 
@@ -1162,7 +1163,7 @@ class BgpAttr(Base):
         'flag', 'type', 'len', 'origin', 'as_path', 'next_hop', 'med',
         'local_pref', 'aggr', 'comm', 'org_id', 'cl_list', 'mp_reach',
         'mp_unreach', 'ext_comm', 'as4_path', 'as4_aggr', 'aigp', 'attr_set',
-        'val'
+        'large_comm', 'val'
     ]
 
     def __init__(self, buf):
@@ -1187,6 +1188,7 @@ class BgpAttr(Base):
         self.as4_aggr = None
         self.aigp = None
         self.attr_set = None
+        self.larg_comm = None
         self.val = None
 
     def unpack(self, af=0):
@@ -1233,6 +1235,8 @@ class BgpAttr(Base):
             self.unpack_aigp()
         elif self.type == BGP_ATTR_T['ATTR_SET']:
             self.unpack_attr_set()
+        elif self.type == BGP_ATTR_T['LARGE_COMMUNITY']:
+            self.unpack_large_community()
         else:
             self.val = self.val_bytes(self.len)
         return self.p
@@ -1443,6 +1447,20 @@ class BgpAttr(Base):
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
             self.attr_set['attr'].append(attr)
+
+    def unpack_large_community(self):
+        '''
+        Decoder for LARGE_COMMUNITY attribute
+        '''
+        attr_len = self.p + self.len
+        self.large_comm = []
+        while self.p < attr_len:
+            global_admin = self.val_num(4)
+            local_data_part_1 = self.val_num(4)
+            local_data_part_2 = self.val_num(4)
+            self.large_comm.append(
+                '%d:%d:%d' %
+                (global_admin, local_data_part_1, local_data_part_2))
 
 class Nlri(Base):
     '''

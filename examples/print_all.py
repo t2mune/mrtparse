@@ -381,6 +381,8 @@ def print_bgp_attr(attr, n):
         prline('Origin AS: %s' % attr.attr_set['origin_as'])
         for attr in attr.attr_set['attr']:
             print_bgp_attr(attr, 3)
+    elif attr.type == BGP_ATTR_T['LARGE_COMMUNITY']:
+        prline(line + ': %s' % ' '.join(attr.large_comm))
     else:
         line += ': 0x'
         for c in attr.val:
