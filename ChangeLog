@@ -1,3 +1,7 @@
+2016-11-28 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added a support for BGP path attribute "LARGE_COMMUNITY". Thank
+	you pierky.
+
 2016-05-07 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - fixed typo.
 
