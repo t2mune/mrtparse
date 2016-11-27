@@ -457,6 +457,10 @@ def get_bgp_attr(args, params, m, attr):
     elif attr.type == BGP_ATTR_T['AIGP']:
         line += ' aigp %d' % attr.aigp[0]['val']
 
+    elif attr.type == BGP_ATTR_T['LARGE_COMMUNITY']:
+        large_comm = ' '.join(attr.large_comm)
+        line += ' large-community [%s]' % large_comm
+
     return line
 
 def main():
