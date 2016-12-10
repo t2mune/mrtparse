@@ -1,3 +1,7 @@
+2016-12-10 Tetsumune KISO <t2mune@gmail.com>
+	* Release - mrtparse 1.5 released.
+	* Update - updated comments.
+
 2016-11-28 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added a support for BGP path attribute "LARGE_COMMUNITY". Thank
 	you pierky.

@@ -30,7 +30,7 @@ import collections
 import signal
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
@@ -334,9 +334,9 @@ BGP_CAP_C = reverse_defaultdict({
     67:'Support for Dynamic Capability (capability specific)',
     # draft-ietf-idr-bgp-multisession
     68:'Multisession BGP Capability',
-    # draft-ietf-idr-add-paths
+    # Defined in RFC7911
     69:'ADD-PATH Capability',
-    # draft-keyur-bgp-enhanced-route-refresh
+    # Defined in RFC7313
     70:'Enhanced Route Refresh Capability',
     # draft-uttaro-idr-bgp-persistence
     71:'Long-Lived Graceful Restart (LLGR) Capability',
@@ -346,6 +346,7 @@ BGP_CAP_C = reverse_defaultdict({
 # Defined in RFC5291
 ORF_T = reverse_defaultdict({
     64:'Address Prefix ORF', # Defined in RFC5292
+    65: 'CP-ORF', # Defined in RFC7543
 })
 
 ORF_SEND_RECV = reverse_defaultdict({
@@ -355,7 +356,7 @@ ORF_SEND_RECV = reverse_defaultdict({
 })
 
 # ADD-PATH Capability
-# Defined in draft-ietf-idr-add-paths
+# Defined in RFC7911
 ADD_PATH_SEND_RECV = reverse_defaultdict({
     1:'Receive',
     2:'Send',
