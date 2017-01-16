@@ -2,7 +2,7 @@
 '''
 summary.py - This script displays summary of MRT format data.
 
-Copyright (C) 2016 greenHippo, LLC.
+Copyright (C) 2017 Tetsumune KISO
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -167,7 +167,6 @@ or
 ----------
 
 | Licensed under the `Apache License, Version 2.0`_
-| Copyright © 2016 `greenHippo, LLC.`_
+| Copyright © 2017 Tetsumune KISO
 
 .. _`Apache License, Version 2.0`: http://www.apache.org/licenses/LICENSE-2.0
-.. _`GreenHippo, LLC.`: http://greenhippo.co.jp
