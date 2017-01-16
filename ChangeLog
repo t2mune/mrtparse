@@ -1,5 +1,6 @@
 2017-01-17 Tetsumune KISO <t2mune@gmail.com>
 	* Update - updated "README.md", "README-ja.md" in "samples" directory.
+	* Update - updated a copyright notice.
 
 2017-01-16 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - fix initialization of BgpAttr with Python 3. Thank you
