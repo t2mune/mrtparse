@@ -1,3 +1,7 @@
+2017-01-17 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - fix initialization of BgpAttr with Python 3. Thank you
+	vincentbernat.
+
 2016-12-10 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 1.5 released.
 	* Update - updated comments.
