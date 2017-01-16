@@ -1189,7 +1189,7 @@ class BgpAttr(Base):
         self.as4_aggr = None
         self.aigp = None
         self.attr_set = None
-        self.larg_comm = None
+        self.large_comm = None
         self.val = None
 
     def unpack(self, af=0):
