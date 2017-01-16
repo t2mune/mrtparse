@@ -1,44 +1,45 @@
 Sample MRT format Data
 ----------------------
 
-+-------------------------+-----------------+----------------------------+------------------------+
-| File Name               | Type            | Subtype                    | Description            |
-|                         |                 |                            |                        |
-|                         |                 |                            |                        |
-+=========================+=================+============================+========================+
-| bird6\_bgp              | BGP4MP          | BGP4MP\_MESSAGE            | IPv6 Peer              |
-|                         |                 | BGP4MP\_MESSAGE\_AS4       | IPv6 Prefix            |
-|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
-|                         |                 |                            | ADD-PATH Capability    |
-+-------------------------+-----------------+----------------------------+------------------------+
-| bird\_bgp               | BGP4MP          | BGP4MP\_MESSAGE            | IPv4 Peer              |
-|                         |                 | BGP4MP\_MESSAGE\_AS4       | IPv4 Prefix            |
-|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
-|                         |                 |                            | ADD-PATH Capability    |
-+-------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_bgp           | BGP4MP          | BGP4MP\_MESSAGE            | IPv4/IPv6 Peer         |
-|                         |                 | BGP4MP\_MESSAGE\_AS4       | IPv4/IPv6/VPNv4 Prefix |
-|                         |                 | BGP4MP\_STATE\_CHANGE      | All BGP Message Types  |
-|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4 |                        |
-+-------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_rib\_table    | TABLE\_DUMP     | AFI\_IPv4                  | IPv4/IPv6 Peer         |
-|                         |                 | AFI\_IPv6                  | IPv4/IPv6 Prefix       |
-+-------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_rib\_table-mp | BGP4MP          | BGP4MP\_ENTRY              | Unsupported Subtype    |
-+-------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_rib\_table-v2 | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE         | IPv4/IPv6 Peer         |
-|                         |                 | RIB\_IPV4\_UNICAST         | IPv4/IPv6/VPNv4 Prefix |
-|                         |                 | RIB\_IPV6\_UNICAST         |                        |
-|                         |                 | RIB\_GENERIC               |                        |
-+-------------------------+-----------------+----------------------------+------------------------+
-| quagga\_bgp             | BGP4MP          | BGP4MP\_MESSAGE            | IPv4/IPv6 Peer         |
-|                         |                 | BGP4MP\_MESSAGE\_AS4       | IPv4/IPv6/VPNv4 Prefix |
-|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
-+-------------------------+-----------------+----------------------------+------------------------+
-| quagga\_rib             | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE         | IPv4/IPv6 Peer         |
-|                         |                 | RIB\_IPV4\_UNICAST         | IPv4/IPv6 Prefix       |
-|                         |                 | RIB\_IPV6\_UNICAST         |                        |
-+-------------------------+-----------------+----------------------------+------------------------+
++---------------------------------+-----------------+----------------------------+------------------------+
+| File Name                       | Type            | Subtype                    | Description            |
+|                                 |                 |                            |                        |
++=================================+=================+============================+========================+
+| bird6\_bgp                      | BGP4MP          | BGP4MP\_MESSAGE            | IPv6 Peer              |
+|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv6 Prefix            |
+|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
+|                                 |                 |                            | ADD-PATH Capability    |
++---------------------------------+-----------------+----------------------------+------------------------+
+| bird\_bgp                       | BGP4MP          | BGP4MP\_MESSAGE            | IPv4 Peer              |
+|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv4 Prefix            |
+|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
+|                                 |                 |                            | ADD-PATH Capability    |
++---------------------------------+-----------------+----------------------------+------------------------+
+| openbgpd\_bgp                   | BGP4MP          | BGP4MP\_MESSAGE            | IPv4/IPv6 Peer         |
+|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv4/IPv6/VPNv4 Prefix |
+|                                 |                 | BGP4MP\_STATE\_CHANGE      | All BGP Message Types  |
+|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 |                        |
++---------------------------------+-----------------+----------------------------+------------------------+
+| openbgpd\_rib\_table            | TABLE\_DUMP     | AFI\_IPv4                  | IPv4/IPv6 Peer         |
+|                                 |                 | AFI\_IPv6                  | IPv4/IPv6 Prefix       |
++---------------------------------+-----------------+----------------------------+------------------------+
+| openbgpd\_rib\_table-mp         | BGP4MP          | BGP4MP\_ENTRY              | Unsupported Subtype    |
++---------------------------------+-----------------+----------------------------+------------------------+
+| openbgpd\_rib\_table-v2         | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE         | IPv4/IPv6 Peer         |
+|                                 |                 | RIB\_IPV4\_UNICAST         | IPv4/IPv6/VPNv4 Prefix |
+|                                 |                 | RIB\_IPV6\_UNICAST         |                        |
+|                                 |                 | RIB\_GENERIC               |                        |
++---------------------------------+-----------------+----------------------------+------------------------+
+| quagga\_bgp                     | BGP4MP          | BGP4MP\_MESSAGE            | IPv4/IPv6 Peer         |
+|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv4/IPv6/VPNv4 Prefix |
+|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
++---------------------------------+-----------------+----------------------------+------------------------+
+| quagga\_bgp\_large\_communities | BGP4MP          | BGP4MP\_MESSAGE\_AS4       | IPv4 Peer              |
++---------------------------------+-----------------+----------------------------+------------------------+
+| quagga\_rib                     | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE         | IPv4/IPv6 Peer         |
+|                                 |                 | RIB\_IPV4\_UNICAST         | IPv4/IPv6 Prefix       |
+|                                 |                 | RIB\_IPV6\_UNICAST         |                        |
++---------------------------------+-----------------+----------------------------+------------------------+
 
 Authors
 -------
