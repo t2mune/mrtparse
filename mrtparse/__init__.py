@@ -886,7 +886,7 @@ class RibEntries(Base):
         self.peer_index = self.val_num(2)
         self.org_time = self.val_num(4)
         if is_add_path():
-            self.path_id == val_num(4)
+            self.path_id = self.val_num(4)
         attr_len = self.attr_len = self.val_num(2)
         self.attr = []
         while attr_len > 0:

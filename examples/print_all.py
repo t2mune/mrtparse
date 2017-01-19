@@ -129,6 +129,8 @@ def print_td_v2(m):
             prline('Originated Time: %d(%s)' %
                 (entry.org_time,
                  datetime.fromtimestamp(entry.org_time)))
+            if entry.path_id is not None:
+                prline('Path Identifier: %d' % entry.path_id)
             prline('Attribute Length: %d' % entry.attr_len)
             for attr in entry.attr:
                 print_bgp_attr(attr, 1)
@@ -458,8 +460,8 @@ def main():
             print_td(m)
         elif m.type == MRT_T['TABLE_DUMP_V2']:
             print_td_v2(m)
-        elif ( m.type == MRT_T['BGP4MP']
-            or m.type == MRT_T['BGP4MP_ET']):
+        elif m.type == MRT_T['BGP4MP'] \
+            or m.type == MRT_T['BGP4MP_ET']:
             print_bgp4mp(m)
 
 if __name__ == '__main__':
