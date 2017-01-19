@@ -1,7 +1,7 @@
 '''
 mrtparse.py - MRT format data parser
 
-Copyright (C) 2017 Tetsumune KISO
+Copyright (C) 2016 greenHippo, LLC.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -124,6 +124,17 @@ TD_V2_ST = reverse_defaultdict({
     4:'RIB_IPV6_UNICAST',
     5:'RIB_IPV6_MULTICAST',
     6:'RIB_GENERIC',
+    7:'GEO_PEER_TABLE',              # Defined in RFC6397
+    # Defined in draft-petrie-grow-mrt-add-paths
+    8:'RIB_IPV4_UNICAST_ADDPATH',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    9:'RIB_IPV4_MULTICAST_ADDPATH',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    10:'RIB_IPV6_UNICAST_ADDPATH',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    11:'RIB_IPV6_MULTICAST_ADDPATH',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    12:'RIB_GENERIC_ADDPATH',
 })
 
 # BGP4MP,BGP4MP_ET Subtypes
@@ -137,6 +148,14 @@ BGP4MP_ST = reverse_defaultdict({
     5:'BGP4MP_STATE_CHANGE_AS4',
     6:'BGP4MP_MESSAGE_LOCAL',
     7:'BGP4MP_MESSAGE_AS4_LOCAL',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    8:'BGP4MP_MESSAGE_ADDPATH',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    9:'BGP4MP_MESSAGE_AS4_ADDPATH',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    10:'BGP4MP_MESSAGE_LOCAL_ADDPATH',
+    # Defined in draft-petrie-grow-mrt-add-paths
+    11:'BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH',
 })
 
 # MRT Message Subtypes
@@ -397,6 +416,17 @@ def as_repr(n=None):
     except AttributeError:
         return AS_REPR['asplain']
 
+def is_add_path(f=None):
+    '''
+    Flag for add-path.
+    '''
+    if f is not None:
+        is_add_path.f = f
+    try:
+        return is_add_path.f
+    except AttributeError:
+        return False
+
 class MrtFormatError(Exception):
     '''
     Exception for invalid MRT formatted data.
@@ -507,6 +537,8 @@ class Base:
         Convert buffers to NLRI.
         '''
         try:
+            if is_add_path():
+                raise MrtFormatError
             p = self.p
             l = []
             while p < n:
@@ -587,6 +619,7 @@ class Reader(Base):
         Decoder for MRT header.
         '''
         as_len(4)
+        is_add_path(False)
         self.mrt = Mrt(self.f.read(12))
         if len(self.mrt.buf) == 0:
             self.close()
@@ -638,18 +671,29 @@ class Reader(Base):
         '''
         Decoder for Table_Dump_V2 format.
         '''
+        if self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
+            is_add_path(True)
+
         if self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']:
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH']:
             self.mrt.rib = AfiSpecRib(data)
             self.mrt.rib.unpack(AFI_T['IPv4'])
         elif self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']:
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
             self.mrt.rib = AfiSpecRib(data)
             self.mrt.rib.unpack(AFI_T['IPv6'])
         elif self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
             self.mrt.peer = PeerIndexTable(data)
             self.mrt.peer.unpack()
-        elif self.mrt.subtype == TD_V2_ST['RIB_GENERIC']:
+        elif self.mrt.subtype == TD_V2_ST['RIB_GENERIC'] \
+            or self.mrt.subtype == TD_V2_ST['RIB_GENERIC_ADDPATH']:
             self.mrt.rib = RibGeneric(data)
             self.mrt.rib.unpack()
         else:
@@ -822,11 +866,18 @@ class RibEntries(Base):
     '''
     Class for Rib Entries format.
     '''
-    __slots__ = ['buf', 'p', 'peer_index', 'org_time', 'attr_len', 'attr']
+    __slots__ = [
+        'buf', 'p', 'peer_index', 'org_time', 'path_id', 'attr_len', 'attr'
+    ]
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
+        self.peer_index = None
+        self.org_time = None
+        self.path_id = None
+        self.attr_len = None
+        self.attr = None
 
     def unpack(self, af):
         '''
@@ -834,6 +885,8 @@ class RibEntries(Base):
         '''
         self.peer_index = self.val_num(2)
         self.org_time = self.val_num(4)
+        if is_add_path():
+            self.path_id == val_num(4)
         attr_len = self.attr_len = self.val_num(2)
         self.attr = []
         while attr_len > 0:
@@ -862,8 +915,16 @@ class Bgp4Mp(Base):
         '''
         if subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE'] \
-            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']:
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL'] \
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_ADDPATH'] \
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL_ADDPATH']:
             as_len(2)
+
+        if subtype == BGP4MP_ST['BGP4MP_MESSAGE_ADDPATH'] \
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_ADDPATH'] \
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL_ADDPATH'] \
+            or subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH']:
+            is_add_path(True)
 
         self.peer_as = self.val_asn(as_len())
         self.local_as = self.val_asn(as_len())
@@ -879,6 +940,7 @@ class Bgp4Mp(Base):
         else:
             self.msg = BgpMessage(self.buf[self.p:])
             self.p += self.msg.unpack(self.af)
+
         return self.p
 
 class BgpMessage(Base):

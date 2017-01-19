@@ -110,10 +110,14 @@ def print_td_v2(m):
             prline('Peer IP Address: %s' % entry.ip)
             prline('Peer AS: %s' % entry.asn)
 
-    elif ( m.subtype == TD_V2_ST['RIB_IPV4_UNICAST']
-        or m.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']
-        or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST']
-        or m.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']):
+    elif m.subtype == TD_V2_ST['RIB_IPV4_UNICAST'] \
+        or m.subtype == TD_V2_ST['RIB_IPV4_MULTICAST'] \
+        or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST'] \
+        or m.subtype == TD_V2_ST['RIB_IPV6_MULTICAST'] \
+        or m.subtype == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
+        or m.subtype == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH'] \
+        or m.subtype == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
+        or m.subtype == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
         prline('Sequence Number: %d' % m.rib.seq)
         prline('Prefix Length: %d' % m.rib.plen)
         prline('Prefix: %s' % m.rib.prefix)
@@ -129,7 +133,8 @@ def print_td_v2(m):
             for attr in entry.attr:
                 print_bgp_attr(attr, 1)
 
-    elif m.subtype == TD_V2_ST['RIB_GENERIC']:
+    elif m.subtype == TD_V2_ST['RIB_GENERIC'] \
+        or m.subtype == TD_V2_ST['RIB_GENERIC_ADDPATH']:
         prline('Sequence Number: %d' % m.rib.seq)
         prline('AFI: %d(%s)' % (m.rib.afi, AFI_T[m.rib.afi]))
         prline('SAFI: %d(%s)' % (m.rib.safi, SAFI_T[m.rib.safi]))
@@ -161,17 +166,21 @@ def print_bgp4mp(m):
     prline('Peer IP Address: %s' % m.bgp.peer_ip)
     prline('Local IP Address: %s' % m.bgp.local_ip)
 
-    if (   m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
-        or m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
+    if m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:
         prline('Old State: %d(%s)' %
             (m.bgp.old_state, BGP_FSM[m.bgp.old_state]))
         prline('New State: %d(%s)' %
             (m.bgp.new_state, BGP_FSM[m.bgp.new_state]))
 
-    elif ( m.subtype == BGP4MP_ST['BGP4MP_MESSAGE']
-        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
-        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
-        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
+    elif m.subtype == BGP4MP_ST['BGP4MP_MESSAGE'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_ADDPATH'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_ADDPATH'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL_ADDPATH'] \
+        or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH']:
         print_bgp_msg(m.bgp.msg, m.subtype)
 
 def print_bgp_msg(msg, subtype):
@@ -330,8 +339,8 @@ def print_bgp_attr(attr, n):
             prline('SAFI: %d(%s)' %
                 (attr.mp_reach['safi'], SAFI_T[attr.mp_reach['safi']]))
 
-            if (   attr.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
-                or attr.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
+            if attr.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST'] \
+                or attr.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']:
                 prline('Route Distinguisher: %s' % attr.mp_reach['rd'])
 
         prline('Length: %d' % attr.mp_reach['nlen'])
@@ -395,8 +404,8 @@ def print_nlri(nlri, title, *args):
     global indt
     safi = args[0] if len(args) > 0 else 0
 
-    if (   safi == SAFI_T['L3VPN_UNICAST']
-        or safi == SAFI_T['L3VPN_MULTICAST']):
+    if safi == SAFI_T['L3VPN_UNICAST'] \
+        or safi == SAFI_T['L3VPN_MULTICAST']:
         prline('%s' % title)
         indt += 1
         plen = nlri.plen - (len(nlri.label) * 3 + 8) * 8
