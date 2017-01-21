@@ -920,12 +920,6 @@ class Bgp4Mp(Base):
         '''
         Decoder for BGP4MP format.
         '''
-        if subtype >= len(BGP4MP_ST):
-            self.p += self.mrt.len
-            raise MrtFormatError(
-                'Unsupported BGP4MP/BGP4MP_ET subtype %d(%s)'
-                % (subtype, BGP4MP_ST[subtype]))
-
         if subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE'] \
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL'] \
