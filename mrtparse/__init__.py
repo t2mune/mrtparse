@@ -641,6 +641,13 @@ class Reader(Base):
                 'Invalid MRT data length %d < %d'
                 % (len(data), self.mrt.len))
 
+        if len(MRT_ST[self.mrt.type]) \
+            and MRT_ST[self.mrt.type][self.mrt.subtype] == 'Unknown':
+            raise MrtFormatError(
+                'Unsupported %s subtype %d(%s)'
+                % (self.mrt.type, self.mrt.subtype,
+                MRT_ST[self.mrt.type][self.mrt.subtype]))
+
         if self.mrt.type == MRT_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
         elif self.mrt.type == MRT_T['BGP4MP'] \
@@ -962,6 +969,12 @@ class Bgp4Mp(Base):
         '''
         Decoder for BGP4MP format.
         '''
+        if subtype >= len(BGP4MP_ST):
+            self.p += self.mrt.len
+            raise MrtFormatError(
+                'Unsupported BGP4MP/BGP4MP_ET subtype %d(%s)'
+                % (subtype, BGP4MP_ST[subtype]))
+
         if subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE'] \
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL'] \
