@@ -2,6 +2,9 @@
 	* Update - initialization of attributes into the Base.__init__ method.
 	Thank you Martin A. Brown.
 
+2017-01-21 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added a MRT subtype error.
+
 2017-01-19 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added a support for draft-petrie-grow-mrt-add-paths.
 
