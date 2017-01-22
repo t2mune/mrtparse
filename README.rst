@@ -70,7 +70,7 @@ Supported TABLE_DUMP_V2 subtypes
 | RIB\_GENERIC\_ADDPATH         | 12      |
 +-------------------------------+---------+
 
-Supported BGP4MP/BGP4MP-ET subtypes
+Supported BGP4MP/BGP4MP_ET subtypes
 -----------------------------------
 
 +--------------------------------------+---------+
