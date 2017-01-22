@@ -412,7 +412,8 @@ class Base:
     __slots__ = ['buf', 'p']
 
     def __init__(self):
-        self.buf = None
+        for slot in self.__slots__:
+            setattr(self, slot, None)
         self.p = 0
 
     def chk_buf(self, n):
@@ -528,12 +529,10 @@ class Reader(Base):
     '''
     Reader for MRT format data.
     '''
-    __slots__ = ['mrt', 'f']
+    __slots__ = ['buf', 'p', 'mrt', 'f']
 
     def __init__(self, arg):
         Base.__init__(self)
-        self.mrt = None
-        self.f = None
 
         # for file instance
         if hasattr(arg, 'read'):
@@ -661,24 +660,13 @@ class Mrt(Base):
     Class for MRT header.
     '''
     __slots__ = [
-        'ts', 'type', 'subtype', 'len', 'micro_ts', 'bgp', 'peer', 'td', 'rib',
-        'err', 'err_msg'
+        'buf', 'p', 'ts', 'type', 'subtype', 'len', 'micro_ts', 'bgp', 'peer',
+        'td', 'rib', 'err', 'err_msg'
     ]
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.ts = None
-        self.type = None
-        self.subtype = None
-        self.len = None
-        self.micro_ts = None
-        self.bgp = None
-        self.peer = None
-        self.td = None
-        self.rib = None
-        self.err = None
-        self.err_msg = None
 
     def unpack(self):
         '''
@@ -695,23 +683,13 @@ class TableDump(Base):
     Class for Table_Dump format.
     '''
     __slots__ = [
-        'view', 'seq', 'prefix', 'plen', 'status', 'org_time', 'peer_ip',
-        'peer_as', 'attr_len', 'attr'
+        'buf', 'p', 'view', 'seq', 'prefix', 'plen', 'status', 'org_time',
+        'peer_ip', 'peer_as', 'attr_len', 'attr'
     ]
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.view = None
-        self.seq = None
-        self.prefix = None
-        self.plen = None
-        self.status = None
-        self.org_time = None
-        self.peer_ip = None
-        self.peer_as = None
-        self.attr_len = None
-        self.attr = None
 
     def unpack(self, subtype):
         '''
@@ -741,16 +719,11 @@ class PeerIndexTable(Base):
     '''
     Class for PEER_INDEX_TABLE format.
     '''
-    __slots__ = ['collector', 'view_len', 'view', 'count', 'entry']
+    __slots__ = ['buf', 'p', 'collector', 'view_len', 'view', 'count', 'entry']
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.collector = None
-        self.view_len = None
-        self.view = None
-        self.count = None
-        self.entry = None
 
     def unpack(self):
         '''
@@ -771,15 +744,11 @@ class PeerEntries(Base):
     '''
     Class for Peer Entries.
     '''
-    __slots__ = ['type', 'bgp_id', 'ip', 'asn']
+    __slots__ = ['buf', 'p', 'type', 'bgp_id', 'ip', 'asn']
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.type = None
-        self.bgp_id = None
-        self.ip = None
-        self.asn = None
 
     def unpack(self):
         '''
@@ -800,17 +769,11 @@ class RibGeneric(Base):
     '''
     Class for RIB_GENERIC format.
     '''
-    __slots__ = ['seq', 'afi', 'safi', 'nlri', 'count', 'entry']
+    __slots__ = ['buf', 'p', 'seq', 'afi', 'safi', 'nlri', 'count', 'entry']
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.seq = None
-        self.afi = None
-        self.safi = None
-        self.nlri = None
-        self.count = None
-        self.entry = None
 
     def unpack(self):
         '''
@@ -834,16 +797,11 @@ class AfiSpecRib(Base):
     '''
     Class for AFI/SAFI-Specific RIB format.
     '''
-    __slots__ = ['seq', 'plen', 'prefix', 'count', 'entry']
+    __slots__ = ['buf', 'p', 'seq', 'plen', 'prefix', 'count', 'entry']
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.seq = None
-        self.plen = None
-        self.prefix = None
-        self.count = None
-        self.entry = None
 
     def unpack(self, af):
         '''
@@ -864,15 +822,11 @@ class RibEntries(Base):
     '''
     Class for Rib Entries format.
     '''
-    __slots__ = ['peer_index', 'org_time', 'attr_len', 'attr']
+    __slots__ = ['buf', 'p', 'peer_index', 'org_time', 'attr_len', 'attr']
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.peer_index = None
-        self.org_time = None
-        self.attr_len = None
-        self.attr = None
 
     def unpack(self, af):
         '''
@@ -894,22 +848,13 @@ class Bgp4Mp(Base):
     Class for BGP4MP format.
     '''
     __slots__ = [
-        'peer_as', 'local_as', 'ifindex', 'af', 'peer_ip', 'local_ip',
-        'old_state', 'new_state', 'msg'
+        'buf', 'p', 'peer_as', 'local_as', 'ifindex', 'af', 'peer_ip',
+        'local_ip', 'old_state', 'new_state', 'msg'
     ]
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.peer_as = None
-        self.local_as = None
-        self.ifindex = None
-        self.af = None
-        self.peer_ip = None
-        self.local_ip = None
-        self.old_state = None
-        self.new_state = None
-        self.msg = None
 
     def unpack(self, subtype):
         '''
@@ -941,34 +886,14 @@ class BgpMessage(Base):
     Class for BGP Message.
     '''
     __slots__ = [
-        'marker', 'len', 'type', 'ver', 'my_as', 'holdtime', 'bgp_id',
-        'opt_len', 'opt_params', 'wd_len', 'withdrawn', 'attr_len', 'attr',
-        'nlri', 'err_code', 'err_subcode', 'data', 'afi', 'rsvd', 'safi'
+        'buf', 'p', 'marker', 'len', 'type', 'ver', 'my_as', 'holdtime',
+        'bgp_id', 'opt_len', 'opt_params', 'wd_len', 'withdrawn', 'attr_len',
+        'attr', 'nlri', 'err_code', 'err_subcode', 'data', 'afi', 'rsvd', 'safi'
     ]
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.marker = None
-        self.len = None
-        self.type = None
-        self.ver = None
-        self.my_as = None
-        self.holdtime = None
-        self.bgp_id = None
-        self.opt_len = None
-        self.opt_params = None
-        self.wd_len = None
-        self.withdrawn = None
-        self.attr_len = None
-        self.attr = None
-        self.nlri = None
-        self.err_code = None
-        self.err_subcode = None
-        self.data = None
-        self.afi = None
-        self.rsvd = None
-        self.safi = None
 
     def unpack(self, af):
         '''
@@ -1042,22 +967,13 @@ class OptParams(Base):
     Class for BGP OPEN Optional Parameters.
     '''
     __slots__ = [
-        'type', 'len', 'cap_type', 'cap_len', 'multi_ext', 'orf',
+        'buf', 'p', 'type', 'len', 'cap_type', 'cap_len', 'multi_ext', 'orf',
         'graceful_restart', 'support_as4', 'add_path'
     ]
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.type = None
-        self.len = None
-        self.cap_type = None
-        self.cap_len = None
-        self.multi_ext = None
-        self.orf = None
-        self.graceful_restart = None
-        self.support_as4 = None
-        self.add_path = None
 
     def unpack(self):
         '''
@@ -1161,8 +1077,8 @@ class BgpAttr(Base):
     Class for BGP path attributes
     '''
     __slots__ = [
-        'flag', 'type', 'len', 'origin', 'as_path', 'next_hop', 'med',
-        'local_pref', 'aggr', 'comm', 'org_id', 'cl_list', 'mp_reach',
+        'buf', 'p', 'flag', 'type', 'len', 'origin', 'as_path', 'next_hop',
+        'med', 'local_pref', 'aggr', 'comm', 'org_id', 'cl_list', 'mp_reach',
         'mp_unreach', 'ext_comm', 'as4_path', 'as4_aggr', 'aigp', 'attr_set',
         'large_comm', 'val'
     ]
@@ -1170,27 +1086,6 @@ class BgpAttr(Base):
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.flag = None
-        self.type = None
-        self.len = None
-        self.origin = None
-        self.as_path = None
-        self.next_hop = None
-        self.med = None
-        self.local_pref = None
-        self.aggr = None
-        self.comm = None
-        self.org_id = None
-        self.cl_list = None
-        self.mp_reach = None
-        self.mp_unreach = None
-        self.ext_comm = None
-        self.as4_path = None
-        self.as4_aggr = None
-        self.aigp = None
-        self.attr_set = None
-        self.large_comm = None
-        self.val = None
 
     def unpack(self, af=0):
         '''
@@ -1467,16 +1362,11 @@ class Nlri(Base):
     '''
     Class for NLRI.
     '''
-    __slots__ = ['path_id', 'label', 'rd', 'plen', 'prefix']
+    __slots__ = ['buf', 'p', 'path_id', 'label', 'rd', 'plen', 'prefix']
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.path_id = None
-        self.label = None
-        self.rd = None
-        self.plen = None
-        self.prefix = None
 
     def unpack(self, af, saf=0, add_path=0):
         '''
