@@ -262,7 +262,8 @@ def print_bgp_opt_params(opt):
         put_lines(
             'AFI: %d(%s)' % (opt.multi_ext['afi'], AFI_T[opt.multi_ext['afi']]),
             'Reserved: %d' % opt.multi_ext['rsvd'],
-            'SAFI: %d(%s)' % (opt.multi_ext['safi'], SAFI_T[opt.multi_ext['safi']])
+            'SAFI: %d(%s)'
+            % (opt.multi_ext['safi'], SAFI_T[opt.multi_ext['safi']])
         )
 
     elif opt.cap_type == BGP_CAP_C['Route Refresh Capability for BGP-4']:
@@ -311,8 +312,10 @@ def print_bgp_opt_params(opt):
 def print_bgp_attr(attr, n):
     global indt_num
     indt_num = n
-    put_lines( 'Path Attribute Flags/Type/Length: 0x%02x/%d/%d' %
-        (attr.flag, attr.type, attr.len))
+    put_lines(
+        'Path Attribute Flags/Type/Length: 0x%02x/%d/%d'
+        % (attr.flag, attr.type, attr.len)
+    )
 
     indt_num += 1
     line = '%s' % BGP_ATTR_T[attr.type]
@@ -348,8 +351,10 @@ def print_bgp_attr(attr, n):
         put_lines(line)
         indt_num += 1
         if 'afi' in attr.mp_reach:
-            put_lines('AFI: %d(%s)' %
-                (attr.mp_reach['afi'], AFI_T[attr.mp_reach['afi']]))
+            put_lines(
+                'AFI: %d(%s)'
+                % (attr.mp_reach['afi'], AFI_T[attr.mp_reach['afi']])
+            )
 
         if 'safi' in attr.mp_reach:
             put_lines(
@@ -398,7 +403,9 @@ def print_bgp_attr(attr, n):
                 'Path Segment Value: %s' % ' '.join(path_seg['val'])
             )
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-        put_lines(line + ': %s %s' % (attr.as4_aggr['asn'], attr.as4_aggr['id']))
+        put_lines(
+            line + ': %s %s' % (attr.as4_aggr['asn'], attr.as4_aggr['id'])
+        )
     elif attr.type == BGP_ATTR_T['AIGP']:
         put_lines(line)
         indt_num += 1
