@@ -357,8 +357,8 @@ def print_bgp_attr(attr, n):
                 (attr.mp_reach['safi'], SAFI_T[attr.mp_reach['safi']])
             )
 
-            if (   attr.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST']
-                or attr.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']):
+            if attr.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST'] \
+                or attr.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']:
                 put_lines('Route Distinguisher: %s' % attr.mp_reach['rd'])
 
         put_lines('Length: %d' % attr.mp_reach['nlen'])
