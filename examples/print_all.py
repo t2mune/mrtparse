@@ -27,7 +27,7 @@ from optparse import OptionParser
 from datetime import *
 from mrtparse import *
 
-indt = '    '
+indt = ' ' * 4
 indt_num = 0
 contents = ''
 
@@ -53,7 +53,7 @@ def prerror(m):
         print('    %s' % s)
 
 def put_lines(*lines):
-    global indt_num, contents
+    global contents
     for line in lines:
         contents += indt * indt_num + line + '\n'
 
