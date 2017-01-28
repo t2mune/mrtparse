@@ -397,6 +397,18 @@ def as_repr(n=None):
     except AttributeError:
         return AS_REPR['asplain']
 
+def af_num(afi=None, safi=None):
+    '''
+    the values of AFI/SAFI.
+    '''
+    if afi is not None:
+        af_num.afi = afi
+        af_num.safi = safi
+    try:
+        return (af_num.afi, af_num.safi)
+    except AttributeError:
+        return (0, 0)
+
 class MrtFormatError(Exception):
     '''
     Exception for invalid MRT formatted data.
@@ -587,6 +599,7 @@ class Reader(Base):
         Decoder for MRT header.
         '''
         as_len(4)
+        af_num(0, 0)
         self.mrt = Mrt(self.f.read(12))
         if len(self.mrt.buf) == 0:
             self.close()
@@ -640,12 +653,14 @@ class Reader(Base):
         '''
         if self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST'] \
             or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST']:
+            af_num.afi = AFI_T['IPv4']
             self.mrt.rib = AfiSpecRib(data)
-            self.mrt.rib.unpack(AFI_T['IPv4'])
+            self.mrt.rib.unpack()
         elif self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST'] \
             or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST']:
+            af_num.afi = AFI_T['IPv6']
             self.mrt.rib = AfiSpecRib(data)
-            self.mrt.rib.unpack(AFI_T['IPv6'])
+            self.mrt.rib.unpack()
         elif self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
             self.mrt.peer = PeerIndexTable(data)
             self.mrt.peer.unpack()
@@ -701,10 +716,14 @@ class TableDump(Base):
         self.plen = self.val_num(1)
         self.status = self.val_num(1)
         self.org_time = self.val_num(4)
+
+        # Considering the IPv4 peers advertising IPv6 Prefixes, first,
+        # the Peer IP Address field is decoded as an IPv4 address.
         self.peer_ip = self.val_addr(AFI_T['IPv4'])
         if subtype == AFI_T['IPv6'] and self.val_num(12):
             self.p -= 16
             self.peer_ip = self.val_addr(subtype)
+
         self.peer_as = self.val_asn(as_len(2))
         attr_len = self.attr_len = self.val_num(2)
         self.attr = []
@@ -756,13 +775,9 @@ class PeerEntries(Base):
         '''
         self.type = self.val_num(1)
         self.bgp_id = self.val_addr(AFI_T['IPv4'])
-        if self.type & 0x01:
-            af = AFI_T['IPv6']
-        else:
-            af = AFI_T['IPv4']
-        self.ip = self.val_addr(af)
-        n = 4 if self.type & (0x01 << 1) else 2
-        self.asn = self.val_asn(n)
+        af_num.afi = AFI_T['IPv6'] if self.type & 0x01 else AFI_T['IPv4']
+        self.ip = self.val_addr(af_num.afi)
+        self.asn = self.val_asn(4 if self.type & (0x01 << 1) else 2)
         return self.p
 
 class RibGeneric(Base):
@@ -780,16 +795,16 @@ class RibGeneric(Base):
         Decoder for RIB_GENERIC format.
         '''
         self.seq = self.val_num(4)
-        self.afi = self.val_num(2)
-        self.safi = self.val_num(1)
+        af_num.afi = self.afi = self.val_num(2)
+        af_num.safi = self.safi = self.val_num(1)
         n = self.val_num(1)
         self.p -= 1
-        self.nlri = self.val_nlri(self.p + (n + 7) // 8, self.afi, self.safi)
+        self.nlri = self.val_nlri(self.p+(n+7)//8, self.afi, self.safi)
         self.count = self.val_num(2)
         self.entry = []
         for _ in range(self.count):
             entry = RibEntries(self.buf[self.p:])
-            self.p += entry.unpack(self.afi)
+            self.p += entry.unpack()
             self.entry.append(entry)
         return self.p
 
@@ -803,18 +818,18 @@ class AfiSpecRib(Base):
         Base.__init__(self)
         self.buf = buf
 
-    def unpack(self, af):
+    def unpack(self):
         '''
         Decoder for AFI/SAFI-Specific RIB format.
         '''
         self.seq = self.val_num(4)
         self.plen = self.val_num(1)
-        self.prefix = self.val_addr(af, self.plen)
+        self.prefix = self.val_addr(af_num.afi, self.plen)
         self.count = self.val_num(2)
         self.entry = []
         for _ in range(self.count):
             entry = RibEntries(self.buf[self.p:])
-            self.p += entry.unpack(af)
+            self.p += entry.unpack()
             self.entry.append(entry)
         return self.p
 
@@ -828,7 +843,7 @@ class RibEntries(Base):
         Base.__init__(self)
         self.buf = buf
 
-    def unpack(self, af):
+    def unpack(self):
         '''
         Decoder for Rib Entries format.
         '''
@@ -838,7 +853,7 @@ class RibEntries(Base):
         self.attr = []
         while attr_len > 0:
             attr = BgpAttr(self.buf[self.p:])
-            self.p += attr.unpack(af)
+            self.p += attr.unpack()
             self.attr.append(attr)
             attr_len -= attr.p
         return self.p
@@ -868,7 +883,7 @@ class Bgp4Mp(Base):
         self.peer_as = self.val_asn(as_len())
         self.local_as = self.val_asn(as_len())
         self.ifindex = self.val_num(2)
-        self.af = self.val_num(2)
+        af_num.afi = self.af = self.val_num(2)
         self.peer_ip = self.val_addr(self.af)
         self.local_ip = self.val_addr(self.af)
 
@@ -878,7 +893,7 @@ class Bgp4Mp(Base):
             self.new_state = self.val_num(2)
         else:
             self.msg = BgpMessage(self.buf[self.p:])
-            self.p += self.msg.unpack(self.af)
+            self.p += self.msg.unpack()
         return self.p
 
 class BgpMessage(Base):
@@ -895,7 +910,7 @@ class BgpMessage(Base):
         Base.__init__(self)
         self.buf = buf
 
-    def unpack(self, af):
+    def unpack(self):
         '''
         Decoder for BGP Message.
         '''
@@ -906,7 +921,7 @@ class BgpMessage(Base):
         if self.type == BGP_MSG_T['OPEN']:
             self.unpack_open()
         elif self.type == BGP_MSG_T['UPDATE']:
-            self.unpack_update(af)
+            self.unpack_update()
         elif self.type == BGP_MSG_T['NOTIFICATION']:
             self.unpack_notification()
         elif self.type == BGP_MSG_T['ROUTE-REFRESH']:
@@ -931,12 +946,12 @@ class BgpMessage(Base):
             self.opt_params.append(opt_params)
             opt_len -= opt_params.p
 
-    def unpack_update(self, af):
+    def unpack_update(self):
         '''
         Decoder for BGP UPDATE Message.
         '''
         self.wd_len = self.val_num(2)
-        self.withdrawn = self.val_nlri(self.p + self.wd_len, af)
+        self.withdrawn = self.val_nlri(self.p+self.wd_len, af_num.afi)
         self.attr_len = self.val_num(2)
         attr_len = self.p + self.attr_len
         self.attr = []
@@ -944,7 +959,7 @@ class BgpMessage(Base):
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
             self.attr.append(attr)
-        self.nlri = self.val_nlri(self.len, af)
+        self.nlri = self.val_nlri(self.len, af_num.afi)
 
     def unpack_notification(self):
         '''
@@ -1087,7 +1102,7 @@ class BgpAttr(Base):
         Base.__init__(self)
         self.buf = buf
 
-    def unpack(self, af=0):
+    def unpack(self):
         '''
         Decoder for BGP path attributes
         '''
@@ -1118,7 +1133,7 @@ class BgpAttr(Base):
         elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
             self.unpack_cluster_list()
         elif self.type == BGP_ATTR_T['MP_REACH_NLRI']:
-            self.unpack_mp_reach_nlri(af)
+            self.unpack_mp_reach_nlri()
         elif self.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
             self.unpack_mp_unreach_nlri()
         elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
@@ -1218,7 +1233,7 @@ class BgpAttr(Base):
         while self.p < attr_len:
             self.cl_list.append(self.val_addr(AFI_T['IPv4']))
 
-    def unpack_mp_reach_nlri(self, af):
+    def unpack_mp_reach_nlri(self):
         '''
         Decoder for MP_REACH_NLRI attribute
         '''
@@ -1227,23 +1242,23 @@ class BgpAttr(Base):
         self.mp_reach['afi'] = self.val_num(2)
 
         if AFI_T[self.mp_reach['afi']] != 'Unknown':
-            af = self.mp_reach['afi']
-            self.mp_reach['safi'] = self.val_num(1)
+            af_num.afi = self.mp_reach['afi']
+            af_num.safi = self.mp_reach['safi'] = self.val_num(1)
             self.mp_reach['nlen'] = self.val_num(1)
 
-            if af != AFI_T['IPv4'] and af != AFI_T['IPv6']:
+            if af_num.afi != AFI_T['IPv4'] and af_num.afi != AFI_T['IPv6']:
                 self.p = attr_len
                 return
 
-            if self.mp_reach['safi'] != SAFI_T['UNICAST'] \
-                and self.mp_reach['safi'] != SAFI_T['MULTICAST'] \
-                and self.mp_reach['safi'] != SAFI_T['L3VPN_UNICAST'] \
-                and self.mp_reach['safi'] != SAFI_T['L3VPN_MULTICAST']:
+            if af_num.safi != SAFI_T['UNICAST'] \
+                and af_num.safi != SAFI_T['MULTICAST'] \
+                and af_num.safi != SAFI_T['L3VPN_UNICAST'] \
+                and af_num.safi != SAFI_T['L3VPN_MULTICAST']:
                 self.p = attr_len
                 return
 
-            if self.mp_reach['safi'] == SAFI_T['L3VPN_UNICAST'] \
-                or self.mp_reach['safi'] == SAFI_T['L3VPN_MULTICAST']:
+            if af_num.safi == SAFI_T['L3VPN_UNICAST'] \
+                or af_num.safi == SAFI_T['L3VPN_MULTICAST']:
                 self.mp_reach['rd'] = self.val_rd()
         else:
             self.p -= 2
@@ -1251,14 +1266,14 @@ class BgpAttr(Base):
             self.mp_reach['nlen'] = self.val_num(1)
 
         self.mp_reach['next_hop'] = []
-        self.mp_reach['next_hop'].append(self.val_addr(af))
-        if self.mp_reach['nlen'] == 32 and af == AFI_T['IPv6']:
-            self.mp_reach['next_hop'].append(self.val_addr(af))
+        self.mp_reach['next_hop'].append(self.val_addr(af_num.afi))
+        if self.mp_reach['nlen'] == 32 and af_num.afi == AFI_T['IPv6']:
+            self.mp_reach['next_hop'].append(self.val_addr(af_num.afi))
 
         if 'afi' in self.mp_reach:
             self.mp_reach['rsvd'] = self.val_num(1)
             self.mp_reach['nlri'] = self.val_nlri(
-                attr_len, af, self.mp_reach['safi'])
+                attr_len, af_num.afi, af_num.safi)
 
     def unpack_mp_unreach_nlri(self):
         '''
