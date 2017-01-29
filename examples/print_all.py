@@ -53,7 +53,7 @@ def prerror(m):
         print('    %s' % s)
 
 def put_lines(*lines):
-    global indt_num, contents
+    global contents
     for line in lines:
         contents += indt * indt_num + line + '\n'
 
