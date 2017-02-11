@@ -12,12 +12,12 @@ MRT Type/Subtype
 |                         |                 |                                    |
 +=========================+=================+====================================+
 | bird6\_bgp              | BGP4MP          | BGP4MP\_MESSAGE                    |
-|                         |                 | BGP4MP\_MESSAGE\_AS4               |
-|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4         |
+|                         |                 | | BGP4MP\_MESSAGE\_AS4             |
+|                         |                 | | BGP4MP\_STATE\_CHANGE\_AS4       |
 +-------------------------+-----------------+------------------------------------+
 | bird\_bgp               | BGP4MP          | BGP4MP\_MESSAGE                    |
-|                         |                 | BGP4MP\_MESSAGE\_AS4               |
-|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4         |
+|                         |                 | | BGP4MP\_MESSAGE\_AS4             |
+|                         |                 | | BGP4MP\_STATE\_CHANGE\_AS4       |
 +-------------------------+-----------------+------------------------------------+
 
 Summary
