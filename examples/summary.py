@@ -69,22 +69,26 @@ def get_summary(f):
         elif m.ts > end_time:
             end_time = m.ts
 
-        if (   m.type == MRT_T['BGP4MP']
-            or m.type == MRT_T['BGP4MP_ET']):
+        if m.type == MRT_T['BGP4MP'] \
+            or m.type == MRT_T['BGP4MP_ET']:
             if not m.type in summary:
                 summary[m.type] = {}
 
-            if (   m.subtype == BGP4MP_ST['BGP4MP_MESSAGE']
-                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
-                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
-                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
+            if m.subtype == BGP4MP_ST['BGP4MP_MESSAGE'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_ADDPATH'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_ADDPATH'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL_ADDPATH'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH']:
 
                 if not m.subtype in summary[m.type]:
                     summary[m.type][m.subtype] = {}
                 count(summary[m.type][m.subtype], m.bgp.msg.type)
 
-            elif ( m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE']
-                or m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
+            elif m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
+                or m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:
 
                 if not m.subtype in summary[m.type]:
                     summary[m.type][m.subtype] = {}
@@ -116,21 +120,25 @@ def print_summary():
             for k2 in sorted(summary[k1].keys()):
                 print_line(1, TD_V2_ST[k2], total(summary[k1][k2]))
 
-        elif ( k1 == MRT_T['BGP4MP']
-            or k1 == MRT_T['BGP4MP_ET']):
+        elif k1 == MRT_T['BGP4MP'] \
+            or k1 == MRT_T['BGP4MP_ET']:
 
             for k2 in sorted(summary[k1].keys()):
                 print_line(1, BGP4MP_ST[k2], total(summary[k1][k2]))
 
-                if (   k2 == BGP4MP_ST['BGP4MP_MESSAGE']
-                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
-                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
-                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
+                if k2 == BGP4MP_ST['BGP4MP_MESSAGE'] \
+                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4'] \
+                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL'] \
+                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL'] \
+                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_ADDPATH'] \
+                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4_ADDPATH'] \
+                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL_ADDPATH'] \
+                    or k2 == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH']:
                     for k3 in sorted(summary[k1][k2].keys()):
                         print_line(2, BGP_MSG_T[k3], total(summary[k1][k2][k3]))
 
-                elif ( k2 == BGP4MP_ST['BGP4MP_STATE_CHANGE']
-                    or k2 == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
+                elif k2 == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
+                    or k2 == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:
                     for k3 in sorted(summary[k1][k2].keys()):
                         print_line(2, BGP_FSM[k3], total(summary[k1][k2][k3]))
 
