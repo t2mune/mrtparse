@@ -1,45 +1,130 @@
 Sample MRT format Data
-----------------------
+======================
 
-+---------------------------------+-----------------+----------------------------+------------------------+
-| File Name                       | Type            | Subtype                    | Description            |
-|                                 |                 |                            |                        |
-+=================================+=================+============================+========================+
-| bird6\_bgp                      | BGP4MP          | BGP4MP\_MESSAGE            | IPv6 Peer              |
-|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv6 Prefix            |
-|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
-|                                 |                 |                            | ADD-PATH Capability    |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| bird\_bgp                       | BGP4MP          | BGP4MP\_MESSAGE            | IPv4 Peer              |
-|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv4 Prefix            |
-|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
-|                                 |                 |                            | ADD-PATH Capability    |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_bgp                   | BGP4MP          | BGP4MP\_MESSAGE            | IPv4/IPv6 Peer         |
-|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv4/IPv6/VPNv4 Prefix |
-|                                 |                 | BGP4MP\_STATE\_CHANGE      | All BGP Message Types  |
-|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 |                        |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_rib\_table            | TABLE\_DUMP     | AFI\_IPv4                  | IPv4/IPv6 Peer         |
-|                                 |                 | AFI\_IPv6                  | IPv4/IPv6 Prefix       |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_rib\_table-mp         | BGP4MP          | BGP4MP\_ENTRY              | Unsupported Subtype    |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| openbgpd\_rib\_table-v2         | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE         | IPv4/IPv6 Peer         |
-|                                 |                 | RIB\_IPV4\_UNICAST         | IPv4/IPv6/VPNv4 Prefix |
-|                                 |                 | RIB\_IPV6\_UNICAST         |                        |
-|                                 |                 | RIB\_GENERIC               |                        |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| quagga\_bgp                     | BGP4MP          | BGP4MP\_MESSAGE            | IPv4/IPv6 Peer         |
-|                                 |                 | BGP4MP\_MESSAGE\_AS4       | IPv4/IPv6/VPNv4 Prefix |
-|                                 |                 | BGP4MP\_STATE\_CHANGE\_AS4 | All BGP Message Types  |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| quagga\_bgp\_large\_communities | BGP4MP          | BGP4MP\_MESSAGE\_AS4       | IPv4 Peer              |
-+---------------------------------+-----------------+----------------------------+------------------------+
-| quagga\_rib                     | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE         | IPv4/IPv6 Peer         |
-|                                 |                 | RIB\_IPV4\_UNICAST         | IPv4/IPv6 Prefix       |
-|                                 |                 | RIB\_IPV6\_UNICAST         |                        |
-+---------------------------------+-----------------+----------------------------+------------------------+
+BIRD
+----
+
+MRT Type/Subtype
+~~~~~~~~~~~~~~~~
+
++-------------------------+-----------------+------------------------------------+
+| File Name               | Type            | Subtype                            |
+|                         |                 |                                    |
++=========================+=================+====================================+
+| bird6\_bgp              | BGP4MP          | BGP4MP\_MESSAGE                    |
+|                         |                 | BGP4MP\_MESSAGE\_AS4               |
+|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4         |
++-------------------------+-----------------+------------------------------------+
+| bird\_bgp               | BGP4MP          | BGP4MP\_MESSAGE                    |
+|                         |                 | BGP4MP\_MESSAGE\_AS4               |
+|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4         |
++-------------------------+-----------------+------------------------------------+
+
+Summary
+~~~~~~~
+
+It generated by `BIRD`_, and includes IPv4/IPv6 peer, IPv4/IPv6 prefix, all BGP message types, ADD-PATH capability, and `LARGE_COMMUNITY`_.
+
+.. _`BIRD`: http://bird.network.cz/
+.. _`LARGE_COMMUNITY`: http://largebgpcommunities.net/
+
+BIRD (mrtdump branch)
+---------------------
+
+MRT Type/Subtype
+~~~~~~~~~~~~~~~~
+
++-------------------------+-----------------+------------------------------------+
+| File Name               | Type            | Subtype                            |
+|                         |                 |                                    |
++=========================+=================+====================================+
+| bird6-mrtdump\_bgp      | BGP4MP          | BGP4MP\_MESSAGE                    |
+|                         |                 | BGP4MP\_MESSAGE\_AS4\_ADDPATH      |
+|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4_ADDPATH |
++-------------------------+-----------------+------------------------------------+
+| bird6-mrtdump\_rib      | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE                 |
+|                         |                 | RIB\_IPV6\_UNICAST                 |
+|                         |                 | RIB\_IPV6\_UNICAST\_ADDPATH        |
++-------------------------+-----------------+------------------------------------+
+| bird-mrtdump\_bgp       | BGP4MP          | BGP4MP\_MESSAGE                    |
+|                         |                 | BGP4MP\_MESSAGE\_AS4\_ADDPATH      |
+|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4_ADDPATH |
++-------------------------+-----------------+------------------------------------+
+| bird-mrtdump\_rib       | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE                 |
+|                         |                 | RIB\_IPV4\_UNICAST                 |
+|                         |                 | RIB\_IPV4\_UNICAST\_ADDPATH        |
++-------------------------+-----------------+------------------------------------+
+
+Summary
+~~~~~~~
+
+It generated by `BIRD (mrtdump branch)`_, and includes IPv4/IPv6 peer, IPv4/IPv6 prefix, all BGP message types, ADD-PATH capability, and LARGE_COMMUNITY_.
+This repository supports TABLE_DUMP_V2/BGP4MP/BGP4MP_ET subtypes for ADD-PATH capability.
+These are defined in `draft-ietf-grow-mrt-add-paths`_.
+
+.. _`BIRD (mrtdump branch)`: https://gitlab.labs.nic.cz/labs/bird/tree/mrtdump
+.. _`LARGE_COMMUNITY`: http://largebgpcommunities.net/
+.. _`draft-ietf-grow-mrt-add-paths`: https://tools.ietf.org/html/draft-ietf-grow-mrt-add-paths-03
+
+OpenBGPD
+--------
+
+MRT Type/Subtype
+~~~~~~~~~~~~~~~~
+
++-------------------------+-----------------+------------------------------------+
+| File Name               | Type            | Subtype                            |
+|                         |                 |                                    |
++=========================+=================+====================================+
+| openbgpd\_bgp           | BGP4MP          | BGP4MP\_MESSAGE                    |
+|                         |                 | BGP4MP\_MESSAGE\_AS4               |
+|                         |                 | BGP4MP\_STATE\_CHANGE              |
+|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4         |
++-------------------------+-----------------+------------------------------------+
+| openbgpd\_rib\_table    | TABLE\_DUMP     | AFI\_IPv4                          |
+|                         |                 | AFI\_IPv6                          |
++-------------------------+-----------------+------------------------------------+
+| openbgpd\_rib\_table-mp | BGP4MP          | BGP4MP\_ENTRY                      |
++-------------------------+-----------------+------------------------------------+
+| openbgpd\_rib\_table-v2 | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE                 |
+|                         |                 | RIB\_IPV4\_UNICAST                 |
+|                         |                 | RIB\_IPV6\_UNICAST                 |
+|                         |                 | RIB\_GENERIC                       |
++-------------------------+-----------------+------------------------------------+
+
+Summary
+~~~~~~~
+
+It generated by `OpenBGPD`_, and includes IPv4/IPv6 peers, IPv4/IPv6/VPNv4 prefix, all BGP message types, and unsupported MRT subtype BGP4MP\_ENTRY.
+
+.. _`OpenBGPD`: http://www.openbgpd.org/
+
+Quagga
+------
+
+MRT Type/Subtype
+~~~~~~~~~~~~~~~~
+
++-------------------------+-----------------+------------------------------------+
+| File Name               | Type            | Subtype                            |
+|                         |                 |                                    |
++=========================+=================+====================================+
+| quagga\_bgp             | BGP4MP          | BGP4MP\_MESSAGE                    |
+|                         |                 | BGP4MP\_MESSAGE\_AS4               |
+|                         |                 | BGP4MP\_STATE\_CHANGE\_AS4         |
++-------------------------+-----------------+------------------------------------+
+| quagga\_rib             | TABLE\_DUMP\_V2 | PEER\_INDEX\_TABLE                 |
+|                         |                 | RIB\_IPV4\_UNICAST                 |
+|                         |                 | RIB\_IPV6\_UNICAST                 |
++-------------------------+-----------------+------------------------------------+
+
+Summary
+~~~~~~~
+
+It generated by `Quagga`_, and includes IPv4/IPv6 peers, IPv4/IPv6/VPNv4 prefix, all BGP message types, and `LARGE_COMMUNITY`_.
+
+.. _Quagga: http://www.nongnu.org/quagga/
+.. _`LARGE_COMMUNITY`: http://largebgpcommunities.net/
 
 Authors
 -------
