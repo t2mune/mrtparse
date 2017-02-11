@@ -63,10 +63,16 @@ def print_mrt(m):
     put_lines('MRT Header')
 
     indt_num += 1
+
+    try:
+        subtype = MRT_ST[m.type][m.subtype]
+    except KeyError:
+        subtype = 'Unknown'
+
     put_lines(
         'Timestamp: %d(%s)' % (m.ts, datetime.fromtimestamp(m.ts)),
         'Type: %d(%s)' % (m.type, MRT_T[m.type]),
-        'Subtype: %d(%s)' % (m.subtype, MRT_ST[m.type][m.subtype]),
+        'Subtype: %d(%s)' % (m.subtype, subtype),
         'Length: %d' % m.len
     )
 

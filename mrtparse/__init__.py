@@ -464,7 +464,7 @@ class Base:
         '''
         if len(self.buf) - self.p < n:
             raise MrtFormatError(
-                'Insufficient buffer %d < %d'
+                'Insufficient buffer %d < %d byte'
                 % (len(self.buf) - self.p, n))
 
     def val_num(self, n):
@@ -638,7 +638,7 @@ class Reader(Base):
             self.close()
         elif len(self.mrt.buf) < 12:
             raise MrtFormatError(
-                'Invalid MRT header length %d < 12'
+                'Invalid MRT header length %d < 12 byte'
                 % len(self.mrt.buf))
         self.mrt.unpack()
 
@@ -650,7 +650,7 @@ class Reader(Base):
         self.mrt.buf += data
         if len(data) < self.mrt.len:
             raise MrtFormatError(
-                'Invalid MRT data length %d < %d'
+                'Invalid MRT data length %d < %d byte'
                 % (len(data), self.mrt.len))
 
         if len(MRT_ST[self.mrt.type]) \
