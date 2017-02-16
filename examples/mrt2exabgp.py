@@ -30,6 +30,7 @@ FLAG_T = {
     'IPv6': 0x02,
     'ALL' : 0x04,
     'API' : 0x08,
+    'SINGLE' : 0x50,
     'API_GROUP_OLD' : 0x10,
     'API_GROUP' : 0x20,
     'API_PROG' : 0x40,
@@ -111,6 +112,9 @@ def parse_args():
         help='convert all entries \
             (default: convert only first entry per one prefix)')
     p.add_argument(
+        '-s', default=False, action='store_true',
+        help='convert only entries from a single asn (the peer asn, specify as -p NNN)')
+    p.add_argument(
         '-A', action='store_false',
         help='convert to ExaBGP API format')
     p.add_argument(
@@ -144,6 +148,8 @@ def parse_args():
         flags = FLAG_T['IPv4'] | FLAG_T['IPv6']
     if '-a' in sys.argv:
         flags |= FLAG_T['ALL']
+    if '-s' in sys.argv:
+        flags |= FLAG_T['SINGLE']
     if '-A' in sys.argv:
         flags |= FLAG_T['API']
     if '-G' in sys.argv:
@@ -152,7 +158,6 @@ def parse_args():
         flags |= FLAG_T['API'] | FLAG_T['API_GROUP_OLD'] | FLAG_T['API_GROUP']
     if '-P' in sys.argv:
         flags |= FLAG_T['API'] | FLAG_T['API_PROG']
-
     return (r, flags)
 
 def conv_format(args, flags, d):
@@ -224,7 +229,18 @@ def print_route_td(args, params, m):
         if flags & FLAG_T['ALL']:
             entry = m.rib.entry
         else:
-            entry.append(m.rib.entry[0])
+            if flags & FLAG_T['SINGLE']:
+                for thisentry in m.rib.entry:
+                    for attr in thisentry.attr:
+                        if attr.type == BGP_ATTR_T['AS_PATH']:
+                            entry_peer_asn = attr.as_path[0]["val"][0]
+                            if entry_peer_asn == str(args.peer_as):
+                                entry.append(thisentry)
+                            continue
+            else:
+                entry.append(m.rib.entry[0])
+
+
 
     elif m.type == MRT_T['TABLE_DUMP']:
         if m.subtype == TD_ST['AFI_IPv4']:
