@@ -88,7 +88,7 @@ Usage
 
     usage: mrt2exabgp.py [-h] [-r ROUTER_ID] [-l LOCAL_AS] [-p PEER_AS]
                          [-L LOCAL_ADDR] [-n NEIGHBOR] [-4 [NEXT_HOP]]
-                         [-6 [NEXT_HOP]] [-a] [-A] [-G [NUM]] [-g [NUM]] [-P]
+                         [-6 [NEXT_HOP]] [-a] [-s] [-A] [-G [NUM]] [-g [NUM]] [-P]
                          path_to_file
 
     This script converts to ExaBGP format.
@@ -107,6 +107,8 @@ Usage
       -6 [NEXT_HOP]  convert IPv6 entries and change IPv6 next-hop if specified
       -a             convert all entries (default: convert only first entry per
                      one prefix)
+      -s             convert only entries from a single asn (the peer asn, specify
+                     as -p PEER_ASN)
       -A             convert to ExaBGP API format
       -G [NUM]       convert to ExaBGP API format and group updates with the same
                      attributes for each spceified the number of prefixes using
