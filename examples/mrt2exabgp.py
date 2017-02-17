@@ -29,12 +29,15 @@ FLAG_T = {
     'IPv4': 0x01,
     'IPv6': 0x02,
     'ALL' : 0x04,
-    'API' : 0x08,
-    'SINGLE' : 0x50,
-    'API_GROUP_OLD' : 0x10,
-    'API_GROUP' : 0x20,
-    'API_PROG' : 0x40,
+    'SINGLE' : 0x08,
+    'API' : 0x10,
+    'API_GROUP_OLD' : 0x20,
+    'API_GROUP' : 0x40,
+    'API_PROG' : 0x80,
 }
+
+class NotDisplay(Exception):
+    pass
 
 def print_conf_header(args):
     print('''\
@@ -113,7 +116,8 @@ def parse_args():
             (default: convert only first entry per one prefix)')
     p.add_argument(
         '-s', default=False, action='store_true',
-        help='convert only entries from a single asn (the peer asn, specify as -p NNN)')
+        help='convert only entries from a single asn \
+            (the peer asn, specify as -p PEER_ASN)')
     p.add_argument(
         '-A', action='store_false',
         help='convert to ExaBGP API format')
@@ -229,18 +233,7 @@ def print_route_td(args, params, m):
         if flags & FLAG_T['ALL']:
             entry = m.rib.entry
         else:
-            if flags & FLAG_T['SINGLE']:
-                for thisentry in m.rib.entry:
-                    for attr in thisentry.attr:
-                        if attr.type == BGP_ATTR_T['AS_PATH']:
-                            entry_peer_asn = attr.as_path[0]["val"][0]
-                            if entry_peer_asn == str(args.peer_as):
-                                entry.append(thisentry)
-                            continue
-            else:
-                entry.append(m.rib.entry[0])
-
-
+            entry.append(m.rib.entry[0])
 
     elif m.type == MRT_T['TABLE_DUMP']:
         if m.subtype == TD_ST['AFI_IPv4']:
@@ -262,11 +255,16 @@ def print_route_td(args, params, m):
         else:
             entry.append(m.td)
 
-    line = ''
     for e in entry:
+        line = ''
         params['next_hop'] = ''
-        for attr in e.attr:
-            line += get_bgp_attr(args, params, m, attr)
+
+        try:
+            for attr in e.attr:
+                line += get_bgp_attr(args, params, m, attr)
+
+        except NotDisplay:
+            continue
 
         if params['flags'] & FLAG_T['API_GROUP']:
             params['api_grp'].setdefault('%s next-hop %s' \
@@ -316,8 +314,13 @@ def print_route_bgp4mp(args, params, m):
     msg = m.bgp.msg
 
     attr_line = ''
-    for attr in msg.attr:
-        attr_line += get_bgp_attr(args, params, m, attr)
+
+    try:
+        for attr in msg.attr:
+            attr_line += get_bgp_attr(args, params, m, attr)
+
+    except NotDisplay:
+        return
 
     wd_line = ''
     for wd in params['mp_withdrawn']:
@@ -370,13 +373,20 @@ def get_bgp_attr(args, params, m, attr):
     if attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
         line += ' atomic-aggregate'
 
-    if attr.len == 0:
-        return line
-
     if attr.type == BGP_ATTR_T['ORIGIN']:
         line += ' origin %s' % ORIGIN_T[attr.origin]
 
     elif attr.type == BGP_ATTR_T['AS_PATH']: 
+        if flags & FLAG_T['SINGLE']:
+            if len(attr.as_path) == 0:
+                raise NotDisplay()
+
+            path_seg = attr.as_path[0]
+            if path_seg['type'] != AS_PATH_SEG_T['AS_SEQUENCE'] \
+                or len(path_seg['val']) == 0 \
+                or path_seg['val'][0] != str(args.peer_as):
+                raise NotDisplay()
+
         as_path = ''
         for path_seg in attr.as_path:
             if path_seg['type'] == AS_PATH_SEG_T['AS_SET']:
