@@ -1,3 +1,6 @@
+2017-03-05 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - can't handle "MP_UNREACH_NLRI" properly in "print_all.py".
+
 2017-02-18 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't display properly with "-a" option in "mrt2exabgp.py".
 	* Update - added "-s" option in "mrt2exabgp.py". Thank you andydavidson.

@@ -99,6 +99,7 @@ def print_td(m):
         'Peer AS: %s' % m.td.peer_as,
         'Attribute Length: %d' % m.td.attr_len
     )
+
     for attr in m.td.attr:
         print_bgp_attr(attr, 1)
 
@@ -146,9 +147,11 @@ def print_td_v2(m):
                 'Originated Time: %d(%s)' %
                 (entry.org_time, datetime.fromtimestamp(entry.org_time))
             )
+
             if entry.path_id is not None:
                 put_lines('Path Identifier: %d' % entry.path_id)
             put_lines('Attribute Length: %d' % entry.attr_len)
+
             for attr in entry.attr:
                 print_bgp_attr(attr, 1)
 
@@ -159,6 +162,7 @@ def print_td_v2(m):
             'AFI: %d(%s)' % (m.rib.afi, AFI_T[m.rib.afi]),
             'SAFI: %d(%s)' % (m.rib.safi, SAFI_T[m.rib.safi])
         )
+
         for nlri in m.rib.nlri:
             print_nlri(nlri, 'NLRI', m.rib.safi)
         put_lines('Entry Count: %d' % m.rib.count)
@@ -171,6 +175,7 @@ def print_td_v2(m):
                 (entry.org_time, datetime.fromtimestamp(entry.org_time)),
                 'Attribute Length: %d' % entry.attr_len
             )
+
             for attr in entry.attr:
                 print_bgp_attr(attr, 1)
 
@@ -195,6 +200,7 @@ def print_bgp4mp(m):
             'Old State: %d(%s)' % (m.bgp.old_state, BGP_FSM[m.bgp.old_state]),
             'New State: %d(%s)' % (m.bgp.new_state, BGP_FSM[m.bgp.new_state])
         )
+
     elif m.subtype == BGP4MP_ST['BGP4MP_MESSAGE'] \
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4'] \
         or m.subtype == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL'] \
@@ -335,8 +341,10 @@ def print_bgp_attr(attr, n):
 
     indt_num += 1
     line = '%s' % BGP_ATTR_T[attr.type]
+
     if attr.type == BGP_ATTR_T['ORIGIN']:
         put_lines(line + ': %d(%s)' % (attr.origin, ORIGIN_T[attr.origin]))
+
     elif attr.type == BGP_ATTR_T['AS_PATH']:
         put_lines(line)
         indt_num += 1
@@ -347,22 +355,31 @@ def print_bgp_attr(attr, n):
                 'Path Segment Length: %d' % path_seg['len'],
                 'Path Segment Value: %s' % ' '.join(path_seg['val'])
             )
+
     elif attr.type == BGP_ATTR_T['NEXT_HOP']:
         put_lines(line + ': %s' % attr.next_hop)
+
     elif attr.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
         put_lines(line + ': %d' % attr.med)
+
     elif attr.type == BGP_ATTR_T['LOCAL_PREF']:
         put_lines(line + ': %d' % attr.local_pref)
+
     elif attr.type == BGP_ATTR_T['ATOMIC_AGGREGATE']:
         put_lines(line)
+
     elif attr.type == BGP_ATTR_T['AGGREGATOR']:
         put_lines(line + ': %s %s' % (attr.aggr['asn'], attr.aggr['id']))
+
     elif attr.type == BGP_ATTR_T['COMMUNITY']:
         put_lines(line + ': %s' % ' '.join(attr.comm))
+
     elif attr.type == BGP_ATTR_T['ORIGINATOR_ID']:
         put_lines(line + ': %s' % attr.org_id)
+
     elif attr.type == BGP_ATTR_T['CLUSTER_LIST']:
         put_lines(line + ': %s' % ' '.join(attr.cl_list))
+
     elif attr.type == BGP_ATTR_T['MP_REACH_NLRI']:
         put_lines(line)
         indt_num += 1
@@ -383,14 +400,17 @@ def print_bgp_attr(attr, n):
                 put_lines('Route Distinguisher: %s' % attr.mp_reach['rd'])
 
         put_lines('Length: %d' % attr.mp_reach['nlen'])
+
         if 'next_hop' not in attr.mp_reach:
             return
+
         next_hop = " ".join(attr.mp_reach['next_hop'])
         put_lines('Next-Hop: %s' % next_hop)
 
         if 'nlri' in attr.mp_reach:
             for nlri in attr.mp_reach['nlri']:
                 print_nlri(nlri, 'NLRI', attr.mp_reach['safi'])
+
     elif attr.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
         put_lines(line)
         indt_num += 1
@@ -401,13 +421,18 @@ def print_bgp_attr(attr, n):
             (attr.mp_unreach['safi'], SAFI_T[attr.mp_unreach['safi']])
         )
 
+        if 'withdrawn' not in attr.mp_unreach:
+            return
+
         for withdrawn in attr.mp_unreach['withdrawn']:
             print_nlri(withdrawn, 'Withdrawn Routes', attr.mp_unreach['safi'])
+
     elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
         ext_comm_list = []
         for ext_comm in attr.ext_comm:
             ext_comm_list.append('0x%016x' % ext_comm)
         put_lines(line + ': %s' % ' '.join(ext_comm_list))
+
     elif attr.type == BGP_ATTR_T['AS4_PATH']:
         put_lines(line)
         indt_num += 1
@@ -418,10 +443,12 @@ def print_bgp_attr(attr, n):
                 'Path Segment Length: %d' % path_seg['len'],
                 'Path Segment Value: %s' % ' '.join(path_seg['val'])
             )
+
     elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
         put_lines(
             line + ': %s %s' % (attr.as4_aggr['asn'], attr.as4_aggr['id'])
         )
+
     elif attr.type == BGP_ATTR_T['AIGP']:
         put_lines(line)
         indt_num += 1
@@ -431,14 +458,17 @@ def print_bgp_attr(attr, n):
                 'Length: %d' % aigp['len'],
                 'Value: %d' % aigp['val']
             )
+
     elif attr.type == BGP_ATTR_T['ATTR_SET']:
         put_lines(line)
         indt_num += 1
         put_lines('Origin AS: %s' % attr.attr_set['origin_as'])
         for attr in attr.attr_set['attr']:
             print_bgp_attr(attr, 3)
+
     elif attr.type == BGP_ATTR_T['LARGE_COMMUNITY']:
         put_lines(line + ': %s' % ' '.join(attr.large_comm))
+
     else:
         line += ': 0x'
         for c in attr.val:
