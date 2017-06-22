@@ -125,16 +125,11 @@ TD_V2_ST = reverse_defaultdict({
     5:'RIB_IPV6_MULTICAST',
     6:'RIB_GENERIC',
     7:'GEO_PEER_TABLE',              # Defined in RFC6397
-    # Defined in draft-petrie-grow-mrt-add-paths
-    8:'RIB_IPV4_UNICAST_ADDPATH',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    9:'RIB_IPV4_MULTICAST_ADDPATH',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    10:'RIB_IPV6_UNICAST_ADDPATH',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    11:'RIB_IPV6_MULTICAST_ADDPATH',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    12:'RIB_GENERIC_ADDPATH',
+    8:'RIB_IPV4_UNICAST_ADDPATH',    # Defined in RFC8050
+    9:'RIB_IPV4_MULTICAST_ADDPATH',  # Defined in RFC8050
+    10:'RIB_IPV6_UNICAST_ADDPATH',   # Defined in RFC8050
+    11:'RIB_IPV6_MULTICAST_ADDPATH', # Defined in RFC8050
+    12:'RIB_GENERIC_ADDPATH',        # Defined in RFC8050
 })
 
 # BGP4MP,BGP4MP_ET Subtypes
@@ -142,20 +137,16 @@ TD_V2_ST = reverse_defaultdict({
 BGP4MP_ST = reverse_defaultdict({
     0:'BGP4MP_STATE_CHANGE',
     1:'BGP4MP_MESSAGE',
-    2:'BGP4MP_ENTRY',             # Deprecated in RFC6396
-    3:'BGP4MP_SNAPSHOT',          # Deprecated in RFC6396
+    2:'BGP4MP_ENTRY',                      # Deprecated in RFC6396
+    3:'BGP4MP_SNAPSHOT',                   # Deprecated in RFC6396
     4:'BGP4MP_MESSAGE_AS4',
     5:'BGP4MP_STATE_CHANGE_AS4',
     6:'BGP4MP_MESSAGE_LOCAL',
     7:'BGP4MP_MESSAGE_AS4_LOCAL',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    8:'BGP4MP_MESSAGE_ADDPATH',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    9:'BGP4MP_MESSAGE_AS4_ADDPATH',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    10:'BGP4MP_MESSAGE_LOCAL_ADDPATH',
-    # Defined in draft-petrie-grow-mrt-add-paths
-    11:'BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH',
+    8:'BGP4MP_MESSAGE_ADDPATH',            # Defined in RFC8050
+    9:'BGP4MP_MESSAGE_AS4_ADDPATH',        # Defined in RFC8050
+    10:'BGP4MP_MESSAGE_LOCAL_ADDPATH',     # Defined in RFC8050
+    11:'BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH', # Defined in RFC8050
 })
 
 # MRT Message Subtypes
