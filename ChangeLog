@@ -1,3 +1,6 @@
+2017-07-02 Tetsumune KISO <t2mune@gmail.com>
+	* Release - mrtparse 1.6 released.
+
 2017-03-05 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't handle "MP_UNREACH_NLRI" properly in "print_all.py".
 

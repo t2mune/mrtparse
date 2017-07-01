@@ -30,7 +30,7 @@ import collections
 import signal
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'

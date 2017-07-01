@@ -178,14 +178,6 @@ or
     $ git clone https://github.com/YoshiyukiYamauchi/mrtparse.git
     $ cd mrtparse
     $ python setup.py install
-    running install
-    running build
-    running build_py
-    running install_lib
-    copying build/lib/mrtparse.py -> /Library/Python/2.7/site-packages
-    byte-compiling /Library/Python/2.7/site-packages/mrtparse.py to mrtparse.pyc
-    running install_egg_info
-    Writing /Library/Python/2.7/site-packages/mrtparse-0.8-py2.7.egg-info
 
 Usage
 -----
