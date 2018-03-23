@@ -265,7 +265,7 @@ class BgpDump:
                 else:
                     self.as4_path += seg['val']
         elif attr.type == BGP_ATTR_T['AS4_AGGREGATOR']:
-            self.as4_aggr = '%d %s' % (attr.as4_aggr['asn'], attr.as4_aggr['ip'])
+            self.as4_aggr = '%s %s' % (attr.as4_aggr['asn'], attr.as4_aggr['id'])
 
     def merge_as_path(self):
         if len(self.as4_path):
