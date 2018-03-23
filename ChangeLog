@@ -1,5 +1,7 @@
 2018-03-23 Tetsumune KISO <t2mune@gmail.com>
-	* Fix - fixed incorrect key and format used in "AS4_AGGREGATOR" of "mrt2bgpdump.py".
+	* Fix - fixed incorrect key and format used in "AS4_AGGREGATOR" of
+	"mrt2bgpdump.py". Thank you julian10m.
+
 
 2017-07-02 Tetsumune KISO <t2mune@gmail.com>
 	* Release - mrtparse 1.6 released.
