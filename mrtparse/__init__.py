@@ -28,7 +28,10 @@ import gzip
 import bz2
 import collections
 import signal
-signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+try:
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+except AttributeError:
+    pass
 
 __version__ = '1.6'
 

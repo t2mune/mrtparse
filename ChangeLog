@@ -1,3 +1,6 @@
+2018-06-28 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - SIGPIPE for Windows. Thank you salmacmpeg.
+
 2018-03-24 Tetsumune KISO <t2mune@gmail.com>
 	* Update - updated a copyright notice.
 
