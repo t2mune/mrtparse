@@ -2,7 +2,7 @@
 '''
 print_all.py - a script to print a MRT format data using mrtparse.
 
-Copyright (C) 2018 Tetsumune KISO
+Copyright (C) 2019 Tetsumune KISO
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

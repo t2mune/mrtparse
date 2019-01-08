@@ -1,7 +1,7 @@
 '''
 mrtparse.py - MRT format data parser
 
-Copyright (C) 2018 Tetsumune KISO
+Copyright (C) 2019 Tetsumune KISO
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ try:
 except AttributeError:
     pass
 
-__version__ = '1.6'
+__version__ = '1.7'
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
