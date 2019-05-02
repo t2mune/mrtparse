@@ -667,7 +667,8 @@ class Reader(Base):
                        BGP4MP_ST[self.mrt.subtype]))
             else:
                 if self.mrt.type == MRT_T['BGP4MP_ET']:
-                    self.mrt.micro_ts = self.val_num(4)
+                    self.mrt.micro_ts = self.mrt.val_num(4)
+                    data = data[4:]
                 self.mrt.bgp = Bgp4Mp(data)
                 self.mrt.bgp.unpack(self.mrt.subtype)
         elif self.mrt.type == MRT_T['TABLE_DUMP']:
