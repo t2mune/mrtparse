@@ -1,5 +1,5 @@
 '''
-mrtparse.py - MRT format data parser
+mrtparse - MRT format data parser
 
 Copyright (C) 2019 Tetsumune KISO
 
@@ -22,560 +22,37 @@ Authors:
 '''
 
 import sys
-import struct
-import socket
 import gzip
 import bz2
 import collections
 import signal
+from datetime import datetime
+from .params import *
+from .base import *
 try:
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 except AttributeError:
     pass
 
-__version__ = '1.7'
+__version__ = '2.0-dev'
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
 BZ2_MAGIC = b'\x42\x5a\x68'
 
-def reverse_defaultdict(d):
-    '''
-    Reverse the keys and values of dictionaries.
-    '''
-    for k in list(d.keys()):
-        d[d[k]] = k
-    d = collections.defaultdict(lambda: "Unknown", d)
-    return d
-
-# Error codes for MrtFormatError exception
-MRT_ERR_C = reverse_defaultdict({
-    1:'MRT Header Error',
-    2:'MRT Data Error',
-})
-
-# AFI Types
-# Assigend by IANA
-AFI_T = reverse_defaultdict({
-    1:'IPv4',
-    2:'IPv6',
-    25: 'L2VPN',
-})
-
-# SAFI Types
-# Assigend by IANA
-SAFI_T = reverse_defaultdict({
-    1:'UNICAST',
-    2:'MULTICAST',
-    65:'VPLS',
-    70:'EVPN',
-    128:'L3VPN_UNICAST',
-    129:'L3VPN_MULTICAST',
-})
-
-# MRT Message Types
-# Defined in RFC6396
-MRT_T = reverse_defaultdict({
-    0:'NULL',           # Deprecated in RFC6396
-    1:'START',          # Deprecated in RFC6396
-    2:'DIE',            # Deprecated in RFC6396
-    3:'I_AM_DEAD',      # Deprecated in RFC6396
-    4:'PEER_DOWN',      # Deprecated in RFC6396
-    5:'BGP',            # Deprecated in RFC6396
-    6:'RIP',            # Deprecated in RFC6396
-    7:'IDRP',           # Deprecated in RFC6396
-    8:'RIPNG',          # Deprecated in RFC6396
-    9:'BGP4PLUS',       # Deprecated in RFC6396
-    10:'BGP4PLUS_01',   # Deprecated in RFC6396
-    11:'OSPFv2',
-    12:'TABLE_DUMP',
-    13:'TABLE_DUMP_V2',
-    16:'BGP4MP',
-    17:'BGP4MP_ET',
-    32:'ISIS',
-    33:'ISIS_ET',
-    48:'OSPFv3',
-    49:'OSPFv3_ET',
-})
-
-# BGP,BGP4PLUS,BGP4PLUS_01 Subtypes
-# Deprecated in RFC6396
-BGP_ST = reverse_defaultdict({
-    0:'BGP_NULL',
-    1:'BGP_UPDATE',
-    2:'BGP_PREF_UPDATE',
-    3:'BGP_STATE_CHANGE',
-    4:'BGP_SYNC',
-    5:'BGP_OPEN',
-    6:'BGP_NOTIFY',
-    7:'BGP_KEEPALIVE',
-})
-
-# TABLE_DUMP Subtypes
-# Defined in RFC6396
-TD_ST = reverse_defaultdict({
-    1:'AFI_IPv4',
-    2:'AFI_IPv6',
-})
-
-# TABLE_DUMP_V2 Subtypes
-# Defined in RFC6396
-TD_V2_ST = reverse_defaultdict({
-    1:'PEER_INDEX_TABLE',
-    2:'RIB_IPV4_UNICAST',
-    3:'RIB_IPV4_MULTICAST',
-    4:'RIB_IPV6_UNICAST',
-    5:'RIB_IPV6_MULTICAST',
-    6:'RIB_GENERIC',
-    7:'GEO_PEER_TABLE',              # Defined in RFC6397
-    8:'RIB_IPV4_UNICAST_ADDPATH',    # Defined in RFC8050
-    9:'RIB_IPV4_MULTICAST_ADDPATH',  # Defined in RFC8050
-    10:'RIB_IPV6_UNICAST_ADDPATH',   # Defined in RFC8050
-    11:'RIB_IPV6_MULTICAST_ADDPATH', # Defined in RFC8050
-    12:'RIB_GENERIC_ADDPATH',        # Defined in RFC8050
-})
-
-# BGP4MP,BGP4MP_ET Subtypes
-# Defined in RFC6396
-BGP4MP_ST = reverse_defaultdict({
-    0:'BGP4MP_STATE_CHANGE',
-    1:'BGP4MP_MESSAGE',
-    2:'BGP4MP_ENTRY',                      # Deprecated in RFC6396
-    3:'BGP4MP_SNAPSHOT',                   # Deprecated in RFC6396
-    4:'BGP4MP_MESSAGE_AS4',
-    5:'BGP4MP_STATE_CHANGE_AS4',
-    6:'BGP4MP_MESSAGE_LOCAL',
-    7:'BGP4MP_MESSAGE_AS4_LOCAL',
-    8:'BGP4MP_MESSAGE_ADDPATH',            # Defined in RFC8050
-    9:'BGP4MP_MESSAGE_AS4_ADDPATH',        # Defined in RFC8050
-    10:'BGP4MP_MESSAGE_LOCAL_ADDPATH',     # Defined in RFC8050
-    11:'BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH', # Defined in RFC8050
-})
-
-# MRT Message Subtypes
-# Defined in RFC6396
-MRT_ST = collections.defaultdict(lambda: dict(), {
-    9:BGP_ST,
-    10:BGP_ST,
-    12:AFI_T,
-    13:TD_V2_ST,
-    16:BGP4MP_ST,
-    17:BGP4MP_ST,
-})
-
-# BGP FSM States
-# Defined in RFC4271
-BGP_FSM = reverse_defaultdict({
-    1:'Idle',
-    2:'Connect',
-    3:'Active',
-    4:'OpenSent',
-    5:'OpenConfirm',
-    6:'Established',
-    7:'Clearing',    # Used only in quagga?
-    8:'Deleted',     # Used only in quagga?
-})
-
-# BGP Attribute Types
-# Defined in RFC4271
-BGP_ATTR_T = reverse_defaultdict({
-    1:'ORIGIN',
-    2:'AS_PATH',
-    3:'NEXT_HOP',
-    4:'MULTI_EXIT_DISC',
-    5:'LOCAL_PREF',
-    6:'ATOMIC_AGGREGATE',
-    7:'AGGREGATOR',
-    8:'COMMUNITY',             # Defined in RFC1997
-    9:'ORIGINATOR_ID',         # Defined in RFC4456
-    10:'CLUSTER_LIST',         # Defined in RFC4456
-    11:'DPA',                  # Deprecated in RFC6938
-    12:'ADVERTISER',           # Deprecated in RFC6938
-    13:'RCID_PATH/CLUSTER_ID', # Deprecated in RFC6938
-    14:'MP_REACH_NLRI',        # Defined in RFC4760
-    15:'MP_UNREACH_NLRI',      # Defined in RFC4760
-    16:'EXTENDED_COMMUNITIES', # Defined in RFC4360
-    17:'AS4_PATH',             # Defined in RFC6793
-    18:'AS4_AGGREGATOR',       # Defined in RFC6793
-    26:'AIGP',                 # Defined in RFC7311
-    32:'LARGE_COMMUNITY',      # Defined in draft-ietf-idr-large-community
-    128:'ATTR_SET',            # Defined in RFC6368
-})
-
-# BGP ORIGIN Types
-# Defined in RFC4271
-ORIGIN_T = reverse_defaultdict({
-    0:'IGP',
-    1:'EGP',
-    2:'INCOMPLETE',
-})
-
-# BGP AS_PATH Types
-# Defined in RFC4271
-AS_PATH_SEG_T = reverse_defaultdict({
-    1:'AS_SET',
-    2:'AS_SEQUENCE',
-    3:'AS_CONFED_SEQUENCE', # Defined in RFC5065
-    4:'AS_CONFED_SET',      # Defined in RFC5065
-})
-
-# Reserved BGP COMMUNITY Types
-# Defined in RFC1997
-COMM_T = reverse_defaultdict({
-    0xffffff01:'NO_EXPORT',
-    0xffffff02:'NO_ADVERTISE',
-    0xffffff03:'NO_EXPORT_SCONFED',
-    0xffffff04:'NO_PEER',           # Defined in RFC3765
-})
-
-# BGP Message Types
-# Defined in RFC4271
-BGP_MSG_T = reverse_defaultdict({
-    1:'OPEN',
-    2:'UPDATE',
-    3:'NOTIFICATION',
-    4:'KEEPALIVE',
-    5:'ROUTE-REFRESH', # Defined in RFC2918
-})
-
-# BGP Error Codes
-# Defined in RFC4271
-BGP_ERR_C = reverse_defaultdict({
-    1:'Message Header Error',
-    2:'OPEN Message Error',
-    3:'UPDATE Message Error',
-    4:'Hold Timer Expired',
-    5:'Finite State Machine Error',
-    6:'Cease',
-    7:'ROUTE-REFRESH Message Error', # Defined in RFC7313
-})
-
-# BGP Message Header Error Subcodes
-# Defined in RFC4271
-BGP_HDR_ERR_SC = reverse_defaultdict({
-    1:'Connection Not Synchronized',
-    2:'Bad Message Length',
-    3:'Bad Message Type',
-})
-
-# OPEN Message Error Subcodes
-# Defined in RFC4271
-BGP_OPEN_ERR_SC = reverse_defaultdict({
-    1:'Unsupported Version Number',
-    2:'Bad Peer AS',
-    3:'Bad BGP Identifier',
-    4:'Unsupported Optional Parameter',
-    5:'[Deprecated]',
-    6:'Unacceptable Hold Time',
-    7:'Unsupported Capability',         # Defined in RFC5492
-})
-
-# UPDATE Message Error Subcodes
-# Defined in RFC4271
-BGP_UPDATE_ERR_SC = reverse_defaultdict({
-    1:'Malformed Attribute List',
-    2:'Unrecognized Well-known Attribute',
-    3:'Missing Well-known Attribute',
-    4:'Attribute Flags Error',
-    5:'Attribute Length Error',
-    6:'Invalid ORIGIN Attribute',
-    7:'[Deprecated]',
-    8:'Invalid NEXT_HOP Attribute',
-    9:'Optional Attribute Error',
-    10:'Invalid Network Field',
-    11:'Malformed AS_PATH',
-})
-
-# BGP Finite State Machine Error Subcodes
-# Defined in RFC6608
-BGP_FSM_ERR_SC = reverse_defaultdict({
-    0:'Unspecified Error',
-    1:'Receive Unexpected Message in OpenSent State',
-    2:'Receive Unexpected Message in OpenConfirm State',
-    3:'Receive Unexpected Message in Established State',
-})
-
-# BGP Cease NOTIFICATION Message Subcodes
-# Defined in RFC4486
-BGP_CEASE_ERR_SC = reverse_defaultdict({
-    1:'Maximum Number of Prefixes Reached',
-    2:'Administrative Shutdown',
-    3:'Peer De-configured',
-    4:'Administrative Reset',
-    5:'Connection Rejected',
-    6:'Other Configuration Change',
-    7:'Connection Collision Resolution',
-    8:'Out of Resources',
-})
-
-# BGP ROUTE-REFRESH Message Error subcodes
-# Defined in RFC7313
-BGP_ROUTE_REFRESH_ERR_SC = reverse_defaultdict({
-    1:'Invalid Message Length',
-})
-
-# BGP Error Subcodes
-BGP_ERR_SC = collections.defaultdict(lambda: dict(), {
-    1:BGP_HDR_ERR_SC,
-    2:BGP_UPDATE_ERR_SC,
-    3:BGP_OPEN_ERR_SC,
-    4:BGP_UPDATE_ERR_SC,
-    5:BGP_FSM_ERR_SC,
-    6:BGP_CEASE_ERR_SC,
-    7:BGP_ROUTE_REFRESH_ERR_SC,
-})
-
-# BGP OPEN Optional Parameter Types
-# Defined in RFC5492
-BGP_OPT_PARAMS_T = reverse_defaultdict({
-    1:'Authentication', # Deprecated
-    2:'Capabilities',
-})
-
-# Capability Codes
-# Defined in RFC5492
-BGP_CAP_C = reverse_defaultdict({
-    1:'Multiprotocol Extensions for BGP-4',          # Defined in RFC2858
-    2:'Route Refresh Capability for BGP-4',          # Defined in RFC2918
-    3:'Outbound Route Filtering Capability',         # Defined in RFC5291
-    4:'Multiple routes to a destination capability', # Defined in RFC3107
-    5:'Extended Next Hop Encoding',                  # Defined in RFC5549
-    64:'Graceful Restart Capability',                # Defined in RFC4724
-    65:'Support for 4-octet AS number capability',   # Defined in RFC6793
-    66:'[Deprecated]',
-    # draft-ietf-idr-dynamic-cap
-    67:'Support for Dynamic Capability (capability specific)',
-    # draft-ietf-idr-bgp-multisession
-    68:'Multisession BGP Capability',
-    # Defined in RFC7911
-    69:'ADD-PATH Capability',
-    # Defined in RFC7313
-    70:'Enhanced Route Refresh Capability',
-    # draft-uttaro-idr-bgp-persistence
-    71:'Long-Lived Graceful Restart (LLGR) Capability',
-})
-
-# Outbound Route Filtering Capability
-# Defined in RFC5291
-ORF_T = reverse_defaultdict({
-    64:'Address Prefix ORF', # Defined in RFC5292
-    65: 'CP-ORF', # Defined in RFC7543
-})
-
-ORF_SEND_RECV = reverse_defaultdict({
-    1:'Receive',
-    2:'Send',
-    3:'Both',
-})
-
-# ADD-PATH Capability
-# Defined in RFC7911
-ADD_PATH_SEND_RECV = reverse_defaultdict({
-    1:'Receive',
-    2:'Send',
-    3:'Both',
-})
-
-# AS Number Representation
-AS_REPR = reverse_defaultdict({
-    1:'asplain',
-    2:'asdot+',
-    3:'asdot',
-})
-
-# MPLS Label
-LBL_BOTTOM = 0x01        # Defined in RFC3032
-LBL_WITHDRAWN = 0x800000 # Defined in RFC3107
-
-def as_len(n=None):
-    '''
-    AS number length for AS_PATH attribute.
-    '''
-    if n is not None:
-        as_len.n = n
-    try:
-        return as_len.n
-    except AttributeError:
-        return 4
-
-def as_repr(n=None):
-    '''
-    AS number representation.
-    Default is 'asplain'(defined in RFC5396).
-    '''
-    if n is not None:
-        as_repr.n = n
-    try:
-        return as_repr.n
-    except AttributeError:
-        return AS_REPR['asplain']
-
-def af_num(afi=None, safi=None):
-    '''
-    the values of AFI/SAFI.
-    '''
-    if afi is not None:
-        af_num.afi = afi
-        af_num.safi = safi
-    try:
-        return (af_num.afi, af_num.safi)
-    except AttributeError:
-        return (0, 0)
-
-def is_add_path(f=None):
-    '''
-    Flag for add-path.
-    '''
-    if f is not None:
-        is_add_path.f = f
-    try:
-        return is_add_path.f
-    except AttributeError:
-        return False
-
-class MrtFormatError(Exception):
-    '''
-    Exception for invalid MRT formatted data.
-    '''
-    def __init__(self, msg=''):
-        Exception.__init__(self)
-        self.msg = msg
-
-class Base:
-    '''
-    Super class for all other classes.
-    '''
-    __slots__ = ['buf', 'p']
-
-    def __init__(self):
-        for slot in self.__slots__:
-            setattr(self, slot, None)
-        self.p = 0
-
-    def chk_buf(self, n):
-        '''
-        Check whether there is sufficient buffers.
-        '''
-        if len(self.buf) - self.p < n:
-            raise MrtFormatError(
-                'Insufficient buffer %d < %d byte'
-                % (len(self.buf) - self.p, n))
-
-    def val_num(self, n):
-        '''
-        Convert buffers to integer.
-        '''
-        self.chk_buf(n)
-        val = 0
-        for i in self.buf[self.p:self.p+n]:
-            val <<= 8
-            # for Python3
-            if isinstance(i, int):
-                val += i
-            # for Python2
-            else:
-                val += struct.unpack('>B', i)[0]
-        self.p += n
-        return val
-
-    def val_bytes(self, n):
-        '''
-        Convert buffers to bytes.
-        '''
-        self.chk_buf(n)
-        val = self.buf[self.p:self.p+n]
-        self.p += n
-        return val
-
-    def val_str(self, n):
-        '''
-        Convert buffers to string.
-        '''
-        self.chk_buf(n)
-        val = self.buf[self.p:self.p+n]
-        self.p += n
-        # for Python2
-        if isinstance(val, str):
-            return val
-        # for Python3
-        else:
-            return val.decode('utf-8')
-
-    def val_addr(self, af, n=-1):
-        '''
-        Convert buffers to IP address.
-        '''
-        if af == AFI_T['IPv4']:
-            m = 4
-            _af = socket.AF_INET
-        elif af == AFI_T['IPv6']:
-            m = 16
-            _af = socket.AF_INET6
-        else:
-            raise MrtFormatError('Unsupported AFI %d(%s)' % (af, AFI_T[af]))
-        n = m if n < 0 else (n + 7) // 8
-        self.chk_buf(n)
-        addr = socket.inet_ntop(
-            _af, self.buf[self.p:self.p+n] + b'\x00'*(m - n))
-        self.p += n
-        return addr
-
-    def val_asn(self, n):
-        '''
-        Convert buffers to AS number.
-        '''
-        asn = self.val_num(n)
-        if as_repr() == AS_REPR['asplain'] \
-            or (as_repr() == AS_REPR['asdot'] and asn < 0x10000):
-            return str(asn)
-        else:
-            return str(asn >> 16) + '.' + str(asn & 0xffff)
-
-    def val_rd(self):
-        '''
-        Convert buffers to route distinguisher.
-        '''
-        rd = self.val_num(8)
-        return str(rd >> 32) + ':' + str(rd & 0xffffffff)
-
-    def val_nlri(self, n, af, saf=0):
-        '''
-        Convert buffers to NLRI.
-        '''
-        try:
-            if is_add_path():
-                raise MrtFormatError
-            p = self.p
-            l = []
-            while p < n:
-                nlri = Nlri(self.buf[p:])
-                p += nlri.unpack(af, saf)
-                nlri.is_valid()
-                nlri.is_dup(l)
-                l.append(nlri)
-            self.p = p
-        except MrtFormatError:
-            l = []
-            while self.p < n:
-                nlri = Nlri(self.buf[self.p:])
-                self.p += nlri.unpack(af, saf, add_path=1)
-                nlri.is_valid()
-                l.append(nlri)
-        return l
-
 class Reader(Base):
     '''
     Reader for MRT format data.
     '''
-    __slots__ = ['buf', 'p', 'mrt', 'f']
+    __slots__ = ['f', 'err', 'err_msg']
 
     def __init__(self, arg):
         Base.__init__(self)
 
-        # for file instance
+        # file instance
         if hasattr(arg, 'read'):
             self.f = arg
-        # for file path
+        # file path
         elif isinstance(arg, str):
             f = open(arg, 'rb')
             hdr = f.read(max(len(BZ2_MAGIC), len(GZIP_MAGIC)))
@@ -601,118 +78,128 @@ class Reader(Base):
         return self
 
     def __next__(self):
+        as_len(4)
+        af_num(0, 0)
+        is_add_path(False)
+        mrt = Mrt(self.f.read(12))
         try:
-            self.unpack_hdr()
+            self.unpack_hdr(mrt)
         except MrtFormatError as e:
-            self.mrt.err = MRT_ERR_C['MRT Header Error']
-            self.mrt.err_msg = e.msg
+            self.err = MRT_ERR_C['MRT Header Error']
+            self.err_msg = e.msg
+            self.buf = mrt.buf
             return self
 
         try:
-            self.unpack_data()
+            self.unpack_msg(mrt)
         except MrtFormatError as e:
-            self.mrt.err = MRT_ERR_C['MRT Data Error']
-            self.mrt.err_msg = e.msg
+            self.err = MRT_ERR_C['MRT Data Error']
+            self.err_msg = e.msg
+            self.buf = mrt.buf
             return self
 
         return self
 
-    # for Python2 compatibility
+    # Python2 compatibility
     next = __next__
 
-    def unpack_hdr(self):
+    def unpack_hdr(self, mrt):
         '''
         Decoder for MRT header.
         '''
-        as_len(4)
-        af_num(0, 0)
-        is_add_path(False)
-        self.mrt = Mrt(self.f.read(12))
-        if len(self.mrt.buf) == 0:
+        if len(mrt.buf) == 0:
             self.close()
-        elif len(self.mrt.buf) < 12:
+        elif len(mrt.buf) < 12:
             raise MrtFormatError(
-                'Invalid MRT header length %d < 12 byte'
-                % len(self.mrt.buf))
-        self.mrt.unpack()
+                'Invalid MRT header length %d < 12 byte' % len(mrt.buf)
+            )
+        mrt.unpack()
+        self.data = mrt.data
 
-    def unpack_data(self):
+    def unpack_msg(self, mrt):
         '''
-        Decoder for MRT payload.
+        Decoder for MRT message.
         '''
-        data = self.f.read(self.mrt.len)
-        self.mrt.buf += data
-        if len(data) < self.mrt.len:
+        buf = self.f.read(mrt.data['length'])
+        mrt.buf += buf
+        if len(buf) < mrt.data['length']:
             raise MrtFormatError(
                 'Invalid MRT data length %d < %d byte'
-                % (len(data), self.mrt.len))
+                % (len(buf), mrt.data['length'])
+            )
 
-        if len(MRT_ST[self.mrt.type]) \
-            and MRT_ST[self.mrt.type][self.mrt.subtype] == 'Unknown':
+        if mrt.data['subtype'][0] == 'Unknown':
             raise MrtFormatError(
-                'Unsupported %s subtype %d(%s)'
-                % (self.mrt.type, self.mrt.subtype,
-                MRT_ST[self.mrt.type][self.mrt.subtype]))
+                'Unsupported type %d(%s) subtype %d(%s)'
+                % tuple(mrt.data['type'] + mrt.data['subtype'])
+            )
 
-        if self.mrt.type == MRT_T['TABLE_DUMP_V2']:
-            self.unpack_td_v2(data)
-        elif self.mrt.type == MRT_T['BGP4MP'] \
-            or self.mrt.type == MRT_T['BGP4MP_ET']:
-            if self.mrt.subtype == BGP4MP_ST['BGP4MP_ENTRY'] \
-                or self.mrt.subtype == BGP4MP_ST['BGP4MP_SNAPSHOT']:
-                self.p += self.mrt.len
+        if mrt.data['type'][0] == MRT_T['TABLE_DUMP_V2']:
+            self.unpack_td_v2(buf, mrt)
+        elif mrt.data['type'][0] == MRT_T['BGP4MP'] \
+            or mrt.data['type'][0] == MRT_T['BGP4MP_ET']:
+            if mrt.data['subtype'][0] == MRT_T['BGP4MP_ENTRY'] \
+                or mrt.data['subtype'][0] == MRT_T['BGP4MP_SNAPSHOT']:
+                self.p += mrt.data['length']
                 raise MrtFormatError(
-                    'Unsupported %s subtype %d(%s)'
-                    % (MRT_T[self.mrt.type], self.mrt.subtype,
-                       BGP4MP_ST[self.mrt.subtype]))
+                    'Unsupported type %d(%s) subtype %d(%s)'
+                    % tuple(mrt.data['type'] + mrt.data['subtype'])
+                )
             else:
-                if self.mrt.type == MRT_T['BGP4MP_ET']:
-                    self.mrt.micro_ts = self.mrt.val_num(4)
-                    data = data[4:]
-                self.mrt.bgp = Bgp4Mp(data)
-                self.mrt.bgp.unpack(self.mrt.subtype)
-        elif self.mrt.type == MRT_T['TABLE_DUMP']:
-            self.mrt.td = TableDump(data)
-            self.mrt.td.unpack(self.mrt.subtype)
+                if mrt.data['type'][0] == MRT_T['BGP4MP_ET']:
+                    mrt.data['micro_ts'] = mrt.val_num(4)
+                    buf = buf[4:]
+                bgp = Bgp4Mp(buf)
+                bgp.unpack(mrt.data['subtype'][0])
+                self.data.update(bgp.data)
+        elif mrt.data['type'][0] == MRT_T['TABLE_DUMP']:
+            td = TableDump(buf)
+            td.unpack(mrt.data['subtype'][0])
+            self.data.update(td.data)
         else:
-            self.p += self.mrt.len
+            self.p += mrt.data['length']
             raise MrtFormatError(
-                'Unsupported MRT type %d(%s)'
-                % (self.mrt.type, MRT_T[self.mrt.type]))
+                'Unsupported type %d(%s) subtype %d(%s)'
+                % tuple(mrt.data['type'] + mrt.data['subtype'])
+            )
 
         return self.p
 
-    def unpack_td_v2(self, data):
+    def unpack_td_v2(self, data, mrt):
         '''
         Decoder for Table_Dump_V2 format.
         '''
-        if self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
+        if mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
             is_add_path(True)
 
-        if self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH']:
+        if mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_UNICAST'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_MULTICAST'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH']:
             af_num.afi = AFI_T['IPv4']
-            self.mrt.rib = AfiSpecRib(data)
-            self.mrt.rib.unpack()
-        elif self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
+            rib = AfiSpecRib(data)
+            rib.unpack()
+            self.data.update(rib.data)
+        elif mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_MULTICAST'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
             af_num.afi = AFI_T['IPv6']
-            self.mrt.rib = AfiSpecRib(data)
-            self.mrt.rib.unpack()
-        elif self.mrt.subtype == TD_V2_ST['PEER_INDEX_TABLE']:
-            self.mrt.peer = PeerIndexTable(data)
-            self.mrt.peer.unpack()
-        elif self.mrt.subtype == TD_V2_ST['RIB_GENERIC'] \
-            or self.mrt.subtype == TD_V2_ST['RIB_GENERIC_ADDPATH']:
-            self.mrt.rib = RibGeneric(data)
-            self.mrt.rib.unpack()
+            rib = AfiSpecRib(data)
+            rib.unpack()
+            self.data.update(rib.data)
+        elif mrt.data['subtype'][0] == TD_V2_ST['PEER_INDEX_TABLE']:
+            peer = PeerIndexTable(data)
+            peer.unpack()
+            self.data.update(peer.data)
+        elif mrt.data['subtype'][0] == TD_V2_ST['RIB_GENERIC'] \
+            or mrt.data['subtype'][0] == TD_V2_ST['RIB_GENERIC_ADDPATH']:
+            rib = RibGeneric(data)
+            rib.unpack()
+            self.data.update(rib.data)
         else:
             self.p += self.mrt.len
 
@@ -720,10 +207,7 @@ class Mrt(Base):
     '''
     Class for MRT header.
     '''
-    __slots__ = [
-        'buf', 'p', 'ts', 'type', 'subtype', 'len', 'micro_ts', 'bgp', 'peer',
-        'td', 'rib', 'err', 'err_msg'
-    ]
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -733,20 +217,25 @@ class Mrt(Base):
         '''
         Decoder for MRT header.
         '''
-        self.ts = self.val_num(4)
-        self.type = self.val_num(2)
-        self.subtype = self.val_num(2)
-        self.len = self.val_num(4)
+        self.data['timestamp'] = [self.val_num(4)]
+        self.data['timestamp'].append(
+            str(datetime.fromtimestamp(self.data['timestamp'][0]))
+        )
+        self.data['type'] = [self.val_num(2)]
+        self.data['type'].append(MRT_T[self.data['type'][0]])
+        self.data['subtype'] = [self.val_num(2)]
+        self.data['subtype'].append(
+            MRT_ST[self.data['type'][0]][self.data['subtype'][0]]
+        )
+        self.data['length'] = self.val_num(4)
+
         return self.p
 
 class TableDump(Base):
     '''
     Class for Table_Dump format.
     '''
-    __slots__ = [
-        'buf', 'p', 'view', 'seq', 'prefix', 'plen', 'status', 'org_time',
-        'peer_ip', 'peer_as', 'attr_len', 'attr'
-    ]
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -756,35 +245,39 @@ class TableDump(Base):
         '''
         Decoder for Table_Dump format.
         '''
-        self.view = self.val_num(2)
-        self.seq = self.val_num(2)
-        self.prefix = self.val_addr(subtype)
-        self.plen = self.val_num(1)
-        self.status = self.val_num(1)
-        self.org_time = self.val_num(4)
+        self.data['view_number'] = self.val_num(2)
+        self.data['sequence number'] = self.val_num(2)
+        self.data['prefix'] = self.val_addr(subtype)
+        self.data['prefix_length'] = self.val_num(1)
+        self.data['status'] = self.val_num(1)
+        self.data['originated_time'] = [self.val_num(4)]
+        self.data['originated_time'].append(
+            str(datetime.fromtimestamp(self.data['originated_time'][0]))
+        )
 
         # Considering the IPv4 peers advertising IPv6 Prefixes, first,
         # the Peer IP Address field is decoded as an IPv4 address.
-        self.peer_ip = self.val_addr(AFI_T['IPv4'])
+        self.data['peer_ip'] = self.val_addr(AFI_T['IPv4'])
         if subtype == AFI_T['IPv6'] and self.val_num(12):
             self.p -= 16
-            self.peer_ip = self.val_addr(subtype)
+            self.data['peer_ip'] = self.val_addr(subtype)
 
-        self.peer_as = self.val_asn(as_len(2))
-        attr_len = self.attr_len = self.val_num(2)
-        self.attr = []
+        self.data['peer_as'] = self.val_as(as_len(2))
+        self.data['path_attribute_length'] = attr_len = self.val_num(2)
+        self.data['path_attributes'] = []
         while attr_len > 0:
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
-            self.attr.append(attr)
+            self.data['path_attributes'].append(attr.data)
             attr_len -= attr.p
+
         return self.p
 
 class PeerIndexTable(Base):
     '''
     Class for PEER_INDEX_TABLE format.
     '''
-    __slots__ = ['buf', 'p', 'collector', 'view_len', 'view', 'count', 'entry']
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -794,22 +287,22 @@ class PeerIndexTable(Base):
         '''
         Decoder for PEER_INDEX_TABLE format.
         '''
-        self.collector = self.val_addr(AFI_T['IPv4'])
-        self.view_len = self.val_num(2)
-        self.view = self.val_str(self.view_len)
-        self.count = self.val_num(2)
-        self.entry = []
-        for _ in range(self.count):
+        self.data['collector_bgp_id'] = self.val_addr(AFI_T['IPv4'])
+        self.data['view_name_length'] = self.val_num(2)
+        self.data['view_name'] = self.val_str(self.data['view_name_length'])
+        self.data['peer_count'] = self.val_num(2)
+        self.data['peer_entries'] = []
+        for _ in range(self.data['peer_count']):
             entry = PeerEntries(self.buf[self.p:])
             self.p += entry.unpack()
-            self.entry.append(entry)
+            self.data['peer_entries'].append(entry.data)
         return self.p
 
 class PeerEntries(Base):
     '''
     Class for Peer Entries.
     '''
-    __slots__ = ['buf', 'p', 'type', 'bgp_id', 'ip', 'asn']
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -819,18 +312,23 @@ class PeerEntries(Base):
         '''
         Decoder for Peer Entries.
         '''
-        self.type = self.val_num(1)
-        self.bgp_id = self.val_addr(AFI_T['IPv4'])
-        af_num.afi = AFI_T['IPv6'] if self.type & 0x01 else AFI_T['IPv4']
-        self.ip = self.val_addr(af_num.afi)
-        self.asn = self.val_asn(4 if self.type & (0x01 << 1) else 2)
+        self.data['peer_type'] = self.val_num(1)
+        self.data['peer_bgp_id'] = self.val_addr(AFI_T['IPv4'])
+        if self.data['peer_type'] & 0x01:
+            af_num.afi = AFI_T['IPv6']
+        else:
+            af_num.afi = AFI_T['IPv4']
+        self.data['peer_ip'] = self.val_addr(af_num.afi)
+        self.data['peer_as'] = self.val_as(
+            4 if self.data['peer_type'] & (0x01 << 1) else 2
+        )
         return self.p
 
 class RibGeneric(Base):
     '''
     Class for RIB_GENERIC format.
     '''
-    __slots__ = ['buf', 'p', 'seq', 'afi', 'safi', 'nlri', 'count', 'entry']
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -840,25 +338,28 @@ class RibGeneric(Base):
         '''
         Decoder for RIB_GENERIC format.
         '''
-        self.seq = self.val_num(4)
-        af_num.afi = self.afi = self.val_num(2)
-        af_num.safi = self.safi = self.val_num(1)
+        self.data['sequence_number'] = self.val_num(4)
+        af_num.afi = self.data['afi'][0] = [self.val_num(3)]
+        self.data['afi'].append(AFI_T[self.data['afi'][0]])
+        af_num.safi = self.data['safi'][0] = self.val_num(1)
+        self.data['safi'].append(SAFI_T[self.data['safi'][0]])
         n = self.val_num(1)
         self.p -= 1
-        self.nlri = self.val_nlri(self.p+(n+7)//8, self.afi, self.safi)
-        self.count = self.val_num(2)
-        self.entry = []
+        self.data['nlri'] \
+            = self.val_nlri(self.p+(n+7)//8, af_num.afi, af_num.safi)
+        self.data['entry_count'] = self.val_num(2)
+        self.data['rib_entries'] = []
         for _ in range(self.count):
             entry = RibEntries(self.buf[self.p:])
             self.p += entry.unpack()
-            self.entry.append(entry)
+            self.data['rib_entries'].append(entry.data)
         return self.p
 
 class AfiSpecRib(Base):
     '''
     Class for AFI/SAFI-Specific RIB format.
     '''
-    __slots__ = ['buf', 'p', 'seq', 'plen', 'prefix', 'count', 'entry']
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -868,48 +369,44 @@ class AfiSpecRib(Base):
         '''
         Decoder for AFI/SAFI-Specific RIB format.
         '''
-        self.seq = self.val_num(4)
-        self.plen = self.val_num(1)
-        self.prefix = self.val_addr(af_num.afi, self.plen)
-        self.count = self.val_num(2)
-        self.entry = []
-        for _ in range(self.count):
+        self.data['sequnce_number'] = self.val_num(4)
+        self.data['prefix_length'] = self.val_num(1)
+        self.data['prefix'] = self.val_addr(af_num.afi, self.data['prefix_length'])
+        self.data['entry_count'] = self.val_num(2)
+        self.data['rib_entries'] = []
+        for _ in range(self.data['entry_count']):
             entry = RibEntries(self.buf[self.p:])
             self.p += entry.unpack()
-            self.entry.append(entry)
+            self.data['rib_entries'].append(entry.data)
         return self.p
 
 class RibEntries(Base):
     '''
     Class for Rib Entries format.
     '''
-    __slots__ = [
-        'buf', 'p', 'peer_index', 'org_time', 'path_id', 'attr_len', 'attr'
-    ]
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
         self.buf = buf
-        self.peer_index = None
-        self.org_time = None
-        self.path_id = None
-        self.attr_len = None
-        self.attr = None
 
     def unpack(self):
         '''
         Decoder for Rib Entries format.
         '''
-        self.peer_index = self.val_num(2)
-        self.org_time = self.val_num(4)
+        self.data['peer_index'] = self.val_num(2)
+        self.data['originated_time'] = [self.val_num(4)]
+        self.data['originated_time'].append(
+            str(datetime.fromtimestamp(self.data['originated_time'][0]))
+        )
         if is_add_path():
-            self.path_id = self.val_num(4)
-        attr_len = self.attr_len = self.val_num(2)
-        self.attr = []
+            self.data['path_id'] = self.val_num(4)
+        attr_len = self.data['path_attribute_length'] = self.val_num(2)
+        self.data['path_attributes'] = []
         while attr_len > 0:
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
-            self.attr.append(attr)
+            self.data['path_attributes'].append(attr.data)
             attr_len -= attr.p
         return self.p
 
@@ -917,10 +414,7 @@ class Bgp4Mp(Base):
     '''
     Class for BGP4MP format.
     '''
-    __slots__ = [
-        'buf', 'p', 'peer_as', 'local_as', 'ifindex', 'af', 'peer_ip',
-        'local_ip', 'old_state', 'new_state', 'msg'
-    ]
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -943,31 +437,31 @@ class Bgp4Mp(Base):
             or subtype == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH']:
             is_add_path(True)
 
-        self.peer_as = self.val_asn(as_len())
-        self.local_as = self.val_asn(as_len())
-        self.ifindex = self.val_num(2)
-        af_num.afi = self.af = self.val_num(2)
-        self.peer_ip = self.val_addr(self.af)
-        self.local_ip = self.val_addr(self.af)
+        self.data['peer_as'] = self.val_as(as_len())
+        self.data['local_as'] = self.val_as(as_len())
+        self.data['ifindex'] = self.val_num(2)
+        af_num.afi = self.val_num(2)
+        self.data['afi'] = [af_num.afi, AFI_T[af_num.afi]]
+        self.data['peer_ip'] = self.val_addr(af_num.afi)
+        self.data['local_ip'] = self.val_addr(af_num.afi)
 
         if subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
             or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:
-            self.old_state = self.val_num(2)
-            self.new_state = self.val_num(2)
+            self.data['old_state'] = [self.val_num(2)]
+            self.data['old_state'].append(BGP_FSM[self.data['old_state'][0]])
+            self.data['new_state'] = [self.val_num(2)]
+            self.data['new_state'].append(BGP_FSM[self.data['new_state'][0]])
         else:
-            self.msg = BgpMessage(self.buf[self.p:])
-            self.p += self.msg.unpack()
+            bgp_msg = BgpMessage(self.buf[self.p:])
+            self.p += bgp_msg.unpack()
+            self.data['bgp_message'] = bgp_msg.data
         return self.p
 
 class BgpMessage(Base):
     '''
     Class for BGP Message.
     '''
-    __slots__ = [
-        'buf', 'p', 'marker', 'len', 'type', 'ver', 'my_as', 'holdtime',
-        'bgp_id', 'opt_len', 'opt_params', 'wd_len', 'withdrawn', 'attr_len',
-        'attr', 'nlri', 'err_code', 'err_subcode', 'data', 'afi', 'rsvd', 'safi'
-    ]
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -977,77 +471,84 @@ class BgpMessage(Base):
         '''
         Decoder for BGP Message.
         '''
-        self.marker = self.val_bytes(16)
-        self.len = self.val_num(2)
-        self.type = self.val_num(1)
+        self.data['marker'] = self.val_bytes(16)
+        self.data['length'] = self.val_num(2)
+        self.data['type'] = [self.val_num(1)]
+        self.data['type'].append(BGP_MSG_T[self.data['type'][0]])
 
-        if self.type == BGP_MSG_T['OPEN']:
+        if self.data['type'][0] == BGP_MSG_T['OPEN']:
             self.unpack_open()
-        elif self.type == BGP_MSG_T['UPDATE']:
+        elif self.data['type'][0] == BGP_MSG_T['UPDATE']:
             self.unpack_update()
-        elif self.type == BGP_MSG_T['NOTIFICATION']:
+        elif self.data['type'][0] == BGP_MSG_T['NOTIFICATION']:
             self.unpack_notification()
-        elif self.type == BGP_MSG_T['ROUTE-REFRESH']:
+        elif self.data['type'][0] == BGP_MSG_T['ROUTE-REFRESH']:
             self.unpack_route_refresh()
 
-        self.p += self.len - self.p
+        self.p += self.data['length'] - self.p
         return self.p
 
     def unpack_open(self):
         '''
         Decoder for BGP OPEN Message.
         '''
-        self.ver = self.val_num(1)
-        self.my_as = self.val_num(2)
-        self.holdtime = self.val_num(2)
-        self.bgp_id = self.val_addr(AFI_T['IPv4'])
-        opt_len = self.opt_len = self.val_num(1)
-        self.opt_params = []
+        self.data['version'] = self.val_num(1)
+        self.data['local_as'] = self.val_num(2)
+        self.data['holdtime'] = self.val_num(2)
+        self.data['bgp_id'] = self.val_addr(AFI_T['IPv4'])
+        opt_len = self.data['length'] = self.val_num(1)
+        self.data['optional_parameters'] = []
         while opt_len > 0:
             opt_params = OptParams(self.buf[self.p:])
             self.p += opt_params.unpack()
-            self.opt_params.append(opt_params)
+            self.data['optional_parameters'].append(opt_params.data)
             opt_len -= opt_params.p
 
     def unpack_update(self):
         '''
         Decoder for BGP UPDATE Message.
         '''
-        self.wd_len = self.val_num(2)
-        self.withdrawn = self.val_nlri(self.p+self.wd_len, af_num.afi)
-        self.attr_len = self.val_num(2)
-        attr_len = self.p + self.attr_len
-        self.attr = []
+        self.data['withdrawn_routes_length'] = self.val_num(2)
+        self.data['withdrawn_routes'] = self.val_nlri(
+            self.p + self.data['withdrawn_routes_length'], af_num.afi
+        )
+        self.data['path_attribute_length'] = self.val_num(2)
+        attr_len = self.p + self.data['path_attribute_length']
+        self.data['path_attributes'] = []
         while self.p < attr_len:
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
-            self.attr.append(attr)
-        self.nlri = self.val_nlri(self.len, af_num.afi)
+            self.data['path_attributes'].append(attr.data)
+        self.data['nlri'] \
+            = self.val_nlri(self.data['length'], af_num.afi)
 
     def unpack_notification(self):
         '''
         Decoder for BGP NOTIFICATION Message.
         '''
-        self.err_code = self.val_num(1)
-        self.err_subcode = self.val_num(1)
-        self.data = self.val_bytes(self.len - self.p)
+        self.data['error_code'] = [self.val_num(1)]
+        self.data['error_code'].append(BGP_ERR_C[self.data['error_code'][0]])
+        self.data['error_subcode'] = [self.val_num(1)]
+        self.data['error_subcode'].append(
+            BGP_ERR_SC[self.data['error_code'][0]][self.data['error_subcode'][0]]
+        )
+        self.data['data'] = self.val_bytes(self.data['length'] - self.p)
 
     def unpack_route_refresh(self):
         '''
         Decoder for BGP ROUTE-REFRESH Message.
         '''
-        self.afi = self.val_num(2)
-        self.rsvd = self.val_num(1)
-        self.safi = self.val_num(1)
+        self.data['afi'] = [self.val_num(2)]
+        self.data['afi'].append(AFI_T[self.data['afi'][0]])
+        self.data['reserved'] = self.val_num(1)
+        self.data['safi'] = [self.val_num(1)]
+        self.data['safi'].append(SAFI_T[self.data['safi'][0]])
 
 class OptParams(Base):
     '''
     Class for BGP OPEN Optional Parameters.
     '''
-    __slots__ = [
-        'buf', 'p', 'type', 'len', 'cap_type', 'cap_len', 'multi_ext', 'orf',
-        'graceful_restart', 'support_as4', 'add_path'
-    ]
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -1057,109 +558,123 @@ class OptParams(Base):
         '''
         Decoder for BGP OPEN Optional Parameters.
         '''
-        self.type = self.val_num(1)
-        self.len = self.val_num(1)
-        if self.type == BGP_OPT_PARAMS_T['Capabilities']:
+        self.data['type'] = [self.val_num(1)]
+        self.data['type'].append(BGP_OPT_PARAMS_T[self.data['type'][0]])
+        self.data['length'] = self.val_num(1)
+        if self.data['type'][0] == BGP_OPT_PARAMS_T['Capabilities']:
             self.unpack_capabilities()
         else:
-            self.p += self.len
+            self.p += self.data['length']
         return self.p
 
     def unpack_capabilities(self):
         '''
         Decoder for BGP Capabilities.
         '''
-        self.cap_type = self.val_num(1)
-        self.cap_len = self.val_num(1)
+        self.data['type'] = [self.val_num(1)]
+        self.data['type'].append(BGP_CAP_C[self.data['type'][0]])
+        self.data['length'] = self.val_num(1)
 
-        if self.cap_type == BGP_CAP_C['Multiprotocol Extensions for BGP-4']:
+        if self.data['type'][0] \
+            == BGP_CAP_C['Multiprotocol Extensions for BGP-4']:
             self.unpack_multi_ext()
-        elif self.cap_type == BGP_CAP_C['Route Refresh Capability for BGP-4']:
-            self.p += self.len - 2
-        elif self.cap_type == BGP_CAP_C['Outbound Route Filtering Capability']:
+        elif self.data['type'][0] \
+            == BGP_CAP_C['Route Refresh Capability for BGP-4']:
+            self.p += self.data['length'] - 2
+        elif self.data['type'][0] \
+            == BGP_CAP_C['Outbound Route Filtering Capability']:
             self.unpack_orf()
-        elif self.cap_type == BGP_CAP_C['Graceful Restart Capability']:
+        elif self.data['type'][0] == BGP_CAP_C['Graceful Restart Capability']:
             self.unpack_graceful_restart()
-        elif self.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
+        elif self.data['type'][0] \
+            == BGP_CAP_C['Support for 4-octet AS number capability']:
             self.unpack_support_as4()
-        elif self.cap_type == BGP_CAP_C['ADD-PATH Capability']:
+        elif self.data['type'][0] == BGP_CAP_C['ADD-PATH Capability']:
             self.unpack_add_path()
         else:
-            self.p += self.len - 2
+            self.p += self.data['length'] - 2
 
     def unpack_multi_ext(self):
         '''
         Decoder for Multiprotocol Extensions for BGP-4.
         '''
-        self.multi_ext = {}
-        self.multi_ext['afi'] = self.val_num(2)
-        self.multi_ext['rsvd'] = self.val_num(1)
-        self.multi_ext['safi'] = self.val_num(1)
+        self.data['value'] = collections.OrderedDict()
+        self.data['value']['afi'] = [self.val_num(2)]
+        self.data['value']['afi'].append(AFI_T[self.data['value']['afi'][0]])
+        self.data['value']['reserved'] = self.val_num(1)
+        self.data['value']['safi'] = [self.val_num(1)]
+        self.data['value']['safi'].append(SAFI_T[self.data['value']['safi'][0]])
 
     def unpack_orf(self):
         '''
         Decoder for Outbound Route Filtering Capability.
         '''
-        self.orf = {}
-        self.orf['afi'] = self.val_num(2)
-        self.orf['rsvd'] = self.val_num(1)
-        self.orf['safi'] = self.val_num(1)
-        self.orf['number'] = self.val_num(1)
-        self.orf['entry'] = []
-        for _ in range(self.orf['number']):
-            entry = {}
-            entry['type'] = self.val_num(1)
-            entry['send_recv'] = self.val_num(1)
-            self.orf['entry'].append(entry)
+        self.data['value'] = collections.OrderedDict()
+        self.data['value']['afi'] = [self.val_num(2)]
+        self.data['value']['afi'].append(AFI_T[self.data['value']['afi'][0]])
+        self.data['value']['reserved'] = self.val_num(1)
+        self.data['value']['safi'] = [self.val_num(1)]
+        self.data['value']['safi'].append(SAFI_T[self.data['value']['safi'][0]])
+        self.data['value']['number'] = self.val_num(1)
+        self.data['value']['entries'] = []
+        for _ in range(self.data['value']['number']):
+            entry = collections.OrderedDict()
+            entry['type'] = [self.val_num(1)]
+            entry['type'].append(ORF_T[entry['type'][0]])
+            entry['send_receive'] = [self.val_num(1)]
+            entry['send_receive'].append(ORF_T[entry['send_receive'][0]])
+            self.data['entries'].append(entry)
 
     def unpack_graceful_restart(self):
         '''
         Decoder for Graceful Restart Capability.
         '''
-        self.graceful_restart = {}
+        self.data['value'] = collections.OrderedDict()
         n = self.val_num(2)
-        self.graceful_restart['flag'] = n & 0xf000
-        self.graceful_restart['sec'] = n & 0x0fff
-        self.graceful_restart['entry'] = []
-        cap_len = self.cap_len
+        self.data['value']['flags'] = n & 0xf000
+        self.data['value']['seconds'] = n & 0x0fff
+        self.data['value']['entries'] = []
+        cap_len = self.data['length']
         while cap_len > 2:
-            entry = {}
-            entry['afi'] = self.val_num(2)
-            entry['safi'] = self.val_num(1)
-            entry['flag'] = self.val_num(1)
-            self.graceful_restart['entry'].append(entry)
+            entry = collections.OrderedDict()
+            entry['afi'] = [self.val_num(2)]
+            entry['afi'].append(AFI_T[entry['afi'][0]])
+            entry['safi'] = [self.val_num(1)]
+            entry['safi'].append(SAFI_T[entry['safi'][0]])
+            entry['flags'] = self.val_num(1)
+            self.data['value']['entries'].append(entry)
             cap_len -= 4
 
     def unpack_support_as4(self):
         '''
         Decoder for Support for 4-octet AS number capability.
         '''
-        self.support_as4 = self.val_asn(4)
+        self.data['value'] = self.val_as(4)
 
     def unpack_add_path(self):
         '''
         Decoder for ADD-PATH Capability
         '''
-        self.add_path = []
-        cap_len = self.cap_len
+        self.data['value'] = []
+        cap_len = self.data['length']
         while cap_len > 2:
-            entry = {}
-            entry['afi'] = self.val_num(2)
-            entry['safi'] = self.val_num(1)
-            entry['send_recv'] = self.val_num(1)
-            self.add_path.append(entry)
+            entry = collections.OrderedDict()
+            entry['afi'] = [self.val_num(2)]
+            entry['afi'].append(AFI_T[entry['afi'][0]])
+            entry['safi'] = [self.val_num(1)]
+            entry['safi'].append(SAFI_T[entry['safi'][0]])
+            entry['send_receive'] = [self.val_num(1)]
+            entry['send_receive'].append(
+                ADD_PATH_SEND_RECV[entry['send_receive'][0]]
+            )
+            self.data['value'].append(entry)
             cap_len -= 4
 
 class BgpAttr(Base):
     '''
     Class for BGP path attributes
     '''
-    __slots__ = [
-        'buf', 'p', 'flag', 'type', 'len', 'origin', 'as_path', 'next_hop',
-        'med', 'local_pref', 'aggr', 'comm', 'org_id', 'cl_list', 'mp_reach',
-        'mp_unreach', 'ext_comm', 'as4_path', 'as4_aggr', 'aigp', 'attr_set',
-        'large_comm', 'val'
-    ]
+    __slots__ = []
 
     def __init__(self, buf):
         Base.__init__(self)
@@ -1169,145 +684,152 @@ class BgpAttr(Base):
         '''
         Decoder for BGP path attributes
         '''
-        self.flag = self.val_num(1)
-        self.type = self.val_num(1)
+        self.data['flag'] = self.val_num(1)
+        self.data['type'] = [self.val_num(1)]
+        self.data['type'].append(BGP_ATTR_T[self.data['type'][0]])
 
-        if self.flag & 0x01 << 4:
-            self.len = self.val_num(2)
+        if self.data['flag'] & 0x01 << 4:
+            self.data['length'] = self.val_num(2)
         else:
-            self.len = self.val_num(1)
+            self.data['length'] = self.val_num(1)
 
-        if self.type == BGP_ATTR_T['ORIGIN']:
+        if self.data['type'][0] == BGP_ATTR_T['ORIGIN']:
             self.unpack_origin()
-        elif self.type == BGP_ATTR_T['AS_PATH']:
+        elif self.data['type'][0] == BGP_ATTR_T['AS_PATH']:
             self.unpack_as_path()
-        elif self.type == BGP_ATTR_T['NEXT_HOP']:
+        elif self.data['type'][0] == BGP_ATTR_T['NEXT_HOP']:
             self.unpack_next_hop()
-        elif self.type == BGP_ATTR_T['MULTI_EXIT_DISC']:
+        elif self.data['type'][0] == BGP_ATTR_T['MULTI_EXIT_DISC']:
             self.unpack_multi_exit_disc()
-        elif self.type == BGP_ATTR_T['LOCAL_PREF']:
+        elif self.data['type'][0] == BGP_ATTR_T['LOCAL_PREF']:
             self.unpack_local_pref()
-        elif self.type == BGP_ATTR_T['AGGREGATOR']:
+        elif self.data['type'][0] == BGP_ATTR_T['AGGREGATOR']:
             self.unpack_aggregator()
-        elif self.type == BGP_ATTR_T['COMMUNITY']:
+        elif self.data['type'][0] == BGP_ATTR_T['COMMUNITY']:
             self.unpack_community()
-        elif self.type == BGP_ATTR_T['ORIGINATOR_ID']:
+        elif self.data['type'][0] == BGP_ATTR_T['ORIGINATOR_ID']:
             self.unpack_originator_id()
-        elif self.type == BGP_ATTR_T['CLUSTER_LIST']:
+        elif self.data['type'][0] == BGP_ATTR_T['CLUSTER_LIST']:
             self.unpack_cluster_list()
-        elif self.type == BGP_ATTR_T['MP_REACH_NLRI']:
+        elif self.data['type'][0] == BGP_ATTR_T['MP_REACH_NLRI']:
             self.unpack_mp_reach_nlri()
-        elif self.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
+        elif self.data['type'][0] == BGP_ATTR_T['MP_UNREACH_NLRI']:
             self.unpack_mp_unreach_nlri()
-        elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+        elif self.data['type'][0] == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
             self.unpack_extended_communities()
-        elif self.type == BGP_ATTR_T['AS4_PATH']:
+        elif self.data['type'][0] == BGP_ATTR_T['AS4_PATH']:
             self.unpack_as4_path()
-        elif self.type == BGP_ATTR_T['AS4_AGGREGATOR']:
+        elif self.data['type'][0] == BGP_ATTR_T['AS4_AGGREGATOR']:
             self.unpack_as4_aggregator()
-        elif self.type == BGP_ATTR_T['AIGP']:
+        elif self.data['type'][0] == BGP_ATTR_T['AIGP']:
             self.unpack_aigp()
-        elif self.type == BGP_ATTR_T['ATTR_SET']:
+        elif self.data['type'][0] == BGP_ATTR_T['ATTR_SET']:
             self.unpack_attr_set()
-        elif self.type == BGP_ATTR_T['LARGE_COMMUNITY']:
+        elif self.data['type'][0] == BGP_ATTR_T['LARGE_COMMUNITY']:
             self.unpack_large_community()
         else:
-            self.val = self.val_bytes(self.len)
+            if self.data['length']:
+                self.data['value'] = self.val_bytes(self.data['length'])
+            else:
+                self.data['value'] = ''
         return self.p
 
     def unpack_origin(self):
         '''
         Decoder for ORIGIN attribute
         '''
-        self.origin = self.val_num(1)
+        self.data['value'] = self.val_num(1)
 
     def unpack_as_path(self):
         '''
         Decoder for AS_PATH attribute
         '''
-        attr_len = self.p + self.len
-        self.as_path = []
+        attr_len = self.p + self.data['length']
+        self.data['value'] = []
         while self.p < attr_len:
-            path_seg = {}
-            path_seg['type'] = self.val_num(1)
-            path_seg['len'] = self.val_num(1)
-            path_seg['val'] = []
-            for _ in range(path_seg['len']):
-                path_seg['val'].append(self.val_asn(as_len()))
-            self.as_path.append(path_seg)
+            path_seg = collections.OrderedDict()
+            path_seg['type'] = [self.val_num(1)]
+            path_seg['type'].append(AS_PATH_SEG_T[path_seg['type'][0]])
+            path_seg['length'] = self.val_num(1)
+            path_seg['value'] = []
+            for _ in range(path_seg['length']):
+                path_seg['value'].append(self.val_as(as_len()))
+            self.data['value'].append(path_seg)
 
     def unpack_next_hop(self):
         '''
         Decoder for NEXT_HOP attribute
         '''
-        if self.len == 4:
-            self.next_hop = self.val_addr(AFI_T['IPv4'])
-        elif self.len == 16:
-            self.next_hop = self.val_addr(AFI_T['IPv6'])
+        if self.data['length'] == 4:
+            self.data['value'] = self.val_addr(AFI_T['IPv4'])
+        elif self.data['length'] == 16:
+            self.data['value'] = self.val_addr(AFI_T['IPv6'])
         else:
-            self.p += self.len
-            self.next_hop = None
+            self.p += self.data['length']
+            self.data['value'] = None
 
     def unpack_multi_exit_disc(self):
         '''
         Decoder for MULTI_EXIT_DISC attribute
         '''
-        self.med = self.val_num(4)
+        self.data['value'] = self.val_num(4)
 
     def unpack_local_pref(self):
         '''
         Decoder for LOCAL_PREF attribute
         '''
-        self.local_pref = self.val_num(4)
+        self.data['value'] = self.val_num(4)
 
     def unpack_aggregator(self):
         '''
         Decoder for AGGREGATOR attribute
         '''
-        self.aggr = {}
-        n = 2 if self.len < 8 else 4
-        self.aggr['asn'] = self.val_asn(n)
-        self.aggr['id'] = self.val_addr(AFI_T['IPv4'])
+        self.data['value'] = collections.OrderedDict()
+        n = 2 if self.data['length'] < 8 else 4
+        self.data['value']['as'] = self.val_as(n)
+        self.data['value']['id'] = self.val_addr(AFI_T['IPv4'])
 
     def unpack_community(self):
         '''
         Decoder for COMMUNITY attribute
         '''
-        attr_len = self.p + self.len
-        self.comm = []
+        attr_len = self.p + self.data['length']
+        self.data['value'] = []
         while self.p < attr_len:
             val = self.val_num(4)
-            self.comm.append(
-                '%d:%d' %
-                ((val & 0xffff0000) >> 16, val & 0x0000ffff))
+            self.data['value'].append(
+                '%d:%d' % ((val & 0xffff0000) >> 16, val & 0x0000ffff)
+            )
 
     def unpack_originator_id(self):
         '''
         Decoder for ORIGINATOR_ID attribute
         '''
-        self.org_id = self.val_addr(AFI_T['IPv4'])
+        self.data['value'] = self.val_addr(AFI_T['IPv4'])
 
     def unpack_cluster_list(self):
         '''
         Decoder for CLUSTER_LIST attribute
         '''
-        attr_len = self.p + self.len
-        self.cl_list = []
+        attr_len = self.p + self.data['length']
+        self.data['value'] = []
         while self.p < attr_len:
-            self.cl_list.append(self.val_addr(AFI_T['IPv4']))
+            self.data['value'].append(self.val_addr(AFI_T['IPv4']))
 
     def unpack_mp_reach_nlri(self):
         '''
         Decoder for MP_REACH_NLRI attribute
         '''
-        attr_len = self.p + self.len
-        self.mp_reach = {}
-        self.mp_reach['afi'] = self.val_num(2)
+        attr_len = self.p + self.data['length']
+        self.data['value'] = collections.OrderedDict()
+        self.data['value']['afi'] = [self.val_num(2)]
+        self.data['value']['afi'].append(AFI_T[self.data['value']['afi'][0]])
 
-        if AFI_T[self.mp_reach['afi']] != 'Unknown':
-            af_num.afi = self.mp_reach['afi']
-            af_num.safi = self.mp_reach['safi'] = self.val_num(1)
-            self.mp_reach['nlen'] = self.val_num(1)
+        if self.data['value']['afi'][1] != 'Unknown':
+            af_num.afi = self.data['value']['afi'][0]
+            af_num.safi = self.val_num(1)
+            self.data['value']['safi'] = [af_num.safi, SAFI_T[af_num.safi]]
+            self.data['value']['next_hop_length'] = self.val_num(1)
 
             if af_num.afi != AFI_T['IPv4'] and af_num.afi != AFI_T['IPv6']:
                 self.p = attr_len
@@ -1322,191 +844,137 @@ class BgpAttr(Base):
 
             if af_num.safi == SAFI_T['L3VPN_UNICAST'] \
                 or af_num.safi == SAFI_T['L3VPN_MULTICAST']:
-                self.mp_reach['rd'] = self.val_rd()
+                self.data['value']['route_distinguisher'] = self.val_rd()
         else:
+            #
+            # RFC6396
+            # 4.3.4. RIB Entries:
+            # There is one exception to the encoding of BGP attributes for the BGP
+            # MP_REACH_NLRI attribute (BGP Type Code 14) [RFC4760].  Since the AFI,
+            # SAFI, and NLRI information is already encoded in the RIB Entry Header
+            # or RIB_GENERIC Entry Header, only the Next Hop Address Length and
+            # Next Hop Address fields are included.  The Reserved field is omitted.
+            # The attribute length is also adjusted to reflect only the length of
+            # the Next Hop Address Length and Next Hop Address fields.
+            #
             self.p -= 2
-            self.mp_reach = {}
-            self.mp_reach['nlen'] = self.val_num(1)
+            self.data['value'] = collections.OrderedDict()
+            self.data['value']['next_hop_length'] = self.val_num(1)
 
-        self.mp_reach['next_hop'] = []
-        self.mp_reach['next_hop'].append(self.val_addr(af_num.afi))
-        if self.mp_reach['nlen'] == 32 and af_num.afi == AFI_T['IPv6']:
-            self.mp_reach['next_hop'].append(self.val_addr(af_num.afi))
+        self.data['value']['next_hop'] = [self.val_addr(af_num.afi)]
 
-        if 'afi' in self.mp_reach:
-            self.mp_reach['rsvd'] = self.val_num(1)
-            self.mp_reach['nlri'] = self.val_nlri(
-                attr_len, af_num.afi, af_num.safi)
+        # RFC2545
+        if self.data['value']['next_hop_length'] == 32 \
+            and af_num.afi == AFI_T['IPv6']:
+            self.data['value']['next_hop'].append(self.val_addr(af_num.afi))
+
+        if 'afi' in self.data['value']:
+            self.data['value']['reserved'] = self.val_num(1)
+            self.data['value']['nlri'] \
+                = self.val_nlri(attr_len, af_num.afi, af_num.safi)
 
     def unpack_mp_unreach_nlri(self):
         '''
         Decoder for MP_UNREACH_NLRI attribute
         '''
-        attr_len = self.p + self.len
-        self.mp_unreach = {}
-        self.mp_unreach['afi'] = self.val_num(2)
-        self.mp_unreach['safi'] = self.val_num(1)
+        attr_len = self.p + self.data['length']
+        self.data['value'] = collections.OrderedDict()
+        self.data['value']['afi'] = [self.val_num(2)]
+        self.data['value']['afi'].append(AFI_T[self.data['value']['afi'][0]])
+        self.data['value']['safi'] = [self.val_num(1)]
+        self.data['value']['safi'].append(SAFI_T[self.data['value']['safi'][0]])
 
-        if self.mp_unreach['afi'] != AFI_T['IPv4'] \
-            and self.mp_unreach['afi'] != AFI_T['IPv6']:
+        if self.data['value']['afi'][0] != AFI_T['IPv4'] \
+            and self.data['value']['afi'][0] != AFI_T['IPv6']:
             self.p = attr_len
             return
 
-        if self.mp_unreach['safi'] != SAFI_T['UNICAST'] \
-            and self.mp_unreach['safi'] != SAFI_T['MULTICAST'] \
-            and self.mp_unreach['safi'] != SAFI_T['L3VPN_UNICAST'] \
-            and self.mp_unreach['safi'] != SAFI_T['L3VPN_MULTICAST']:
+        if self.data['value']['safi'][0] != SAFI_T['UNICAST'] \
+            and self.data['value']['safi'][0] != SAFI_T['MULTICAST'] \
+            and self.data['value']['safi'][0] != SAFI_T['L3VPN_UNICAST'] \
+            and self.data['value']['safi'][0] != SAFI_T['L3VPN_MULTICAST']:
             self.p = attr_len
             return
 
-        self.mp_unreach['withdrawn'] = self.val_nlri(
-            attr_len, self.mp_unreach['afi'], self.mp_unreach['safi'])
+        self.data['value']['withdrawn_routes'] = self.val_nlri(
+            attr_len,
+            self.data['value']['afi'][0],
+            self.data['value']['safi'][0]
+        )
 
     def unpack_extended_communities(self):
         '''
         Decoder for EXT_COMMUNITIES attribute
         '''
-        attr_len = self.p + self.len
-        self.ext_comm = []
+        attr_len = self.p + self.data['length']
+        self.data['value'] = []
         while self.p < attr_len:
             ext_comm = self.val_num(8)
-            self.ext_comm.append(ext_comm)
+            self.data['value'].append(ext_comm)
 
     def unpack_as4_path(self):
         '''
         Decoder for AS4_PATH attribute
         '''
-        attr_len = self.p + self.len
-        self.as4_path = []
+        attr_len = self.p + self.data['length']
+        self.data['value'] = []
         while self.p < attr_len:
-            path_seg = {}
-            path_seg['type'] = self.val_num(1)
-            path_seg['len'] = self.val_num(1)
-            path_seg['val'] = []
+            path_seg = collections.OrderedDict()
+            path_seg['type'] = [self.val_num(1)]
+            path_seg['type'].append(AS_PATH_SEG_T[path_seg['type'][0]])
+            path_seg['length'] = self.val_num(1)
+            path_seg['value'] = []
             for _ in range(path_seg['len']):
-                path_seg['val'].append(self.val_asn(4))
-            self.as4_path.append(path_seg)
+                path_seg['value'].append(self.val_as(4))
+            self.data['value'].append(path_seg)
 
     def unpack_as4_aggregator(self):
         '''
         Decoder for AS4_AGGREGATOR attribute
         '''
-        self.as4_aggr = {}
-        self.as4_aggr['asn'] = self.val_asn(4)
-        self.as4_aggr['id'] = self.val_addr(AFI_T['IPv4'])
+        self.data['value'] = collections.OrderedDict()
+        self.data['value']['as'] = self.val_as(4)
+        self.data['value']['id'] = self.val_addr(AFI_T['IPv4'])
 
     def unpack_aigp(self):
         '''
         Decoder for AIGP attribute
         '''
-        attr_len = self.p + self.len
-        self.aigp = []
+        attr_len = self.p + self.data['length']
+        self.data['value'] = []
         while self.p < attr_len:
-            aigp = {}
-            aigp['type'] = self.val_num(1)
-            aigp['len'] = self.val_num(2)
-            aigp['val'] = self.val_num(aigp['len'] - 3)
-            self.aigp.append(aigp)
+            aigp = collections.OrderedDict()
+            aigp['type'] = [self.val_num(1)]
+            aigp['type'].append(AIGP_T[aigp['type'][0]])
+            aigp['length'] = self.val_num(2)
+            aigp['value'] = self.val_num(aigp['length'] - 3)
+            self.data['value'].append(aigp)
 
     def unpack_attr_set(self):
         '''
         Decoder for ATTR_SET attribute
         '''
-        attr_len = self.p + self.len
-        self.attr_set = {}
-        self.attr_set['origin_as'] = self.val_asn(4)
+        attr_len = self.p + self.data['length']
+        self.data['value'] = collections.OrderedDict()
+        self.data['value']['origin_as'] = self.val_as(4)
         attr_len -= 4
-        self.attr_set['attr'] = []
+        self.data['value']['path_attributes'] = []
         while self.p < attr_len:
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
-            self.attr_set['attr'].append(attr)
+            self.data['value']['path_attributes'].append(attr.data)
 
     def unpack_large_community(self):
         '''
         Decoder for LARGE_COMMUNITY attribute
         '''
-        attr_len = self.p + self.len
-        self.large_comm = []
+        attr_len = self.p + self.data['length']
+        self.data['value'] = []
         while self.p < attr_len:
             global_admin = self.val_num(4)
             local_data_part_1 = self.val_num(4)
             local_data_part_2 = self.val_num(4)
-            self.large_comm.append(
-                '%d:%d:%d' %
-                (global_admin, local_data_part_1, local_data_part_2))
-
-class Nlri(Base):
-    '''
-    Class for NLRI.
-    '''
-    __slots__ = ['buf', 'p', 'path_id', 'label', 'rd', 'plen', 'prefix']
-
-    def __init__(self, buf):
-        Base.__init__(self)
-        self.buf = buf
-
-    def unpack(self, af, saf=0, add_path=0):
-        '''
-        Decoder for NLRI.
-        '''
-        if add_path:
-            self.path_id = self.val_num(4)
-        self.plen = plen = self.val_num(1)
-        if saf == SAFI_T['L3VPN_UNICAST'] \
-            or saf == SAFI_T['L3VPN_MULTICAST']:
-            plen = self.unpack_l3vpn(plen)
-        if af == AFI_T['IPv4'] and plen > 32 \
-            or af == AFI_T['IPv6'] and plen > 128:
-            raise MrtFormatError(
-                'Invalid prefix length %d (%s)'
-                % (self.plen, AFI_T[af]))
-        self.prefix = self.val_addr(af, plen)
-        return self.p
-
-    def unpack_l3vpn(self, plen):
-        '''
-        Decoder for L3VPN NLRI.
-        '''
-        self.label = []
-        while True:
-            label = self.val_num(3)
-            self.label.append(label)
-            if label &  LBL_BOTTOM or label == LBL_WITHDRAWN:
-                break
-        self.rd = self.val_rd()
-        plen -= (3 * len(self.label) + 8) * 8
-        return plen
-
-    def is_dup(self, l):
-        '''
-        Check whether there is duplicate routes in NLRI.
-        '''
-        for e in l:
-            if self.plen == e.plen and self.prefix == e.prefix \
-                and self.label == e.label and self.rd == e.rd:
-                raise MrtFormatError(
-                    'Duplicate prefix %s/%d'
-                    % (self.prefix, self.plen))
-
-    def is_valid(self):
-        '''
-        Check whether route is valid.
-        '''
-        if self.label is not None:
-            plen = self.plen - (len(self.label) * 3 + 8) * 8
-        else:
-            plen = self.plen
-        if ':' in self.prefix:
-            b = socket.inet_pton(socket.AF_INET6, self.prefix)
-            t = struct.unpack("!QQ", b)
-            n = t[0] << 64 | t[1]
-            plen_max = 128
-        else:
-            b = socket.inet_pton(socket.AF_INET, self.prefix)
-            n = struct.unpack("!L", b)[0]
-            plen_max = 32
-        if n & ~(-1 << (plen_max - plen)):
-            raise MrtFormatError(
-                'Invalid prefix %s/%d'
-                % (self.prefix, self.plen))
+            self.data['value'].append(
+                '%d:%d:%d'
+                % (global_admin, local_data_part_1, local_data_part_2)
+            )

@@ -1,3 +1,8 @@
+2019-06-08 Tetsumune KISO <t2mune@gmail.com>
+	* Update - added "data" attribute for storing parsed data.
+	* Update - added "mrt2json.py".
+	* Update - added "mrt2yaml.py".
+
 2019-05-02 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't handle "Extended Timestamp MRT Header" properly.
 	Thank you rodrigodalri.
