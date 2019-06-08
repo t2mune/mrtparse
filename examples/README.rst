@@ -7,14 +7,14 @@ mrt2json.py
 Description
 ~~~~~~~~~~~
 
-| This script converts MRT format to JSON.
+| It converts MRT format to JSON.
 
 Usage
 ~~~~~
 
 ::
 
-    mrt2json.py <path_to_file>
+    mrt2json.py PATH_TO_FILE
 
 Result
 ~~~~~~
@@ -41,7 +41,7 @@ Result
         "ifindex": 0,
         "afi": [
           1,
-        ...
+          ...
 
 mrt2yaml.py
 -----------
@@ -49,14 +49,14 @@ mrt2yaml.py
 Description
 ~~~~~~~~~~~
 
-| This script converts MRT format to
+| It converts MRT format to YAML.
 
 Usage
 ~~~~~
 
 ::
 
-    usage: mrt2json.py path_to_file
+    mrt2yaml.py PATH_TO_FILE
 
 Result
 ~~~~~~
