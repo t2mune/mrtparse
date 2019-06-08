@@ -218,8 +218,8 @@ or
 
 We have prepared some example scripts and sample data in `"examples"`_ and `"samples"`_ directory.
 
-.. _`"examples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/examples
-.. _`"samples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/samples
+.. _`"examples"`: examples
+.. _`"samples"`: samples
 
 Authors
 =======
