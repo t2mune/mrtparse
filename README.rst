@@ -186,7 +186,7 @@ or
 
 ::
 
-    $ git clone https://github.com/YoshiyukiYamauchi/mrtparse.git
+    $ git clone https://github.com/t2mune/mrtparse.git
     $ cd mrtparse
     $ python setup.py install
 
