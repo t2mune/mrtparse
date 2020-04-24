@@ -946,7 +946,7 @@ class Bgp4Mp(Base):
         self.peer_as = self.val_asn(as_len())
         self.local_as = self.val_asn(as_len())
         self.ifindex = self.val_num(2)
-        af_num.afi = self.af = self.val_num(2)
+        self.af = self.val_num(2)
         self.peer_ip = self.val_addr(self.af)
         self.local_ip = self.val_addr(self.af)
 
@@ -1014,7 +1014,7 @@ class BgpMessage(Base):
         Decoder for BGP UPDATE Message.
         '''
         self.wd_len = self.val_num(2)
-        self.withdrawn = self.val_nlri(self.p+self.wd_len, af_num.afi)
+        self.withdrawn = self.val_nlri(self.p+self.wd_len, AFI_T['IPv4'])
         self.attr_len = self.val_num(2)
         attr_len = self.p + self.attr_len
         self.attr = []
@@ -1022,7 +1022,7 @@ class BgpMessage(Base):
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
             self.attr.append(attr)
-        self.nlri = self.val_nlri(self.len, af_num.afi)
+        self.nlri = self.val_nlri(self.len, AFI_T['IPv4'])
 
     def unpack_notification(self):
         '''
