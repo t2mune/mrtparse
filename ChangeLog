@@ -1,3 +1,6 @@
+2020-04-26 Tetsumune KISO <t2mune@gmail.com>
+	* Update - updated a copyright notice.
+
 2020-04-24 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't decode NLRI correctly in "BGP4MP_MESSAGE". Thank you Zahaib.
 
