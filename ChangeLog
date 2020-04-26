@@ -1,3 +1,6 @@
+2020-04-27 Tetsumune KISO <t2mune@gmail.com>
+	* Release - version 1.8 released.
+
 2020-04-26 Tetsumune KISO <t2mune@gmail.com>
 	* Update - updated a copyright notice.
 
@@ -9,7 +12,7 @@
 	Thank you rodrigodalri.
 
 2019-01-08 Tetsumune KISO <t2mune@gmail.com>
-	* Update - version 1.7 release.
+	* Release - version 1.7 released.
 
 2018-06-28 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - SIGPIPE for Windows. Thank you salmacmpeg.
@@ -22,7 +25,7 @@
 	"mrt2bgpdump.py". Thank you julian10m.
 
 2017-07-02 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtparse 1.6 released.
+	* Release - version 1.6 released.
 
 2017-03-05 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't handle "MP_UNREACH_NLRI" properly in "print_all.py".
@@ -60,7 +63,7 @@
 	vincentbernat.
 
 2016-12-10 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtparse 1.5 released.
+	* Release - version 1.5 released.
 	* Update - updated comments.
 
 2016-11-28 Tetsumune KISO <t2mune@gmail.com>
@@ -102,7 +105,7 @@
 	* Update - registered the mrtparse to PyPI.
 
 2015-12-10 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>
-	* Release - mrtparse 1.4 released. 
+	* Release - version 1.4 released. 
 
 2015-11-28 Tetsumune KISO <t2mune@gmail.com>
 	* Update - changed function name in class "Nlri" from "chk_dup" to
@@ -171,7 +174,7 @@
 	method "unpack" of class "Nlri".
 
 2015-08-09 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
-	* Release - mrtparse 1.3 released. 
+	* Release - version 1.3 released. 
 
 2015-08-06 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - a wrong AS4_PATH format in "mrt2bgpdump.py".
@@ -217,7 +220,7 @@
 	* Update - changed command line options in "exabgp_conf.py".
 
 2015-05-04 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
-	* Release - mrtparse 1.2 released. 
+	* Release - version 1.2 released. 
 
 2015-05-04 Tetsumune KISO <t2mune@gmail.com>
 	* Bugfix - can't handle flags properly in "exabgp_conf.py".
@@ -245,7 +248,7 @@
 	__iter__ of class Reader
 
 2014-12-28 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
-	* Release - mrtparse 1.1 released. 
+	* Release - version 1.1 released. 
 
 2014-12-27 Tetsumune KISO <t2mune@gmail.com>
 	* Update - added a support for IPv6 in "exabgp_conf.py".
@@ -313,21 +316,21 @@
 	* Bugfix - can't parse NLRI in BGP update message. Thank you Jay Borkenhagen.
 
 2014-02-23 Yoshiyuki YAMAUCHI <info@greenhippo.co.jp>
-	* Release - mrtparse 1.0 released.
+	* Release - version 1.0 released.
 	* Update - update "README.md", "README-ja.md".
 
 2014-02-23 Tetsumune KISO <t2mune@gmail.com>
 	* Bugfix - fixed a script "exabgp.py".
 
 2014-02-22 Nobuhiro ITOU<js333123@gmail.com>
-	* Release - mrtparse 0.9 released.
+	* Release - version 0.9 released.
 	* Update - added a support for BGP Message "Route-Refresh".
 
 2014-02-22 Tetsumune KISO <t2mune@gmail.com>
 	* Update - improved codes.
 
 2014-02-17 Yoshiyuki Yamauchi <info@greenhippo.co.jp>
-	* Release - mrtparse 0.8 released.
+	* Release - version 0.8 released.
 	* Update - added a support for BGP Message "OPEN", "NOTIFICATION" and "KEEPALIVE".
 
 2014-02-11 Tetsumune KISO <t2mune@gmail.com>
@@ -337,15 +340,15 @@
 	* Bugfix - fixed a format "MSG_T".
 
 2014-02-09 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtparse 0.7 released.
+	* Release - version 0.7 released.
 	* Update - added a support for python3.
 
 2014-02-08 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtparse 0.6 released.
+	* Release - version 0.6 released.
 	* Update - added a support for a "MP_REACH_NLRI", "MP_UNREACH_NLRI" attribute.
 
 2014-02-05 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtparse 0.5 released.
+	* Release - version 0.5 released.
 	* Update - added the ability to be passed a filename as an argument of class "Reader"
 	as well as file objects.
 	* Bugfix - can't parse a "EXTENDED_COMMUNITES" attribute correctly.
@@ -355,7 +358,7 @@
 	* Update - added a support for a "EXTENDED_COMMUNITIES" attribute.
 
 2014-02-02 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtparse 0.4 released.
+	* Release - version 0.4 released.
 	* Update - added a dictionaries to convert from a number to a string, and
 	vice versa.
 	* Update - updated an example script "print_all.py".
@@ -365,7 +368,7 @@
 	ASN format "x.y".
 
 2014-01-27 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtparse 0.3 released.
+	* Release - version 0.3 released.
 	* Update - added class Bgp4Mp, BgpMessage and Nlri.
 
 2014-01-25 Tetsumune KISO <t2mune@gmail.com>
@@ -376,11 +379,11 @@
 	* Update - added methods for each adttribute in class BGPAttr.
 
 2014-01-21 Tetsumuned KISO <t2mune@gmail.com>
-	* Release - mrtparse 0.2 released.
+	* Release - version 0.2 released.
 	* New - created setup.py, ChangeLog.
 	* Update - a module name changed mrtparse from mrtdump.
 	* Update - placed all instances of MRT padyload class under self.mrt, 
 	to make it easy to initialize them in a loop of class Reader.
 
 2014-01-19 Tetsumune KISO <t2mune@gmail.com>
-	* Release - mrtdump 0.1 released.
+	* Release - version 0.1 released.
