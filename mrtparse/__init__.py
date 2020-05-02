@@ -458,8 +458,8 @@ class Base:
         '''
         if len(self.buf) - self.p < n:
             raise MrtFormatError(
-                'Insufficient buffer %d < %d byte'
-                % (len(self.buf) - self.p, n))
+                'Insufficient buffer %d < %d byte' % (len(self.buf) - self.p, n)
+            )
 
     def val_num(self, n):
         '''
@@ -501,22 +501,38 @@ class Base:
         else:
             return val.decode('utf-8')
 
-    def val_addr(self, af, n=-1):
+    def val_addr(self, af, plen=-1):
         '''
         Convert buffers to IP address.
         '''
         if af == AFI_T['IPv4']:
-            m = 4
+            plen_max = 32
             _af = socket.AF_INET
         elif af == AFI_T['IPv6']:
-            m = 16
+            plen_max = 128
             _af = socket.AF_INET6
         else:
             raise MrtFormatError('Unsupported AFI %d(%s)' % (af, AFI_T[af]))
-        n = m if n < 0 else (n + 7) // 8
+        if plen < 0:
+            plen = plen_max
+        elif plen > plen_max:
+            raise MrtFormatError(
+                'Invalid prefix length %d (%s)' % (plen, AFI_T[af])
+            )
+        n = (plen + 7) // 8
         self.chk_buf(n)
-        addr = socket.inet_ntop(
-            _af, self.buf[self.p:self.p+n] + b'\x00'*(m - n))
+        buf = self.buf[self.p:self.p+n]
+        addr = socket.inet_ntop(_af, buf + b'\x00'*(plen_max // 8 - n))
+        # A prefix like "192.168.0.0/9" is invalid
+        if plen % 8:
+            # for Python2
+            if isinstance(buf, str):
+                num = int(buf.encode('hex'), 16)
+            # for Python3
+            else:
+                num = int.from_bytes(buf, 'big')
+            if num & ~(-1 << (n * 8 - plen)):
+                raise MrtFormatError('Invalid prefix %s/%d' % (addr, plen))
         self.p += n
         return addr
 
@@ -550,7 +566,6 @@ class Base:
             while p < n:
                 nlri = Nlri(self.buf[p:])
                 p += nlri.unpack(af, saf)
-                nlri.is_valid()
                 nlri.is_dup(l)
                 l.append(nlri)
             self.p = p
@@ -559,7 +574,6 @@ class Base:
             while self.p < n:
                 nlri = Nlri(self.buf[self.p:])
                 self.p += nlri.unpack(af, saf, add_path=1)
-                nlri.is_valid()
                 l.append(nlri)
         return l
 
@@ -632,8 +646,8 @@ class Reader(Base):
             self.close()
         elif len(self.mrt.buf) < 12:
             raise MrtFormatError(
-                'Invalid MRT header length %d < 12 byte'
-                % len(self.mrt.buf))
+                'Invalid MRT header length %d < 12 byte' % len(self.mrt.buf)
+            )
         self.mrt.unpack()
 
     def unpack_data(self):
@@ -645,14 +659,19 @@ class Reader(Base):
         if len(data) < self.mrt.len:
             raise MrtFormatError(
                 'Invalid MRT data length %d < %d byte'
-                % (len(data), self.mrt.len))
+                % (len(data), self.mrt.len)
+            )
 
         if len(MRT_ST[self.mrt.type]) \
             and MRT_ST[self.mrt.type][self.mrt.subtype] == 'Unknown':
             raise MrtFormatError(
                 'Unsupported %s subtype %d(%s)'
-                % (self.mrt.type, self.mrt.subtype,
-                MRT_ST[self.mrt.type][self.mrt.subtype]))
+                % (
+                    self.mrt.type,
+                    self.mrt.subtype,
+                    MRT_ST[self.mrt.type][self.mrt.subtype]
+                )
+            )
 
         if self.mrt.type == MRT_T['TABLE_DUMP_V2']:
             self.unpack_td_v2(data)
@@ -663,8 +682,12 @@ class Reader(Base):
                 self.p += self.mrt.len
                 raise MrtFormatError(
                     'Unsupported %s subtype %d(%s)'
-                    % (MRT_T[self.mrt.type], self.mrt.subtype,
-                       BGP4MP_ST[self.mrt.subtype]))
+                    % (
+                        MRT_T[self.mrt.type],
+                        self.mrt.subtype,
+                        BGP4MP_ST[self.mrt.subtype]
+                    )
+                )
             else:
                 if self.mrt.type == MRT_T['BGP4MP_ET']:
                     self.mrt.micro_ts = self.mrt.val_num(4)
@@ -678,7 +701,8 @@ class Reader(Base):
             self.p += self.mrt.len
             raise MrtFormatError(
                 'Unsupported MRT type %d(%s)'
-                % (self.mrt.type, MRT_T[self.mrt.type]))
+                % (self.mrt.type, MRT_T[self.mrt.type])
+            )
 
         return self.p
 
@@ -1080,7 +1104,8 @@ class OptParams(Base):
             self.unpack_orf()
         elif self.cap_type == BGP_CAP_C['Graceful Restart Capability']:
             self.unpack_graceful_restart()
-        elif self.cap_type == BGP_CAP_C['Support for 4-octet AS number capability']:
+        elif self.cap_type \
+            == BGP_CAP_C['Support for 4-octet AS number capability']:
             self.unpack_support_as4()
         elif self.cap_type == BGP_CAP_C['ADD-PATH Capability']:
             self.unpack_add_path()
@@ -1278,8 +1303,8 @@ class BgpAttr(Base):
         while self.p < attr_len:
             val = self.val_num(4)
             self.comm.append(
-                '%d:%d' %
-                ((val & 0xffff0000) >> 16, val & 0x0000ffff))
+                '%d:%d' % ((val & 0xffff0000) >> 16, val & 0x0000ffff)
+            )
 
     def unpack_originator_id(self):
         '''
@@ -1336,7 +1361,8 @@ class BgpAttr(Base):
         if 'afi' in self.mp_reach:
             self.mp_reach['rsvd'] = self.val_num(1)
             self.mp_reach['nlri'] = self.val_nlri(
-                attr_len, af_num.afi, af_num.safi)
+                attr_len, af_num.afi, af_num.safi
+            )
 
     def unpack_mp_unreach_nlri(self):
         '''
@@ -1360,7 +1386,8 @@ class BgpAttr(Base):
             return
 
         self.mp_unreach['withdrawn'] = self.val_nlri(
-            attr_len, self.mp_unreach['afi'], self.mp_unreach['safi'])
+            attr_len, self.mp_unreach['afi'], self.mp_unreach['safi']
+        )
 
     def unpack_extended_communities(self):
         '''
@@ -1434,7 +1461,8 @@ class BgpAttr(Base):
             local_data_part_2 = self.val_num(4)
             self.large_comm.append(
                 '%d:%d:%d' %
-                (global_admin, local_data_part_1, local_data_part_2))
+                (global_admin, local_data_part_1, local_data_part_2)
+            )
 
 class Nlri(Base):
     '''
@@ -1453,14 +1481,8 @@ class Nlri(Base):
         if add_path:
             self.path_id = self.val_num(4)
         self.plen = plen = self.val_num(1)
-        if saf == SAFI_T['L3VPN_UNICAST'] \
-            or saf == SAFI_T['L3VPN_MULTICAST']:
+        if saf == SAFI_T['L3VPN_UNICAST'] or saf == SAFI_T['L3VPN_MULTICAST']:
             plen = self.unpack_l3vpn(plen)
-        if af == AFI_T['IPv4'] and plen > 32 \
-            or af == AFI_T['IPv6'] and plen > 128:
-            raise MrtFormatError(
-                'Invalid prefix length %d (%s)'
-                % (self.plen, AFI_T[af]))
         self.prefix = self.val_addr(af, plen)
         return self.p
 
@@ -1472,7 +1494,7 @@ class Nlri(Base):
         while True:
             label = self.val_num(3)
             self.label.append(label)
-            if label &  LBL_BOTTOM or label == LBL_WITHDRAWN:
+            if label & LBL_BOTTOM or label == LBL_WITHDRAWN:
                 break
         self.rd = self.val_rd()
         plen -= (3 * len(self.label) + 8) * 8
@@ -1486,27 +1508,5 @@ class Nlri(Base):
             if self.plen == e.plen and self.prefix == e.prefix \
                 and self.label == e.label and self.rd == e.rd:
                 raise MrtFormatError(
-                    'Duplicate prefix %s/%d'
-                    % (self.prefix, self.plen))
-
-    def is_valid(self):
-        '''
-        Check whether route is valid.
-        '''
-        if self.label is not None:
-            plen = self.plen - (len(self.label) * 3 + 8) * 8
-        else:
-            plen = self.plen
-        if ':' in self.prefix:
-            b = socket.inet_pton(socket.AF_INET6, self.prefix)
-            t = struct.unpack("!QQ", b)
-            n = t[0] << 64 | t[1]
-            plen_max = 128
-        else:
-            b = socket.inet_pton(socket.AF_INET, self.prefix)
-            n = struct.unpack("!L", b)[0]
-            plen_max = 32
-        if n & ~(-1 << (plen_max - plen)):
-            raise MrtFormatError(
-                'Invalid prefix %s/%d'
-                % (self.prefix, self.plen))
+                    'Duplicate prefix %s/%d' % (self.prefix, self.plen)
+                )
