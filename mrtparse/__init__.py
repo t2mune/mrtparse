@@ -198,7 +198,7 @@ BGP_ATTR_T = reverse_defaultdict({
     17:'AS4_PATH',             # Defined in RFC6793
     18:'AS4_AGGREGATOR',       # Defined in RFC6793
     26:'AIGP',                 # Defined in RFC7311
-    32:'LARGE_COMMUNITY',      # Defined in draft-ietf-idr-large-community
+    32:'LARGE_COMMUNITY',      # Defined in RFC8092
     128:'ATTR_SET',            # Defined in RFC6368
 })
 
@@ -359,7 +359,7 @@ BGP_CAP_C = reverse_defaultdict({
 # Defined in RFC5291
 ORF_T = reverse_defaultdict({
     64:'Address Prefix ORF', # Defined in RFC5292
-    65: 'CP-ORF', # Defined in RFC7543
+    65: 'CP-ORF',            # Defined in RFC7543
 })
 
 ORF_SEND_RECV = reverse_defaultdict({
