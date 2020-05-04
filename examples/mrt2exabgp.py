@@ -458,7 +458,7 @@ def get_bgp_attr(args, params, m, attr):
                 if 'withdrawn' in attr.mp_unreach:
                     params['mp_withdrawn'] = attr.mp_unreach['withdrawn']
 
-    elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+    elif attr.type == BGP_ATTR_T['EXTENDED COMMUNITIES']:
         ext_comm_list = []
         for ext_comm in attr.ext_comm:
             ext_comm_list.append('0x%016x' % ext_comm)

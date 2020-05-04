@@ -186,20 +186,43 @@ BGP_ATTR_T = reverse_defaultdict({
     5:'LOCAL_PREF',
     6:'ATOMIC_AGGREGATE',
     7:'AGGREGATOR',
-    8:'COMMUNITY',             # Defined in RFC1997
-    9:'ORIGINATOR_ID',         # Defined in RFC4456
-    10:'CLUSTER_LIST',         # Defined in RFC4456
-    11:'DPA',                  # Deprecated in RFC6938
-    12:'ADVERTISER',           # Deprecated in RFC6938
-    13:'RCID_PATH/CLUSTER_ID', # Deprecated in RFC6938
-    14:'MP_REACH_NLRI',        # Defined in RFC4760
-    15:'MP_UNREACH_NLRI',      # Defined in RFC4760
-    16:'EXTENDED_COMMUNITIES', # Defined in RFC4360
-    17:'AS4_PATH',             # Defined in RFC6793
-    18:'AS4_AGGREGATOR',       # Defined in RFC6793
-    26:'AIGP',                 # Defined in RFC7311
-    32:'LARGE_COMMUNITY',      # Defined in RFC8092
-    128:'ATTR_SET',            # Defined in RFC6368
+    8:'COMMUNITY',                # Defined in RFC1997
+    9:'ORIGINATOR_ID',            # Defined in RFC4456
+    10:'CLUSTER_LIST',            # Defined in RFC4456
+    11:'DPA',                     # Deprecated in RFC6938
+    12:'ADVERTISER',              # Defined in RFC1863 / Deprecated in RFC6938
+    13:'RCID_PATH/CLUSTER_ID',    # Defined in RFC1863 / Deprecated in RFC6938
+    14:'MP_REACH_NLRI',           # Defined in RFC4760
+    15:'MP_UNREACH_NLRI',         # Defined in RFC4760
+    16:'EXTENDED COMMUNITIES',    # Defined in RFC4360
+    17:'AS4_PATH',                # Defined in RFC6793
+    18:'AS4_AGGREGATOR',          # Defined in RFC6793
+    # Proposed in draft-kapoor-nalawade-idr-bgp-ssa / Deprecated 
+    19:'SAFI Specific Attribute',
+    20:'Connector Attribute',     # Defined in RFC6037 / Deprecated
+    # Proposed in draft-ietf-idr-as-pathlimit / Deprecated
+    21:'AS_PATHLIMIT',
+    22:'PMSI_TUNNEL',             # Defined in RFC6514
+    # Defined in RFC5512
+    23:'Tunnel Encapsulation Attribute',
+    24:'Traffic Engineering',     # Defined in RFC5543
+    # Defined in RFC5701
+    25:'IPv6 Address Specific Extended Community',
+    26:'AIGP',                    # Defined in RFC7311
+    27:'PE Distinguisher Labels', # Defined in RFC6514
+    # Defined in RFC6790 / Deprecated in RFC7447
+    28:'BGP Entropy Label Capability Attribute',
+    29:'BGP-LS Attribute',        # Defined in RFC7752
+    32:'LARGE_COMMUNITY',         # Defined in RFC8092
+    33:'BGPsec_Path',             # Defined in RFC8205
+    # Proposed in draft-ietf-idr-wide-bgp-communities
+    34:'BGP Community Container Attribute',
+    # Proposed in draft-ietf-idr-bgp-open-policy
+    35:'Only to Customer',
+    # Proposed in draft-ietf-bess-evpn-ipvpn-interworking
+    36:'BGP Domain Path',
+    40:'BGP Prefix-SID',          # Defined in RFC8669
+    128:'ATTR_SET',               # Defined in RFC6368
 })
 
 # BGP ORIGIN Types
@@ -268,6 +291,8 @@ BGP_OPEN_ERR_SC = reverse_defaultdict({
     5:'[Deprecated]',
     6:'Unacceptable Hold Time',
     7:'Unsupported Capability',         # Defined in RFC5492
+    # Proposed in draft-ietf-idr-bgp-open-policy
+    8:'Role Mismatch',
 })
 
 # UPDATE Message Error Subcodes
@@ -299,13 +324,14 @@ BGP_FSM_ERR_SC = reverse_defaultdict({
 # Defined in RFC4486
 BGP_CEASE_ERR_SC = reverse_defaultdict({
     1:'Maximum Number of Prefixes Reached',
-    2:'Administrative Shutdown',
+    2:'Administrative Shutdown',            # Updated in RFC8203
     3:'Peer De-configured',
-    4:'Administrative Reset',
+    4:'Administrative Reset',               # Updated in RFC8203
     5:'Connection Rejected',
     6:'Other Configuration Change',
     7:'Connection Collision Resolution',
     8:'Out of Resources',
+    9:'Hard Reset',                         # Defined in RFC8538
 })
 
 # BGP ROUTE-REFRESH Message Error subcodes
@@ -326,10 +352,9 @@ BGP_ERR_SC = collections.defaultdict(lambda: dict(), {
 })
 
 # BGP OPEN Optional Parameter Types
-# Defined in RFC5492
 BGP_OPT_PARAMS_T = reverse_defaultdict({
-    1:'Authentication', # Deprecated
-    2:'Capabilities',
+    1:'Authentication', # Deprecated in RFC4271 / RFC5492
+    2:'Capabilities',   # Defined in RFC5492
 })
 
 # Capability Codes
@@ -338,21 +363,28 @@ BGP_CAP_C = reverse_defaultdict({
     1:'Multiprotocol Extensions for BGP-4',          # Defined in RFC2858
     2:'Route Refresh Capability for BGP-4',          # Defined in RFC2918
     3:'Outbound Route Filtering Capability',         # Defined in RFC5291
-    4:'Multiple routes to a destination capability', # Defined in RFC3107
+    4:'Multiple routes to a destination capability', # Deprecated in RFC8277
     5:'Extended Next Hop Encoding',                  # Defined in RFC5549
+    6:'BGP Extended Message',                        # Defined in RFC8654
+    7:'BGPsec Capability',                           # Defined in RFC8205
+    8:'Multiple Labels Capability',                  # Defined in RFC8277
+    # Proposed in draft-ietf-idr-bgp-open-policy
+    9:'BGP Role',
     64:'Graceful Restart Capability',                # Defined in RFC4724
     65:'Support for 4-octet AS number capability',   # Defined in RFC6793
     66:'[Deprecated]',
-    # draft-ietf-idr-dynamic-cap
-    67:'Support for Dynamic Capability (capability specific)',
-    # draft-ietf-idr-bgp-multisession
+    # Proposed in draft-ietf-idr-dynamic-cap
+    67:'Support for Dynamic Capability',
+    # Proposed in draft-ietf-idr-bgp-multisession
     68:'Multisession BGP Capability',
     # Defined in RFC7911
     69:'ADD-PATH Capability',
     # Defined in RFC7313
     70:'Enhanced Route Refresh Capability',
-    # draft-uttaro-idr-bgp-persistence
+    # Proposed in draft-uttaro-idr-bgp-persistence
     71:'Long-Lived Graceful Restart (LLGR) Capability',
+    # Proposed in draft-walton-bgp-hostname-capability
+    73:'FQDN Capability',
 })
 
 # Outbound Route Filtering Capability
@@ -1224,7 +1256,7 @@ class BgpAttr(Base):
             self.unpack_mp_reach_nlri()
         elif self.type == BGP_ATTR_T['MP_UNREACH_NLRI']:
             self.unpack_mp_unreach_nlri()
-        elif self.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+        elif self.type == BGP_ATTR_T['EXTENDED COMMUNITIES']:
             self.unpack_extended_communities()
         elif self.type == BGP_ATTR_T['AS4_PATH']:
             self.unpack_as4_path()

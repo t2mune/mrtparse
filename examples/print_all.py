@@ -427,7 +427,7 @@ def print_bgp_attr(attr, n):
         for withdrawn in attr.mp_unreach['withdrawn']:
             print_nlri(withdrawn, 'Withdrawn Routes', attr.mp_unreach['safi'])
 
-    elif attr.type == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+    elif attr.type == BGP_ATTR_T['EXTENDED COMMUNITIES']:
         ext_comm_list = []
         for ext_comm in attr.ext_comm:
             ext_comm_list.append('0x%016x' % ext_comm)
