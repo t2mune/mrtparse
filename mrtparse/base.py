@@ -1,7 +1,7 @@
 '''
 mrtparse - MRT format data parser
 
-Copyright (C) 2019 Tetsumune KISO
+Copyright (C) 2020 Tetsumune KISO
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -99,8 +99,8 @@ class _Base:
         '''
         if len(self.buf) - self.p < n:
             raise MrtFormatError(
-                'Insufficient buffer %d < %d byte'
-                % (len(self.buf) - self.p, n))
+                'Insufficient buffer %d < %d byte' % (len(self.buf) - self.p, n)
+            )
 
     def val_num(self, n):
         '''
@@ -120,25 +120,11 @@ class _Base:
         '''
         pass
 
-    def val_addr(self, af, n=-1):
+    def val_addr(self, af, plen=-1):
         '''
         Convert buffers to IP address.
         '''
-        if af == AFI_T['IPv4']:
-            m = 4
-            _af = socket.AF_INET
-        elif af == AFI_T['IPv6']:
-            m = 16
-            _af = socket.AF_INET6
-        else:
-            raise MrtFormatError('Unsupported AFI %d(%s)' % (af, AFI_T[af]))
-        n = m if n < 0 else (n + 7) // 8
-        self.chk_buf(n)
-        addr = socket.inet_ntop(
-            _af, self.buf[self.p:self.p+n] + b'\x00'*(m - n)
-        )
-        self.p += n
-        return addr
+        pass
 
     def val_as(self, n):
         '''
@@ -206,9 +192,7 @@ class _BasePy2(_Base):
         Convert buffers to bytes.
         '''
         self.chk_buf(n)
-        val = ' '.join([
-            '%02x' % ord(buf) for buf in self.buf[self.p:self.p+n]
-        ])
+        val = ' '.join(['%02x' % ord(buf) for buf in self.buf[self.p:self.p+n]])
         self.p += n
         return val
 
@@ -220,6 +204,36 @@ class _BasePy2(_Base):
         val = self.buf[self.p:self.p+n]
         self.p += n
         return val
+
+    def val_addr(self, af, plen=-1):
+        '''
+        Convert buffers to IP address.
+        '''
+        if af == AFI_T['IPv4']:
+            plen_max = 32
+            _af = socket.AF_INET
+        elif af == AFI_T['IPv6']:
+            plen_max = 128
+            _af = socket.AF_INET6
+        else:
+            raise MrtFormatError('Unsupported AFI %d(%s)' % (af, AFI_T[af]))
+        if plen < 0:
+            plen = plen_max
+        elif plen > plen_max:
+            raise MrtFormatError(
+                'Invalid prefix length %d (%s)' % (plen, AFI_T[af])
+            )
+        n = (plen + 7) // 8
+        self.chk_buf(n)
+        buf = self.buf[self.p:self.p+n]
+        addr = socket.inet_ntop(_af, buf + b'\x00'*(plen_max // 8 - n))
+        # A prefix like "192.168.0.0/9" is invalid
+        if plen % 8:
+            num = int(buf.encode('hex'), 16)
+            if num & ~(-1 << (n * 8 - plen)):
+                raise MrtFormatError('Invalid prefix %s/%d' % (addr, plen))
+        self.p += n
+        return addr
 
 class _BasePy3(_Base):
     '''
@@ -258,6 +272,36 @@ class _BasePy3(_Base):
         val = self.buf[self.p:self.p+n].decode('utf-8')
         self.p += n
         return val
+
+    def val_addr(self, af, plen=-1):
+        '''
+        Convert buffers to IP address.
+        '''
+        if af == AFI_T['IPv4']:
+            plen_max = 32
+            _af = socket.AF_INET
+        elif af == AFI_T['IPv6']:
+            plen_max = 128
+            _af = socket.AF_INET6
+        else:
+            raise MrtFormatError('Unsupported AFI %d(%s)' % (af, AFI_T[af]))
+        if plen < 0:
+            plen = plen_max
+        elif plen > plen_max:
+            raise MrtFormatError(
+                'Invalid prefix length %d (%s)' % (plen, AFI_T[af])
+            )
+        n = (plen + 7) // 8
+        self.chk_buf(n)
+        buf = self.buf[self.p:self.p+n]
+        addr = socket.inet_ntop(_af, buf + b'\x00'*(plen_max // 8 - n))
+        # A prefix like "192.168.0.0/9" is invalid
+        if plen % 8:
+            num = int.from_bytes(buf, 'big')
+            if num & ~(-1 << (n * 8 - plen)):
+                raise MrtFormatError('Invalid prefix %s/%d' % (addr, plen))
+        self.p += n
+        return addr
 
 if sys.version_info.major == 3:
     Base = _BasePy3

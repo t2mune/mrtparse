@@ -1,7 +1,7 @@
 '''
 mrtparse - MRT format data parser
 
-Copyright (C) 2019 Tetsumune KISO
+Copyright (C) 2020 Tetsumune KISO
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -170,7 +170,8 @@ class Reader(Base):
         Decoder for Table_Dump_V2 format.
         '''
         if mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_UNICAST_ADDPATH'] \
-            or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH'] \
+            or mrt.data['subtype'][0] \
+            == TD_V2_ST['RIB_IPV4_MULTICAST_ADDPATH'] \
             or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST_ADDPATH'] \
             or mrt.data['subtype'][0] == TD_V2_ST['RIB_IPV6_MULTICAST_ADDPATH']:
             is_add_path(True)
@@ -371,7 +372,8 @@ class AfiSpecRib(Base):
         '''
         self.data['sequnce_number'] = self.val_num(4)
         self.data['prefix_length'] = self.val_num(1)
-        self.data['prefix'] = self.val_addr(af_num.afi, self.data['prefix_length'])
+        self.data['prefix'] \
+            = self.val_addr(af_num.afi, self.data['prefix_length'])
         self.data['entry_count'] = self.val_num(2)
         self.data['rib_entries'] = []
         for _ in range(self.data['entry_count']):
@@ -440,8 +442,8 @@ class Bgp4Mp(Base):
         self.data['peer_as'] = self.val_as(as_len())
         self.data['local_as'] = self.val_as(as_len())
         self.data['ifindex'] = self.val_num(2)
-        af_num.afi = self.val_num(2)
-        self.data['afi'] = [af_num.afi, AFI_T[af_num.afi]]
+        self.data['afi'] = [self.val_num(2)]
+        self.data['afi'].append(AFI_T[self.data['afi'][0]])
         self.data['peer_ip'] = self.val_addr(af_num.afi)
         self.data['local_ip'] = self.val_addr(af_num.afi)
 
@@ -510,7 +512,7 @@ class BgpMessage(Base):
         '''
         self.data['withdrawn_routes_length'] = self.val_num(2)
         self.data['withdrawn_routes'] = self.val_nlri(
-            self.p + self.data['withdrawn_routes_length'], af_num.afi
+            self.p + self.data['withdrawn_routes_length'], AFI_T['IPv4']
         )
         self.data['path_attribute_length'] = self.val_num(2)
         attr_len = self.p + self.data['path_attribute_length']
@@ -519,8 +521,7 @@ class BgpMessage(Base):
             attr = BgpAttr(self.buf[self.p:])
             self.p += attr.unpack()
             self.data['path_attributes'].append(attr.data)
-        self.data['nlri'] \
-            = self.val_nlri(self.data['length'], af_num.afi)
+        self.data['nlri'] = self.val_nlri(self.data['length'], AFI_T['IPv4'])
 
     def unpack_notification(self):
         '''
@@ -530,7 +531,8 @@ class BgpMessage(Base):
         self.data['error_code'].append(BGP_ERR_C[self.data['error_code'][0]])
         self.data['error_subcode'] = [self.val_num(1)]
         self.data['error_subcode'].append(
-            BGP_ERR_SC[self.data['error_code'][0]][self.data['error_subcode'][0]]
+            BGP_ERR_SC[self.data['error_code'][0]]\
+                [self.data['error_subcode'][0]]
         )
         self.data['data'] = self.val_bytes(self.data['length'] - self.p)
 
@@ -715,7 +717,7 @@ class BgpAttr(Base):
             self.unpack_mp_reach_nlri()
         elif self.data['type'][0] == BGP_ATTR_T['MP_UNREACH_NLRI']:
             self.unpack_mp_unreach_nlri()
-        elif self.data['type'][0] == BGP_ATTR_T['EXTENDED_COMMUNITIES']:
+        elif self.data['type'][0] == BGP_ATTR_T['EXTENDED COMMUNITIES']:
             self.unpack_extended_communities()
         elif self.data['type'][0] == BGP_ATTR_T['AS4_PATH']:
             self.unpack_as4_path()
@@ -845,18 +847,19 @@ class BgpAttr(Base):
             if af_num.safi == SAFI_T['L3VPN_UNICAST'] \
                 or af_num.safi == SAFI_T['L3VPN_MULTICAST']:
                 self.data['value']['route_distinguisher'] = self.val_rd()
+
+        #
+        # RFC6396
+        # 4.3.4. RIB Entries:
+        # There is one exception to the encoding of BGP attributes for the BGP
+        # MP_REACH_NLRI attribute (BGP Type Code 14) [RFC4760].  Since the AFI,
+        # SAFI, and NLRI information is already encoded in the RIB Entry Header
+        # or RIB_GENERIC Entry Header, only the Next Hop Address Length and
+        # Next Hop Address fields are included.  The Reserved field is omitted.
+        # The attribute length is also adjusted to reflect only the length of
+        # the Next Hop Address Length and Next Hop Address fields.
+        #
         else:
-            #
-            # RFC6396
-            # 4.3.4. RIB Entries:
-            # There is one exception to the encoding of BGP attributes for the BGP
-            # MP_REACH_NLRI attribute (BGP Type Code 14) [RFC4760].  Since the AFI,
-            # SAFI, and NLRI information is already encoded in the RIB Entry Header
-            # or RIB_GENERIC Entry Header, only the Next Hop Address Length and
-            # Next Hop Address fields are included.  The Reserved field is omitted.
-            # The attribute length is also adjusted to reflect only the length of
-            # the Next Hop Address Length and Next Hop Address fields.
-            #
             self.p -= 2
             self.data['value'] = collections.OrderedDict()
             self.data['value']['next_hop_length'] = self.val_num(1)
