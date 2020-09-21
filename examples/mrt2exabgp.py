@@ -302,6 +302,10 @@ def print_route_bgp4mp(args, params, m):
         sys.stderr.write('Error: BGP4MP/BGP4MP_ET is only suuported ' \
             + 'by API Grouping format.\n')
         sys.stderr.write('Error: You must run with -G or -g option.\n')
+        if params['flags'] & FLAG_T['API_PROG']:
+            print_api_prog_footer()
+        else:
+            print_conf_footer()
         exit(1)
 
     if m.subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
