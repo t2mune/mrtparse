@@ -266,6 +266,9 @@ def print_route_td(args, params, m):
         except NotDisplay:
             continue
 
+        if not params['next_hop']:
+            continue
+
         if params['flags'] & FLAG_T['API_GROUP']:
             params['api_grp'].setdefault(
                 '%s next-hop %s' % (line, params['next_hop']), {}
@@ -351,9 +354,10 @@ def print_route_bgp4mp(args, params, m):
             nlri_line += ' %s/%s' % (nlri.prefix, nlri.plen)
 
     if len(nlri_line):
-        sys.stdout.write('%sannounce %s%s next-hop %s nlri%s%s\n' \
-            % (params['pre_line'], params['api_grp_syntax'], attr_line,
-            params['next_hop'], nlri_line, params['post_line']))
+        if params['next_hop']:
+            sys.stdout.write('%sannounce %s%s next-hop %s nlri%s%s\n' \
+                % (params['pre_line'], params['api_grp_syntax'], attr_line,
+                params['next_hop'], nlri_line, params['post_line']))
 
     interval = 0
     if params['ts_before'] >= 0:
