@@ -267,8 +267,9 @@ def print_route_td(args, params, m):
             continue
 
         if params['flags'] & FLAG_T['API_GROUP']:
-            params['api_grp'].setdefault('%s next-hop %s' \
-                % (line, params['next_hop']), []).append('%s' % prefix)
+            params['api_grp'].setdefault(
+                '%s next-hop %s' % (line, params['next_hop']), {}
+            ).update({'%s' % prefix: None})
         elif params['flags'] & FLAG_T['API']:
             sys.stdout.write('%sannounce route %s%s next-hop %s%s\n'
                 % (params['pre_line'], prefix, line, params['next_hop'],
