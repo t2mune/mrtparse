@@ -147,7 +147,7 @@ class Reader(Base):
                 )
             else:
                 if mrt.data['type'][0] == MRT_T['BGP4MP_ET']:
-                    mrt.data['micro_ts'] = mrt.val_num(4)
+                    mrt.data['microsecond_timestamp'] = mrt.val_num(4)
                     buf = buf[4:]
                 bgp = Bgp4Mp(buf)
                 bgp.unpack(mrt.data['subtype'][0])
@@ -340,17 +340,17 @@ class RibGeneric(Base):
         Decoder for RIB_GENERIC format.
         '''
         self.data['sequence_number'] = self.val_num(4)
-        af_num.afi = self.data['afi'][0] = [self.val_num(3)]
-        self.data['afi'].append(AFI_T[self.data['afi'][0]])
-        af_num.safi = self.data['safi'][0] = self.val_num(1)
-        self.data['safi'].append(SAFI_T[self.data['safi'][0]])
+        af_num.afi = self.val_num(3)
+        self.data['afi'] = [af_num.afi, AFI_T[af_num.afi]]
+        af_num.safi = self.val_num(1)
+        self.data['safi'] = [af_num.safi, SAFI_T[af_num.safi]]
         n = self.val_num(1)
         self.p -= 1
         self.data['nlri'] \
             = self.val_nlri(self.p+(n+7)//8, af_num.afi, af_num.safi)
         self.data['entry_count'] = self.val_num(2)
         self.data['rib_entries'] = []
-        for _ in range(self.count):
+        for _ in range(self.data['entry_count']):
             entry = RibEntries(self.buf[self.p:])
             self.p += entry.unpack()
             self.data['rib_entries'].append(entry.data)
@@ -444,8 +444,8 @@ class Bgp4Mp(Base):
         self.data['ifindex'] = self.val_num(2)
         self.data['afi'] = [self.val_num(2)]
         self.data['afi'].append(AFI_T[self.data['afi'][0]])
-        self.data['peer_ip'] = self.val_addr(af_num.afi)
-        self.data['local_ip'] = self.val_addr(af_num.afi)
+        self.data['peer_ip'] = self.val_addr(self.data['afi'][0])
+        self.data['local_ip'] = self.val_addr(self.data['afi'][0])
 
         if subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
             or subtype == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:

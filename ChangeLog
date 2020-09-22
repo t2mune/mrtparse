@@ -1,3 +1,9 @@
+2020-09-22 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - print a next_hop twice in "mrt2exabgp.py".
+	* Update - don't print without a next_hop in "mrt2exabgp.py".
+	* Update - don't print a same prefix repeatedly in "mrt2exabgp.py".
+	* Update - print a footer if an error occurred in "mrt2exabgp.py".
+
 2020-05-05 Tetsumune KISO <t2mune@gmail.com>
 	* Update - updated "BGP_ATTR_T", "BGP_OPEN_ERR_SC", "BGP_CEASE_ERR_SC".
 
@@ -15,11 +21,6 @@
 
 2020-04-24 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't decode NLRI correctly in "BGP4MP_MESSAGE". Thank you Zahaib.
-
-2019-06-08 Tetsumune KISO <t2mune@gmail.com>
-	* Update - added "data" attribute for storing parsed data.
-	* Update - added "mrt2json.py".
-	* Update - added "mrt2yaml.py".
 
 2019-05-02 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - can't handle "Extended Timestamp MRT Header" properly.
