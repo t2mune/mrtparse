@@ -339,11 +339,12 @@ def print_route_bgp4mp(args, params, m):
             wd_line += ' %s/%s' % (wd.prefix, wd.plen)
 
     if len(wd_line):
+        nh_line = ''
         if params['next_hop']:
-            attr_line += ' next-hop %s' % params['next_hop']
-        sys.stdout.write('%swithdrawn %s%s nlri%s%s\n' \
-            % (params['pre_line'], params['api_grp_syntax'], attr_line, wd_line,
-            params['post_line']))
+            nh_line = ' next-hop %s' % params['next_hop']
+        sys.stdout.write('%swithdrawn %s%s%s nlri%s%s\n' \
+            % (params['pre_line'], params['api_grp_syntax'], attr_line, nh_line,
+            wd_line, params['post_line']))
 
     nlri_line = ''
     for nlri in params['mp_nlri']:
