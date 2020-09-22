@@ -1,22 +1,39 @@
 mrtparse
-========
+########
+
+Introduction
+============
 
 | mrtparse is a module to read and analyze the MRT format data.
 | The MRT format can be used to export routing protocol messages, state changes, and routing information base contents, and is defined in RFC6396_.
-| Programs like Quagga_ / Zebra_, BIRD_, OpenBGPD_ and PyRT_ can dump the MRT format data.
+| Programs like FRRouting_, Quagga_, Zebra_, BIRD_, OpenBGPD_ and PyRT_ can dump the MRT format data.
 | You can also download archives from `the Route Views Projects`_, `RIPE NCC`_.
 
 .. _RFC6396: https://tools.ietf.org/html/rfc6396
-.. _Quagga: http://www.nongnu.org/quagga/
+.. _FRRouting: https://frrouting.org/ 
+.. _Quagga: https://www.nongnu.org/quagga/
 .. _Zebra: https://www.gnu.org/software/zebra/
-.. _BIRD: http://bird.network.cz/
+.. _BIRD: https://bird.network.cz/
 .. _OpenBGPD: http://www.openbgpd.org/
 .. _PyRT: https://github.com/mor1/pyrt
 .. _`the Route Views Projects`: http://archive.routeviews.org/
 .. _`RIPE NCC`: https://www.ripe.net/analyse/internet-measurements/routing-information-service-ris/ris-raw-data
 
-Supported MRT types
--------------------
+Support
+=======
+
+Python Version
+--------------
+
+If you want your code to run faster, you should use PyPy or PyPy3.
+
+* Python2
+* Python3
+* PyPy
+* PyPy3
+
+MRT Type
+--------
 
 +-------------------+---------+
 | Name              | Value   |
@@ -30,8 +47,8 @@ Supported MRT types
 | BGP4MP\_ET        | 17      |
 +-------------------+---------+
 
-Supported TABLE_DUMP subtypes
-------------------------------
+TABLE_DUMP Subtype
+------------------
 
 +-------------------+---------+
 | Name              | Value   |
@@ -41,8 +58,8 @@ Supported TABLE_DUMP subtypes
 | AFI\_IPv6         | 2       |
 +-------------------+---------+
 
-Supported TABLE_DUMP_V2 subtypes
---------------------------------
+TABLE_DUMP_V2 Subtype
+---------------------
 
 +-------------------------------+---------+
 | Name                          | Value   |
@@ -70,8 +87,8 @@ Supported TABLE_DUMP_V2 subtypes
 | RIB\_GENERIC\_ADDPATH         | 12      |
 +-------------------------------+---------+
 
-Supported BGP4MP/BGP4MP_ET subtypes
------------------------------------
+BGP4MP/BGP4MP_ET Subtype
+------------------------
 
 +--------------------------------------+---------+
 | Name                                 | Value   |
@@ -97,8 +114,8 @@ Supported BGP4MP/BGP4MP_ET subtypes
 | BGP4MP\_MESSAGE\_AS4\_LOCAL\_ADDPATH | 11      |
 +--------------------------------------+---------+
 
-Supported BGP capabilities
---------------------------
+BGP Capability
+--------------
 
 +--------------------------------------------+---------+
 | Name                                       | Value   |
@@ -116,8 +133,8 @@ Supported BGP capabilities
 | ADD-PATH Capability                        | 69      |
 +--------------------------------------------+---------+
 
-Supported BGP attributes
-------------------------
+BGP Attribute
+-------------
 
 +-------------------------+---------+
 | Name                    | Value   |
@@ -159,13 +176,8 @@ Supported BGP attributes
 | ATTR\_SET               | 128     |
 +-------------------------+---------+
 
-Requirements
-------------
-
-Python2 or Python3 or PyPy or PyPy3
-
 Installation
-------------
+============
 
 ::
 
@@ -175,12 +187,14 @@ or
 
 ::
 
-    $ git clone https://github.com/YoshiyukiYamauchi/mrtparse.git
+    $ git clone https://github.com/t2mune/mrtparse.git
     $ cd mrtparse
     $ python setup.py install
 
 Usage
------
+=====
+
+First, import the module.
 
 ::
 
@@ -192,39 +206,31 @@ or
 
     import mrtparse
 
-Programming
------------
-
-First, import the module.
-
-::
-
-    from mrtparse import *
-
 | And pass a MRT format data as a filepath string or file object to a class Reader().
 | It is also supported gzip and bzip2 format.
 | You can retrieve each entry from the returned object using a loop and then process it.
+|
 
 ::
 
-    d = Reader(f)
-    for m in d:
+    for entry in Reader(f):
+        # Parsed data is stored in "entry.data"
         <statements>
 
 We have prepared some example scripts and sample data in `"examples"`_ and `"samples"`_ directory.
 
-.. _`"examples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/examples
-.. _`"samples"`: https://github.com/YoshiyukiYamauchi/mrtparse/tree/master/samples
+.. _`"examples"`: examples
+.. _`"samples"`: samples
 
 Authors
--------
+=======
 
 | Tetsumune KISO t2mune@gmail.com
 | Yoshiyuki YAMAUCHI info@greenhippo.co.jp
 | Nobuhiro ITOU js333123@gmail.com
 
 License
--------
+=======
 
 | Licensed under the `Apache License, Version 2.0`_
 | Copyright (C) 2020 Tetsumune KISO
