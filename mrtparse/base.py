@@ -78,6 +78,13 @@ class MrtFormatError(Exception):
     Exception for invalid MRT formatted data.
     '''
     def __init__(self, msg=''):
+        """
+        Create a message
+
+        Args:
+            self: (todo): write your description
+            msg: (str): write your description
+        """
         Exception.__init__(self)
         self.msg = msg
 
@@ -88,6 +95,12 @@ class _Base:
     __slots__ = ['data', 'buf', 'p']
 
     def __init__(self):
+        """
+        Initialize all slots.
+
+        Args:
+            self: (todo): write your description
+        """
         for slot in self.__slots__:
             setattr(self, slot, None)
         self.data = collections.OrderedDict()
@@ -174,6 +187,12 @@ class _BasePy2(_Base):
     __slots__ = []
 
     def __init__(self):
+        """
+        Initialize the state.
+
+        Args:
+            self: (todo): write your description
+        """
         _Base.__init__(self)
 
     def val_num(self, n):
@@ -242,6 +261,12 @@ class _BasePy3(_Base):
     __slots__ = []
 
     def __init__(self):
+        """
+        Initialize the state.
+
+        Args:
+            self: (todo): write your description
+        """
         _Base.__init__(self)
 
     def val_num(self, n):
@@ -315,6 +340,13 @@ class Nlri(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 

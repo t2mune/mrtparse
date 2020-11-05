@@ -39,6 +39,11 @@ class NotDisplay(Exception):
     pass
 
 def print_conf_header(args):
+    """
+    Print the configuration for the current peer.
+
+    Args:
+    """
     print('''\
 neighbor %s {
     router-id %s;
@@ -53,9 +58,19 @@ neighbor %s {
         args.local_as, args.peer_as))
 
 def print_conf_footer():
+    """
+    Print all available footer
+
+    Args:
+    """
     print('    }\n}')
 
 def print_api_prog_header():
+    """
+    Print the api header.
+
+    Args:
+    """
     print('''\
 #!/usr/bin/env python
 
@@ -65,6 +80,11 @@ import time
 msgs = [''')
 
 def print_api_prog_footer():
+    """
+    Print api footer.
+
+    Args:
+    """
     print('''\
 ]
 
@@ -81,6 +101,11 @@ while True:
 ''')
 
 def parse_args():
+    """
+    Parse command line arguments.
+
+    Args:
+    """
     global flags
 
     p = argparse.ArgumentParser(
@@ -156,6 +181,13 @@ def parse_args():
     return (r, flags)
 
 def conv_format(args, flags, d):
+    """
+    Formats data format of a dt.
+
+    Args:
+        flags: (int): write your description
+        d: (todo): write your description
+    """
     params = {}
     params['flags'] = flags
     params['next_hop'] = ''
@@ -203,6 +235,13 @@ def conv_format(args, flags, d):
     return 0
 
 def print_route_td(args, params, m):
+    """
+    Print route information about route
+
+    Args:
+        params: (dict): write your description
+        m: (todo): write your description
+    """
     entry = []
 
     if m['type'][0] == MRT_T['TABLE_DUMP_V2']:
@@ -283,6 +322,12 @@ def print_route_td(args, params, m):
     params['prefix_num'] += 1
 
 def print_api_grp(args, params):
+    """
+    Print the api information.
+
+    Args:
+        params: (dict): write your description
+    """
     for k in params['api_grp']:
         sys.stdout.write(
             '%sannounce %s%s nlri %s%s\n' % (
@@ -293,6 +338,13 @@ def print_api_grp(args, params):
         sys.stdout.flush()
 
 def print_route_bgp4mp(args, params, m):
+    """
+    Show bgp route parameters
+
+    Args:
+        params: (dict): write your description
+        m: (todo): write your description
+    """
     params['next_hop'] = ''
     params['mp_withdrawn'] = []
     params['mp_nlri'] = []
@@ -380,6 +432,14 @@ def print_route_bgp4mp(args, params, m):
             time.sleep(interval)
 
 def get_bgp_attr(args, params, m, attr):
+    """
+    Get bgp attribute.
+
+    Args:
+        params: (dict): write your description
+        m: (todo): write your description
+        attr: (str): write your description
+    """
     line = ''
     r = re.compile("([0-9]+)\.([0-9]+)")
 
@@ -506,6 +566,11 @@ def get_bgp_attr(args, params, m, attr):
     return line
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     (args, flags) = parse_args()
     d = Reader(args.path_to_file)
     conv_format(args, flags, d)

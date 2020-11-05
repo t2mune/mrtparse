@@ -6,6 +6,13 @@ import collections
 from mrtparse import *
 
 def represent_ordereddict(dumper, instance):
+    """
+    Convert a dictionary of ordereddict.
+
+    Args:
+        dumper: (todo): write your description
+        instance: (dict): write your description
+    """
     return dumper.represent_mapping('tag:yaml.org,2002:map', instance.items())
 
 yaml.add_representer(collections.OrderedDict, represent_ordereddict)
@@ -21,6 +28,11 @@ yaml.add_representer(collections.OrderedDict, represent_ordereddict)
 #    return collections.OrderedDict(loader.construct_pairs(node))
 
 def main():
+    """
+    Main entry point.
+
+    Args:
+    """
     print('---')
     for entry in Reader(sys.argv[1]):
         print(yaml.dump([entry.data])[:-1])
