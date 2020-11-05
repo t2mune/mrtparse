@@ -5,6 +5,11 @@ import sys
 from mrtparse import *
 
 def main():
+    """
+    Main entry point.
+
+    Args:
+    """
     sys.stdout.write('[\n')
     i = 0
     for entry in Reader(sys.argv[1]):

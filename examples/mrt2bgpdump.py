@@ -29,6 +29,11 @@ from mrtparse import *
 peer = None
 
 def parse_args():
+    """
+    Parse command line arguments.
+
+    Args:
+    """
     p = argparse.ArgumentParser(
         description='This script converts to bgpdump format.')
     p.add_argument(
@@ -68,6 +73,12 @@ class BgpDump:
     ]
 
     def __init__(self, args):
+        """
+        Initialize connection
+
+        Args:
+            self: (todo): write your description
+        """
         self.verbose = args.verbose
         self.output = args.output
         self.ts_format = args.ts_format
@@ -95,6 +106,14 @@ class BgpDump:
         self.new_state = 0
 
     def print_line(self, prefix, next_hop):
+        """
+        Print a single line.
+
+        Args:
+            self: (todo): write your description
+            prefix: (str): write your description
+            next_hop: (str): write your description
+        """
         if self.ts_format == 'dump':
             d = self.ts
         else:
@@ -140,6 +159,12 @@ class BgpDump:
             )
 
     def print_routes(self):
+        """
+        Print all routes.
+
+        Args:
+            self: (todo): write your description
+        """
         for withdrawn in self.withdrawn:
             if self.type == 'BGP4MP':
                 self.flag = 'W'
@@ -151,6 +176,14 @@ class BgpDump:
                 self.print_line(nlri, next_hop)
 
     def td(self, m, count):
+        """
+        Tdrips.
+
+        Args:
+            self: (todo): write your description
+            m: (int): write your description
+            count: (int): write your description
+        """
         self.type = 'TABLE_DUMP'
         self.flag = 'B'
         self.ts = m['timestamp'][0]
@@ -164,6 +197,13 @@ class BgpDump:
         self.print_routes()
 
     def td_v2(self, m):
+        """
+        Post v2
+
+        Args:
+            self: (todo): write your description
+            m: (todo): write your description
+        """
         global peer
         self.type = 'TABLE_DUMP2'
         self.flag = 'B'
@@ -195,6 +235,14 @@ class BgpDump:
                 self.print_routes()
 
     def bgp4mp(self, m, count):
+        """
+        Bgp peer
+
+        Args:
+            self: (todo): write your description
+            m: (todo): write your description
+            count: (int): write your description
+        """
         self.type = 'BGP4MP'
         self.ts = m['timestamp'][0]
         self.num = count
@@ -230,6 +278,13 @@ class BgpDump:
             self.print_routes()
 
     def bgp_attr(self, attr):
+        """
+        Bgp attribute
+
+        Args:
+            self: (todo): write your description
+            attr: (str): write your description
+        """
         if attr['type'][0] == BGP_ATTR_T['ORIGIN']:
             self.origin = ORIGIN_T[attr['value']]
         elif attr['type'][0] == BGP_ATTR_T['NEXT_HOP']:
@@ -295,6 +350,12 @@ class BgpDump:
             )
 
     def merge_as_path(self):
+        """
+        Merge the as_as_as into the path.
+
+        Args:
+            self: (todo): write your description
+        """
         if len(self.as4_path):
             n = len(self.as_path) - len(self.as4_path)
             return ' '.join(self.as_path[:n] + self.as4_path)
@@ -302,12 +363,23 @@ class BgpDump:
             return ' '.join(self.as_path)
 
     def merge_aggr(self):
+        """
+        Merge the mergrgr.
+
+        Args:
+            self: (todo): write your description
+        """
         if len(self.as4_aggr):
             return self.as4_aggr
         else:
             return self.aggr
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     args = parse_args()
     d = Reader(args.path_to_file)
     count = 0

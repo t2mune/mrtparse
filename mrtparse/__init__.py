@@ -47,6 +47,13 @@ class Reader(Base):
     __slots__ = ['f', 'err', 'err_msg']
 
     def __init__(self, arg):
+        """
+        Initialize the gzip file.
+
+        Args:
+            self: (todo): write your description
+            arg: (todo): write your description
+        """
         Base.__init__(self)
 
         # file instance
@@ -75,9 +82,21 @@ class Reader(Base):
         raise StopIteration
 
     def __iter__(self):
+        """
+        Returns an iterator over the iterable.
+
+        Args:
+            self: (todo): write your description
+        """
         return self
 
     def __next__(self):
+        """
+        Read next next rdf packet
+
+        Args:
+            self: (todo): write your description
+        """
         as_len(4)
         af_num(0, 0)
         is_add_path(False)
@@ -211,6 +230,13 @@ class Mrt(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -239,6 +265,13 @@ class TableDump(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -281,6 +314,13 @@ class PeerIndexTable(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -306,6 +346,13 @@ class PeerEntries(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -332,6 +379,13 @@ class RibGeneric(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -363,6 +417,13 @@ class AfiSpecRib(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -389,6 +450,13 @@ class RibEntries(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -419,6 +487,13 @@ class Bgp4Mp(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -466,6 +541,13 @@ class BgpMessage(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -553,6 +635,13 @@ class OptParams(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
@@ -679,6 +768,13 @@ class BgpAttr(Base):
     __slots__ = []
 
     def __init__(self, buf):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buf: (list): write your description
+        """
         Base.__init__(self)
         self.buf = buf
 
