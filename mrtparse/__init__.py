@@ -247,7 +247,7 @@ class TableDump(Base):
         Decoder for Table_Dump format.
         '''
         self.data['view_number'] = self.val_num(2)
-        self.data['sequence number'] = self.val_num(2)
+        self.data['sequence_number'] = self.val_num(2)
         self.data['prefix'] = self.val_addr(subtype)
         self.data['prefix_length'] = self.val_num(1)
         self.data['status'] = self.val_num(1)
@@ -370,7 +370,7 @@ class AfiSpecRib(Base):
         '''
         Decoder for AFI/SAFI-Specific RIB format.
         '''
-        self.data['sequnce_number'] = self.val_num(4)
+        self.data['sequence_number'] = self.val_num(4)
         self.data['prefix_length'] = self.val_num(1)
         self.data['prefix'] \
             = self.val_addr(af_num.afi, self.data['prefix_length'])
