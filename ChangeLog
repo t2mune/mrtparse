@@ -1,3 +1,7 @@
+2020-10-07 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - fix an incorrect key in unpack_as4_path(). Thank you giselle-briand and
+	andre-luiz-dos-santos.
+
 2020-09-22 Tetsumune KISO <t2mune@gmail.com>
 	* Release - version 2.0.0 released.
 	* Fix - print a next_hop twice in "mrt2exabgp.py".
