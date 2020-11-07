@@ -174,7 +174,7 @@ class BgpDump:
             or m['subtype'][0] == TD_V2_ST['RIB_IPV4_MULTICAST']
             or m['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST']
             or m['subtype'][0] == TD_V2_ST['RIB_IPV6_MULTICAST']):
-            self.num = m['sequnce_number']
+            self.num = m['sequence_number']
             self.nlri.append('%s/%d' % (m['prefix'], m['prefix_length']))
             for entry in m['rib_entries']:
                 self.org_time = entry['originated_time'][0]
