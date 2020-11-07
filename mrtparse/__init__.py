@@ -927,7 +927,7 @@ class BgpAttr(Base):
             path_seg['type'].append(AS_PATH_SEG_T[path_seg['type'][0]])
             path_seg['length'] = self.val_num(1)
             path_seg['value'] = []
-            for _ in range(path_seg['len']):
+            for _ in range(path_seg['length']):
                 path_seg['value'].append(self.val_as(4))
             self.data['value'].append(path_seg)
 
