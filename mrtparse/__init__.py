@@ -947,8 +947,7 @@ class BgpAttr(Base):
         self.data['value'] = []
         while self.p < attr_len:
             aigp = collections.OrderedDict()
-            aigp['type'] = [self.val_num(1)]
-            aigp['type'].append(AIGP_T[aigp['type'][0]])
+            aigp['type'] = self.val_num(1)
             aigp['length'] = self.val_num(2)
             aigp['value'] = self.val_num(aigp['length'] - 3)
             self.data['value'].append(aigp)
