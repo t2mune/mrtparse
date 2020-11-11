@@ -156,8 +156,10 @@ class _Base:
             while p < n:
                 nlri = Nlri(self.buf[p:])
                 p += nlri.unpack(af, saf)
-                nlri.is_dup(nlri_list, af, saf)
                 nlri_list.append(nlri.data)
+            if len(nlri_list) > 0 and len(nlri_list) != \
+                len(set(map(lambda x: tuple(x.values()), nlri_list))):
+                raise MrtFormatError
             self.p = p
         except MrtFormatError:
             nlri_list = []
@@ -349,21 +351,3 @@ class Nlri(Base):
         self.data['route_distinguisher'] = self.val_rd()
         plen -= (3 * len(self.data['label']) + 8) * 8
         return plen
-
-    def is_dup(self, nlri_list, af, saf=0):
-        '''
-        Check whether duplicate routes exist in NLRI.
-        '''
-        for nlri in nlri_list:
-            if saf == SAFI_T['L3VPN_UNICAST'] \
-                or saf == SAFI_T['L3VPN_MULTICAST']:
-                if self.data['label'] != nlri['label'] \
-                    or self.data['route_distinguisher'] \
-                        != nlri['route_distinguisher']:
-                    next
-            if self.data['prefix_length'] == nlri['prefix_length'] \
-                and self.data['prefix'] == nlri['prefix']:
-                raise MrtFormatError(
-                    'Duplicate prefix %s, prefix_length: %d' \
-                    % (self.data['prefix'], self.data['prefix_length'])
-                )
