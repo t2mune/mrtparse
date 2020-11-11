@@ -1,3 +1,6 @@
+2020-10-12 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - fixed an incorrect key in "mrt2exabgp.py". Thank you nkukard.
+
 2020-10-08 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - fixed typos. Thnak you for andre-luiz-dos-santos.
 

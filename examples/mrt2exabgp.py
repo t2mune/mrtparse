@@ -394,7 +394,7 @@ def get_bgp_attr(args, params, m, attr):
             if len(attr['value']) == 0:
                 raise NotDisplay()
 
-            path_seg = attr['as_path'][0]
+            path_seg = attr['value'][0]
             if path_seg['type'][0] != AS_PATH_SEG_T['AS_SEQUENCE'] \
                 or len(path_seg['value']) == 0 \
                 or path_seg['value'][0] != str(args.peer_as):
