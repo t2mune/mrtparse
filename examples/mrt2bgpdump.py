@@ -288,7 +288,7 @@ class BgpDump:
                 elif seg['type'][0] == AS_PATH_SEG_T['AS_CONFED_SET']:
                     self.as4_path.append('[%s]' % ','.join(seg['value']))
                 else:
-                    self.as4_path += seg['val']
+                    self.as4_path += seg['value']
         elif attr['type'][0] == BGP_ATTR_T['AS4_AGGREGATOR']:
             self.as4_aggr = '%s %s' % (
                 attr['value']['as'], attr['value']['id']
