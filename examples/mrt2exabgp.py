@@ -484,9 +484,9 @@ def get_bgp_attr(args, params, m, attr):
         as4_path = ''
         for path_seg in attr['value']:
             if path_seg['type'][0] == AS_PATH_SEG_T['AS_SET']:
-                as4_path += '(%s) ' % ' '.join(path_seg['val'])
+                as4_path += '(%s) ' % ' '.join(path_seg['value'])
             else:
-                as4_path += '%s ' % ' '.join(path_seg['val'])
+                as4_path += '%s ' % ' '.join(path_seg['value'])
         line += ' as4-path [%s]' % as4_path
 
     elif attr['type'][0] == BGP_ATTR_T['AS4_AGGREGATOR']:
@@ -497,7 +497,7 @@ def get_bgp_attr(args, params, m, attr):
         line += ' as4-aggregator (%s:%s)' % (str(asn), attr['value']['id'])
 
     elif attr['type'][0] == BGP_ATTR_T['AIGP']:
-        line += ' aigp %d' % attr['value'][0]['val']
+        line += ' aigp %d' % attr['value'][0]['value']
 
     elif attr['type'][0] == BGP_ATTR_T['LARGE_COMMUNITY']:
         large_comm = ' '.join(attr['value'])
