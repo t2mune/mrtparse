@@ -247,6 +247,13 @@ Description
 ~~~~~~~~~~~
 
 | It converts MRT format to YAML.
+| To run this script, you need to install PyYAML_.
+
+.. _PyYAML: https://pyyaml.org
+
+::
+
+    pip install pyyaml
 
 Usage
 ~~~~~
