@@ -157,8 +157,10 @@ class _Base:
                 nlri = Nlri(self.buf[p:])
                 p += nlri.unpack(af, saf)
                 nlri_list.append(nlri.data)
+
+            # Check whether duplicate routes exist in NLRI
             if len(nlri_list) > 0 and len(nlri_list) != \
-                len(set(map(lambda x: tuple(x.values()), nlri_list))):
+                len(set(map(lambda x: str(x.values()), nlri_list))):
                 raise MrtFormatError
             self.p = p
         except MrtFormatError:

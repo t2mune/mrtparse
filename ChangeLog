@@ -1,3 +1,6 @@
+2020-10-15 Tetsumune KISO <t2mune@gmail.com>
+	* Update - code optimization.
+
 2020-10-12 Tetsumune KISO <t2mune@gmail.com>
 	* Update - code optimization.
 	* Fix - fixed an refernce to a dictionary that does not exist.
