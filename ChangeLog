@@ -1,20 +1,21 @@
-2020-10-16 Tetsumune KISO <t2mune@gmail.com>
+2020-11-16 Tetsumune KISO <t2mune@gmail.com>
+	* Fix - fixed ChangeLog.
 	* Release - version 2.0.1 released.
 
-2020-10-15 Tetsumune KISO <t2mune@gmail.com>
+2020-11-15 Tetsumune KISO <t2mune@gmail.com>
 	* Update - "examples/README.rst".
 	* Update - code optimization.
 
-2020-10-12 Tetsumune KISO <t2mune@gmail.com>
+2020-11-12 Tetsumune KISO <t2mune@gmail.com>
 	* Update - code optimization.
 	* Fix - fixed an refernce to a dictionary that does not exist.
 	* Fix - fixed an incorrect key in "mrt2bgpdump.py".
 	* Fix - fixed an incorrect key in "mrt2exabgp.py". Thank you nkukard.
 
-2020-10-08 Tetsumune KISO <t2mune@gmail.com>
+2020-11-08 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - fixed typos. Thnak you for andre-luiz-dos-santos.
 
-2020-10-07 Tetsumune KISO <t2mune@gmail.com>
+2020-11-07 Tetsumune KISO <t2mune@gmail.com>
 	* Fix - fixed an incorrect key in unpack_as4_path(). Thank you giselle-briand and
 	andre-luiz-dos-santos.
 
