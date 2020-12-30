@@ -490,7 +490,7 @@ def get_bgp_attr(args, params, m, attr):
         line += ' as4-path [%s]' % as4_path
 
     elif attr['type'][0] == BGP_ATTR_T['AS4_AGGREGATOR']:
-        asn = attr['value']['asn']
+        asn = attr['value']['as']
         m = r.search(asn)
         if m is not None:
             asn = int(m.group(1)) * 65536 + int(m.group(2))
