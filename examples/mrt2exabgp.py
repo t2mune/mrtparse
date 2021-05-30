@@ -340,7 +340,7 @@ def print_route_bgp4mp(args, params, m):
         if params['next_hop']:
             nh_line = ' next-hop %s' % params['next_hop']
         sys.stdout.write(
-            '%swithdrawn %s%s%s nlri%s%s\n' % (
+            '%swithdraw %s%s%s nlri%s%s\n' % (
                 params['pre_line'], params['api_grp_syntax'], attr_line,
                 nh_line, wd_line, params['post_line']
             )
