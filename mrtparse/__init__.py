@@ -740,7 +740,8 @@ class BgpAttr(Base):
         '''
         Decoder for ORIGIN attribute
         '''
-        self.data['value'] = self.val_num(1)
+        self.data['value'] = [self.val_num(1)]
+        self.data['value'].append(ORIGIN_T[self.data['value'][0]])
 
     def unpack_as_path(self):
         '''

@@ -340,7 +340,7 @@ def print_route_bgp4mp(args, params, m):
         if params['next_hop']:
             nh_line = ' next-hop %s' % params['next_hop']
         sys.stdout.write(
-            '%swithdraw %s%s%s nlri%s%s\n' % (
+            '%swithdrawn %s%s%s nlri%s%s\n' % (
                 params['pre_line'], params['api_grp_syntax'], attr_line,
                 nh_line, wd_line, params['post_line']
             )
@@ -387,7 +387,7 @@ def get_bgp_attr(args, params, m, attr):
         line += ' atomic-aggregate'
 
     if attr['type'][0] == BGP_ATTR_T['ORIGIN']:
-        line += ' origin %s' % ORIGIN_T[attr['value']]
+        line += ' origin %s' % ORIGIN_T[attr['value'][0]]
 
     elif attr['type'][0] == BGP_ATTR_T['AS_PATH']: 
         if flags & FLAG_T['SINGLE']:

@@ -231,7 +231,7 @@ class BgpDump:
 
     def bgp_attr(self, attr):
         if attr['type'][0] == BGP_ATTR_T['ORIGIN']:
-            self.origin = ORIGIN_T[attr['value']]
+            self.origin = ORIGIN_T[attr['value'][0]]
         elif attr['type'][0] == BGP_ATTR_T['NEXT_HOP']:
             self.next_hop.append(attr['value'])
         elif attr['type'][0] == BGP_ATTR_T['AS_PATH']:
