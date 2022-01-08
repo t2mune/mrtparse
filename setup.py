@@ -1,7 +1,7 @@
 '''
 setup.py - a setup script
 
-Copyright (C) 2020 Tetsumune KISO
+Copyright (C) 2022 Tetsumune KISO
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ try:
         version=mrtparse.__version__,
         description='MRT format data parser',
         long_description=long_descr,
-        url='https://github.com/YoshiyukiYamauchi/mrtparse',
+        url='https://github.com/t2mune/mrtparse',
         author='Tetsumune KISO, Yoshiyuki YAMAUCHI, Nobuhiro ITOU',
         author_email='t2mune@gmail.com, info@greenhippo.co.jp, js333123@gmail.com',
         license='Apache License 2.0',

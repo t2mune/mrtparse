@@ -233,6 +233,6 @@ License
 =======
 
 | Licensed under the `Apache License, Version 2.0`_
-| Copyright (C) 2020 Tetsumune KISO
+| Copyright (C) 2022 Tetsumune KISO
 
 .. _`Apache License, Version 2.0`: http://www.apache.org/licenses/LICENSE-2.0
