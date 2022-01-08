@@ -1,4 +1,5 @@
 2022-01-08 Tetsumune KISO <t2mune@gmail.com>
+	* Release - version 2.0.2 released.
 	* Update - resolved a value of BGP path attribute "ORIGIN".
 	* Update - copyright notices.
 
