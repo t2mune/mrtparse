@@ -128,7 +128,7 @@ class Reader(Base):
                 % (len(buf), mrt.data['length'])
             )
 
-        if mrt.data['subtype'][0] == 'Unknown':
+        if mrt.data['subtype'][1] == 'Unknown':
             raise MrtFormatError(
                 'Unsupported type %d(%s) subtype %d(%s)'
                 % tuple(mrt.data['type'] + mrt.data['subtype'])
