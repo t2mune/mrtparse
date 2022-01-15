@@ -180,11 +180,10 @@ def conv_format(args, flags, d):
         if m.err:
             continue
 
-        if m.data['type'][0] == MRT_T['TABLE_DUMP_V2'] \
-            or m.data['type'][0] == MRT_T['TABLE_DUMP']:
+        t = list(m.data['type'])[0]
+        if t == MRT_T['TABLE_DUMP_V2'] or t == MRT_T['TABLE_DUMP']:
             print_route_td(args, params, m.data)
-        elif m.data['type'][0] == MRT_T['BGP4MP'] \
-            or m.data['type'][0] == MRT_T['BGP4MP_ET']:
+        elif t == MRT_T['BGP4MP'] or t == MRT_T['BGP4MP_ET']:
             params['flags'] |= FLAG_T['API'] | FLAG_T['API_GROUP']
             print_route_bgp4mp(args, params, m.data)
 
@@ -205,11 +204,13 @@ def conv_format(args, flags, d):
 def print_route_td(args, params, m):
     entry = []
 
-    if m['type'][0] == MRT_T['TABLE_DUMP_V2']:
-        if m['subtype'][0] == TD_V2_ST['RIB_IPV4_UNICAST']:
+    t = list(m['type'])[0]
+    st = list(m['subtype'])[0]
+    if t == MRT_T['TABLE_DUMP_V2']:
+        if st == TD_V2_ST['RIB_IPV4_UNICAST']:
             if not params['flags'] & FLAG_T['IPv4']:
                 return
-        elif m['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST']:
+        elif st == TD_V2_ST['RIB_IPV6_UNICAST']:
             if not params['flags'] & FLAG_T['IPv6']:
                 return
         else:
@@ -221,11 +222,11 @@ def print_route_td(args, params, m):
         else:
             entry.append(m['rib_entries'][0])
 
-    elif m['type'][0] == MRT_T['TABLE_DUMP']:
-        if m['subtype'][0] == TD_ST['AFI_IPv4']:
+    elif t == MRT_T['TABLE_DUMP']:
+        if st == TD_ST['AFI_IPv4']:
             if not params['flags'] & FLAG_T['IPv4']:
                 return
-        elif m['subtype'][0] == TD_ST['AFI_IPv6']:
+        elif st == TD_ST['AFI_IPv6']:
             if not params['flags'] & FLAG_T['IPv6']:
                 return
         else:
@@ -296,6 +297,8 @@ def print_route_bgp4mp(args, params, m):
     params['next_hop'] = ''
     params['mp_withdrawn'] = []
     params['mp_nlri'] = []
+    t = list(m['type'])[0]
+    st = list(m['subtype'])[0]
 
     if flags & FLAG_T['API_GROUP'] == 0:
         sys.stderr.write(
@@ -309,13 +312,13 @@ def print_route_bgp4mp(args, params, m):
             print_conf_footer()
         exit(1)
 
-    if m['subtype'][0] == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
-        or m['subtype'][0] == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:
+    if st == BGP4MP_ST['BGP4MP_STATE_CHANGE'] \
+        or st == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']:
         return
 
     msg = m['bgp_message']
 
-    if msg['type'][0] != BGP_MSG_T['UPDATE']:
+    if list(msg['type'])[0] != BGP_MSG_T['UPDATE']:
         return
 
     attr_line = ''
@@ -365,12 +368,12 @@ def print_route_bgp4mp(args, params, m):
 
     interval = 0
     if params['ts_before'] >= 0:
-        interval = m['timestamp'][0] - params['ts_before']
-        if m['type'][0] == MRT_T['BGP4MP_ET']:
+        interval = list(m['timestamp'])[0] - params['ts_before']
+        if t == MRT_T['BGP4MP_ET']:
             interval += m['micro_timestamp'] / 1000000.0
 
-    params['ts_before'] = m['timestamp'][0]
-    if m['type'][0] == MRT_T['BGP4MP_ET']:
+    params['ts_before'] = list(m['timestamp'])[0]
+    if t == MRT_T['BGP4MP_ET']:
         params['ts_before'] += m['microsecond_timestamp']
 
     if interval > 0:
@@ -382,124 +385,126 @@ def print_route_bgp4mp(args, params, m):
 def get_bgp_attr(args, params, m, attr):
     line = ''
     r = re.compile("([0-9]+)\.([0-9]+)")
+    mrt_t = list(m['type'])[0]
+    mrt_st = list(m['subtype'])[0]
+    attr_t = list(attr['type'])[0]
 
-    if attr['type'][0] == BGP_ATTR_T['ATOMIC_AGGREGATE']:
+    if attr_t == BGP_ATTR_T['ATOMIC_AGGREGATE']:
         line += ' atomic-aggregate'
 
-    if attr['type'][0] == BGP_ATTR_T['ORIGIN']:
-        line += ' origin %s' % ORIGIN_T[attr['value'][0]]
+    if attr_t == BGP_ATTR_T['ORIGIN']:
+        line += ' origin %s' % ORIGIN_T[list(attr['value'])[0]]
 
-    elif attr['type'][0] == BGP_ATTR_T['AS_PATH']: 
+    elif attr_t == BGP_ATTR_T['AS_PATH']: 
         if flags & FLAG_T['SINGLE']:
             if len(attr['value']) == 0:
                 raise NotDisplay()
 
             path_seg = attr['value'][0]
-            if path_seg['type'][0] != AS_PATH_SEG_T['AS_SEQUENCE'] \
+            path_seg_t = list(path_seg['type'])[0]
+            if path_seg_t != AS_PATH_SEG_T['AS_SEQUENCE'] \
                 or len(path_seg['value']) == 0 \
-                or path_seg['value'][0] != str(args.peer_as):
+                or path_seg_t != str(args.peer_as):
                 raise NotDisplay()
 
         as_path = ''
         for path_seg in attr['value']:
-            if path_seg['type'][0] == AS_PATH_SEG_T['AS_SET']:
+            path_seg_t = list(path_seg['type'])[0]
+            if path_seg_t == AS_PATH_SEG_T['AS_SET']:
                 as_path += '(%s) ' % ' '.join(path_seg['value'])
             else:
                 as_path += '%s ' % ' '.join(path_seg['value'])
         line += ' as-path [%s]' % as_path
 
-    elif attr['type'][0] == BGP_ATTR_T['NEXT_HOP']:
+    elif attr_t == BGP_ATTR_T['NEXT_HOP']:
         params['next_hop'] = args.next_hop if args.next_hop else attr['value']
 
-    elif attr['type'][0] == BGP_ATTR_T['MULTI_EXIT_DISC']:
+    elif attr_t == BGP_ATTR_T['MULTI_EXIT_DISC']:
         line += ' med %d' % attr['value']
 
-    elif attr['type'][0] == BGP_ATTR_T['LOCAL_PREF']:
+    elif attr_t == BGP_ATTR_T['LOCAL_PREF']:
         line += ' local-preference %d' % attr['value']
 
-    elif attr['type'][0] == BGP_ATTR_T['AGGREGATOR']:
+    elif attr_t == BGP_ATTR_T['AGGREGATOR']:
         asn = attr['value']['as']
         m = r.search(asn)
         if m is not None:
             asn = int(m.group(1)) * 65536 + int(m.group(2))
         line += ' aggregator (%s:%s)' % (str(asn), attr['value']['id'])
 
-    elif attr['type'][0] == BGP_ATTR_T['COMMUNITY']:
+    elif attr_t == BGP_ATTR_T['COMMUNITY']:
         comm = ' '.join(attr['value'])
         line += ' community [%s]' % comm
 
-    elif attr['type'][0] == BGP_ATTR_T['ORIGINATOR_ID']:
+    elif attr_t == BGP_ATTR_T['ORIGINATOR_ID']:
         line += ' originator-id %s' % attr['value']
 
-    elif attr['type'][0] == BGP_ATTR_T['CLUSTER_LIST']:
+    elif attr_t == BGP_ATTR_T['CLUSTER_LIST']:
         line += ' cluster-list [%s]' % ' '.join(attr['value'])
 
-    elif attr['type'][0] == BGP_ATTR_T['MP_REACH_NLRI']:
+    elif attr_t == BGP_ATTR_T['MP_REACH_NLRI']:
         params['next_hop'] = attr['value']['next_hop'][0]
-        if m['type'][0] == MRT_T['TABLE_DUMP_V2']:
-            if m['subtype'][0] == TD_V2_ST['RIB_IPV4_UNICAST'] \
+        if mrt_t == MRT_T['TABLE_DUMP_V2']:
+            if mrt_st == TD_V2_ST['RIB_IPV4_UNICAST'] \
                 and args.next_hop:
                 params['next_hop'] = args.next_hop
-            elif m['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST'] \
+            elif mrt_st == TD_V2_ST['RIB_IPV6_UNICAST'] \
                 and args.next_hop6:
                 params['next_hop'] = args.next_hop6
-        elif m['type'][0] == MRT_T['TABLE_DUMP']:
-            if m['subtype'][0] == TD_ST['AFI_IPv4'] and args.next_hop:
+        elif mrt_t == MRT_T['TABLE_DUMP']:
+            if mrt_st == TD_ST['AFI_IPv4'] and args.next_hop:
                 params['next_hop'] = args.next_hop
-            elif m['subtype'][0] == TD_ST['AFI_IPv6'] and args.next_hop6:
+            elif mrt_st == TD_ST['AFI_IPv6'] and args.next_hop6:
                 params['next_hop'] = args.next_hop6
-        elif m['type'][0] == MRT_T['BGP4MP'] \
-            or m['type'][0] == MRT_T['BGP4MP_ET']:
-            if attr['value']['afi'][0] == AFI_T['IPv4'] \
-                and params['flags'] & FLAG_T['IPv4']:
+        elif mrt_t == MRT_T['BGP4MP'] or mrt_t == MRT_T['BGP4MP_ET']:
+            afi = list(attr['value']['afi'])[0]
+            if afi == AFI_T['IPv4'] and params['flags'] & FLAG_T['IPv4']:
                 if args.next_hop:
                     params['next_hop'] = args.next_hop
                 if 'nlri' in attr['value']:
                     params['mp_nlri'] = attr['value']['nlri']
-            elif attr['value']['afi'][0] == AFI_T['IPv6'] \
-                and params['flags'] & FLAG_T['IPv6']:
+            elif afi == AFI_T['IPv6'] and params['flags'] & FLAG_T['IPv6']:
                 if args.next_hop6:
                     params['next_hop'] = args.next_hop6
                 if 'nlri' in attr['value']:
                     params['mp_nlri'] = attr['value']['nlri']
 
-    elif attr['type'][0] == BGP_ATTR_T['MP_UNREACH_NLRI']:
-        if m['type'][0] == MRT_T['BGP4MP'] or m['type'][0] == MRT_T['BGP4MP_ET']:
-            if attr['value']['afi'][0] == AFI_T['IPv4'] \
-                and params['flags'] & FLAG_T['IPv4']:
+    elif attr_t == BGP_ATTR_T['MP_UNREACH_NLRI']:
+        if mrt_t == MRT_T['BGP4MP'] or mrt_t == MRT_T['BGP4MP_ET']:
+            afi = list(attr['value']['afi'])[0]
+            if afi == AFI_T['IPv4'] and params['flags'] & FLAG_T['IPv4']:
                 if 'withdrawn_routes' in attr['value']:
                     params['mp_withdrawn'] = attr['value']['withdrawn_routes']
-            elif attr['value']['afi'][0] == AFI_T['IPv6'] \
-                and params['flags'] & FLAG_T['IPv6']:
+            elif afi == AFI_T['IPv6'] and params['flags'] & FLAG_T['IPv6']:
                 if 'withdrawn_routes' in attr['value']:
                     params['mp_withdrawn'] = attr['value']['withdrawn_routes']
 
-    elif attr['type'][0] == BGP_ATTR_T['EXTENDED COMMUNITIES']:
+    elif attr_t == BGP_ATTR_T['EXTENDED COMMUNITIES']:
         ext_comm_list = []
         for ext_comm in attr['value']:
             ext_comm_list.append('0x%016x' % ext_comm)
         line += ' extended-community [%s]' % ' '.join(ext_comm_list)
 
-    elif attr['type'][0] == BGP_ATTR_T['AS4_PATH']:
+    elif attr_t == BGP_ATTR_T['AS4_PATH']:
         as4_path = ''
         for path_seg in attr['value']:
-            if path_seg['type'][0] == AS_PATH_SEG_T['AS_SET']:
+            if list(path_seg['type'])[0] == AS_PATH_SEG_T['AS_SET']:
                 as4_path += '(%s) ' % ' '.join(path_seg['value'])
             else:
                 as4_path += '%s ' % ' '.join(path_seg['value'])
         line += ' as4-path [%s]' % as4_path
 
-    elif attr['type'][0] == BGP_ATTR_T['AS4_AGGREGATOR']:
+    elif attr_t == BGP_ATTR_T['AS4_AGGREGATOR']:
         asn = attr['value']['as']
         m = r.search(asn)
         if m is not None:
             asn = int(m.group(1)) * 65536 + int(m.group(2))
         line += ' as4-aggregator (%s:%s)' % (str(asn), attr['value']['id'])
 
-    elif attr['type'][0] == BGP_ATTR_T['AIGP']:
+    elif attr_t == BGP_ATTR_T['AIGP']:
         line += ' aigp %d' % attr['value'][0]['value']
 
-    elif attr['type'][0] == BGP_ATTR_T['LARGE_COMMUNITY']:
+    elif attr_t == BGP_ATTR_T['LARGE_COMMUNITY']:
         large_comm = ' '.join(attr['value'])
         line += ' large-community [%s]' % large_comm
 

@@ -153,9 +153,9 @@ class BgpDump:
     def td(self, m, count):
         self.type = 'TABLE_DUMP'
         self.flag = 'B'
-        self.ts = m['timestamp'][0]
+        self.ts = list(m['timestamp'])[0]
         self.num = count
-        self.org_time = m['originated_time'][0]
+        self.org_time = list(m['originated_time'])[0]
         self.peer_ip = m['peer_ip']
         self.peer_as = m['peer_as']
         self.nlri.append('%s/%d' % (m['prefix'], m['prefix_length']))
@@ -167,17 +167,18 @@ class BgpDump:
         global peer
         self.type = 'TABLE_DUMP2'
         self.flag = 'B'
-        self.ts = m['timestamp'][0]
-        if m['subtype'][0] == TD_V2_ST['PEER_INDEX_TABLE']:
+        self.ts = list(m['timestamp'])[0]
+        st = list(m['subtype'])[0]
+        if st == TD_V2_ST['PEER_INDEX_TABLE']:
             peer = copy.copy(m['peer_entries'])
-        elif (m['subtype'][0] == TD_V2_ST['RIB_IPV4_UNICAST']
-            or m['subtype'][0] == TD_V2_ST['RIB_IPV4_MULTICAST']
-            or m['subtype'][0] == TD_V2_ST['RIB_IPV6_UNICAST']
-            or m['subtype'][0] == TD_V2_ST['RIB_IPV6_MULTICAST']):
+        elif (st == TD_V2_ST['RIB_IPV4_UNICAST']
+            or st == TD_V2_ST['RIB_IPV4_MULTICAST']
+            or st == TD_V2_ST['RIB_IPV6_UNICAST']
+            or st == TD_V2_ST['RIB_IPV6_MULTICAST']):
             self.num = m['sequence_number']
             self.nlri.append('%s/%d' % (m['prefix'], m['prefix_length']))
             for entry in m['rib_entries']:
-                self.org_time = entry['originated_time'][0]
+                self.org_time = list(entry['originated_time'])[0]
                 self.peer_ip = peer[entry['peer_index']]['peer_ip']
                 self.peer_as = peer[entry['peer_index']]['peer_as']
                 self.as_path = []
@@ -196,22 +197,23 @@ class BgpDump:
 
     def bgp4mp(self, m, count):
         self.type = 'BGP4MP'
-        self.ts = m['timestamp'][0]
+        self.ts = list(m['timestamp'])[0]
         self.num = count
-        self.org_time = m['timestamp'][0]
+        self.org_time = list(m['timestamp'])[0]
         self.peer_ip = m['peer_ip']
         self.peer_as = m['peer_as']
-        if (m['subtype'][0] == BGP4MP_ST['BGP4MP_STATE_CHANGE']
-            or m['subtype'][0] == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
+        st = list(m['subtype'])[0]
+        if (st == BGP4MP_ST['BGP4MP_STATE_CHANGE']
+            or st == BGP4MP_ST['BGP4MP_STATE_CHANGE_AS4']):
             self.flag = 'STATE'
-            self.old_state = m['old_state'][0]
-            self.new_state = m['new_state'][0]
+            self.old_state = list(m['old_state'])[0]
+            self.new_state = list(m['new_state'])[0]
             self.print_line([], '')
-        elif (m['subtype'][0] == BGP4MP_ST['BGP4MP_MESSAGE']
-            or m['subtype'][0] == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
-            or m['subtype'][0] == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
-            or m['subtype'][0] == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
-            if m['bgp_message']['type'][0] != BGP_MSG_T['UPDATE']:
+        elif (st == BGP4MP_ST['BGP4MP_MESSAGE']
+            or st == BGP4MP_ST['BGP4MP_MESSAGE_AS4']
+            or st == BGP4MP_ST['BGP4MP_MESSAGE_LOCAL']
+            or st == BGP4MP_ST['BGP4MP_MESSAGE_AS4_LOCAL']):
+            if list(m['bgp_message']['type'])[0] != BGP_MSG_T['UPDATE']:
                 return
             for attr in m['bgp_message']['path_attributes']:
                 self.bgp_attr(attr)
@@ -230,34 +232,36 @@ class BgpDump:
             self.print_routes()
 
     def bgp_attr(self, attr):
-        if attr['type'][0] == BGP_ATTR_T['ORIGIN']:
-            self.origin = ORIGIN_T[attr['value'][0]]
-        elif attr['type'][0] == BGP_ATTR_T['NEXT_HOP']:
+        attr_t = list(attr['type'])[0]
+        if attr_t == BGP_ATTR_T['ORIGIN']:
+            self.origin = ORIGIN_T[list(attr['value'])[0]]
+        elif attr_t == BGP_ATTR_T['NEXT_HOP']:
             self.next_hop.append(attr['value'])
-        elif attr['type'][0] == BGP_ATTR_T['AS_PATH']:
+        elif attr_t == BGP_ATTR_T['AS_PATH']:
             self.as_path = []
             for seg in attr['value']:
-                if seg['type'][0] == AS_PATH_SEG_T['AS_SET']:
+                seg_t = list(seg['type'])[0]
+                if seg_t == AS_PATH_SEG_T['AS_SET']:
                     self.as_path.append('{%s}' % ','.join(seg['value']))
-                elif seg['type'][0] == AS_PATH_SEG_T['AS_CONFED_SEQUENCE']:
+                elif seg_t == AS_PATH_SEG_T['AS_CONFED_SEQUENCE']:
                     self.as_path.append('(' + seg['value'][0])
                     self.as_path += seg['value'][1:-1]
                     self.as_path.append(seg['value'][-1] + ')')
-                elif seg['type'][0] == AS_PATH_SEG_T['AS_CONFED_SET']:
+                elif seg_t == AS_PATH_SEG_T['AS_CONFED_SET']:
                     self.as_path.append('[%s]' % ','.join(seg['value']))
                 else:
                     self.as_path += seg['value']
-        elif attr['type'][0] == BGP_ATTR_T['MULTI_EXIT_DISC']:
+        elif attr_t == BGP_ATTR_T['MULTI_EXIT_DISC']:
             self.med = attr['value']
-        elif attr['type'][0] == BGP_ATTR_T['LOCAL_PREF']:
+        elif attr_t == BGP_ATTR_T['LOCAL_PREF']:
             self.local_pref = attr['value']
-        elif attr['type'][0] == BGP_ATTR_T['ATOMIC_AGGREGATE']:
+        elif attr_t == BGP_ATTR_T['ATOMIC_AGGREGATE']:
             self.atomic_aggr = 'AG'
-        elif attr['type'][0] == BGP_ATTR_T['AGGREGATOR']:
+        elif attr_t == BGP_ATTR_T['AGGREGATOR']:
             self.aggr = '%s %s' % (attr['value']['as'], attr['value']['id'])
-        elif attr['type'][0] == BGP_ATTR_T['COMMUNITY']:
+        elif attr_t == BGP_ATTR_T['COMMUNITY']:
             self.comm = ' '.join(attr['value'])
-        elif attr['type'][0] == BGP_ATTR_T['MP_REACH_NLRI']:
+        elif attr_t == BGP_ATTR_T['MP_REACH_NLRI']:
             self.next_hop = attr['value']['next_hop']
             if self.type != 'BGP4MP':
                 return
@@ -267,7 +271,7 @@ class BgpDump:
                         nlri['prefix'], nlri['prefix_length']
                     )
                 )
-        elif attr['type'][0] == BGP_ATTR_T['MP_UNREACH_NLRI']:
+        elif attr_t == BGP_ATTR_T['MP_UNREACH_NLRI']:
             if self.type != 'BGP4MP':
                 return
             for withdrawn in attr['value']['withdrawn_routes']:
@@ -276,20 +280,21 @@ class BgpDump:
                         withdrawn['prefix'], withdrawn['prefix_length']
                     )
                 )
-        elif attr['type'][0] == BGP_ATTR_T['AS4_PATH']:
+        elif attr_t == BGP_ATTR_T['AS4_PATH']:
             self.as4_path = []
+            seg_t = list(seg['type'])[0]
             for seg in attr['value']:
-                if seg['type'][0] == AS_PATH_SEG_T['AS_SET']:
+                if seg_t == AS_PATH_SEG_T['AS_SET']:
                     self.as4_path.append('{%s}' % ','.join(seg['value']))
-                elif seg['type'][0] == AS_PATH_SEG_T['AS_CONFED_SEQUENCE']:
+                elif seg_t == AS_PATH_SEG_T['AS_CONFED_SEQUENCE']:
                     self.as4_path.append('(' + seg['value'][0])
                     self.as4_path += seg['value'][1:-1]
                     self.as4_path.append(seg['value'][-1] + ')')
-                elif seg['type'][0] == AS_PATH_SEG_T['AS_CONFED_SET']:
+                elif seg_t == AS_PATH_SEG_T['AS_CONFED_SET']:
                     self.as4_path.append('[%s]' % ','.join(seg['value']))
                 else:
                     self.as4_path += seg['value']
-        elif attr['type'][0] == BGP_ATTR_T['AS4_AGGREGATOR']:
+        elif attr_t == BGP_ATTR_T['AS4_AGGREGATOR']:
             self.as4_aggr = '%s %s' % (
                 attr['value']['as'], attr['value']['id']
             )
@@ -315,11 +320,12 @@ def main():
         if m.err:
             continue
         b = BgpDump(args)
-        if m.data['type'][0] == MRT_T['TABLE_DUMP']:
+        t = list(m.data['type'])[0]
+        if t == MRT_T['TABLE_DUMP']:
             b.td(m.data, count)
-        elif m.data['type'][0] == MRT_T['TABLE_DUMP_V2']:
+        elif t == MRT_T['TABLE_DUMP_V2']:
             b.td_v2(m.data)
-        elif m.data['type'][0] == MRT_T['BGP4MP']:
+        elif t == MRT_T['BGP4MP']:
             b.bgp4mp(m.data, count)
         count += 1
 
