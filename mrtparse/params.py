@@ -229,17 +229,17 @@ AS_PATH_SEG_T = reverse_defaultdict({
 # Reserved BGP COMMUNITY Types
 # Defined in RFC1997
 COMM_T = reverse_defaultdict({
-    0xFFFF0000:'GRACEFUL_SHUTDOWN',          # Defined in RFC8326
-    0xFFFF0001:'ACCEPT_OWN',                 # Defined in RFC7611
-    0xFFFF0002:'ROUTE_FILTER_TRANSLATED_v4', # Proposed in draft-l3vpn-legacy-rtc
-    0xFFFF0003:'ROUTE_FILTER_v4',            # Proposed in draft-l3vpn-legacy-rtc
-    0xFFFF0004:'ROUTE_FILTER_TRANSLATED_v6', # Proposed in draft-l3vpn-legacy-rtc
-    0xFFFF0005:'ROUTE_FILTER_v6',            # Proposed in draft-l3vpn-legacy-rtc
-    0xFFFF0006:'LLGR_STALE',                 # Proposed in draft-uttaro-idr-bgp-persistence
-    0xFFFF0007:'NO_LLGR',                    # Proposed in draft-uttaro-idr-bgp-persistence
-    0xFFFF0008:'accept-own-nexthop',         # Proposed in draft-agrewal-idr-accept-own-nexthop
-    0xFFFF0009:'Standby PE',                 # Defined in RFC9026
-    0xFFFF029A:'BLACKHOLE',                  # Defined in RFC7999
+    0xffff0000:'GRACEFUL_SHUTDOWN',          # Defined in RFC8326
+    0xffff0001:'ACCEPT_OWN',                 # Defined in RFC7611
+    0xffff0002:'ROUTE_FILTER_TRANSLATED_v4', # Proposed in draft-l3vpn-legacy-rtc
+    0xffff0003:'ROUTE_FILTER_v4',            # Proposed in draft-l3vpn-legacy-rtc
+    0xffff0004:'ROUTE_FILTER_TRANSLATED_v6', # Proposed in draft-l3vpn-legacy-rtc
+    0xffff0005:'ROUTE_FILTER_v6',            # Proposed in draft-l3vpn-legacy-rtc
+    0xffff0006:'LLGR_STALE',                 # Proposed in draft-uttaro-idr-bgp-persistence
+    0xffff0007:'NO_LLGR',                    # Proposed in draft-uttaro-idr-bgp-persistence
+    0xffff0008:'accept-own-nexthop',         # Proposed in draft-agrewal-idr-accept-own-nexthop
+    0xffff0009:'Standby PE',                 # Defined in RFC9026
+    0xffff029a:'BLACKHOLE',                  # Defined in RFC7999
     0xffffff01:'NO_EXPORT',
     0xffffff02:'NO_ADVERTISE',
     0xffffff03:'NO_EXPORT_SCONFED',
