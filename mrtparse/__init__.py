@@ -34,7 +34,7 @@ try:
 except AttributeError:
     pass
 
-__version__ = '2.1.1.dev0'
+__version__ = '2.2.0.dev0'
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
@@ -247,7 +247,7 @@ class TableDump(Base):
         self.data['view_number'] = self.val_num(2)
         self.data['sequence_number'] = self.val_num(2)
         self.data['prefix'] = self.val_addr(subtype)
-        self.data['prefix_length'] = self.val_num(1)
+        self.data['length'] = self.val_num(1)
         self.data['status'] = self.val_num(1)
         ot = self.val_num(4)
         self.data['originated_time'] = {ot: str(datetime.fromtimestamp(ot))}
@@ -260,7 +260,7 @@ class TableDump(Base):
             self.data['peer_ip'] = self.val_addr(subtype)
 
         self.data['peer_as'] = self.val_as(as_len(2))
-        self.data['path_attribute_length'] = attr_len = self.val_num(2)
+        self.data['path_attributes_length'] = attr_len = self.val_num(2)
         self.data['path_attributes'] = []
         while attr_len > 0:
             attr = BgpAttr(self.buf[self.p:])
@@ -367,9 +367,9 @@ class AfiSpecRib(Base):
         Decoder for AFI/SAFI-Specific RIB format.
         '''
         self.data['sequence_number'] = self.val_num(4)
-        self.data['prefix_length'] = self.val_num(1)
+        self.data['length'] = self.val_num(1)
         self.data['prefix'] \
-            = self.val_addr(af_num.afi, self.data['prefix_length'])
+            = self.val_addr(af_num.afi, self.data['length'])
         self.data['entry_count'] = self.val_num(2)
         self.data['rib_entries'] = []
         for _ in range(self.data['entry_count']):
@@ -397,7 +397,7 @@ class RibEntries(Base):
         self.data['originated_time'] = {ot: str(datetime.fromtimestamp(ot))}
         if is_add_path():
             self.data['path_id'] = self.val_num(4)
-        attr_len = self.data['path_attribute_length'] = self.val_num(2)
+        attr_len = self.data['path_attributes_length'] = self.val_num(2)
         self.data['path_attributes'] = []
         while attr_len > 0:
             attr = BgpAttr(self.buf[self.p:])
@@ -508,8 +508,8 @@ class BgpMessage(Base):
         self.data['withdrawn_routes'] = self.val_nlri(
             self.p + self.data['withdrawn_routes_length'], AFI_T['IPv4']
         )
-        self.data['path_attribute_length'] = self.val_num(2)
-        attr_len = self.p + self.data['path_attribute_length']
+        self.data['path_attributes_length'] = self.val_num(2)
+        attr_len = self.p + self.data['path_attributes_length']
         self.data['path_attributes'] = []
         while self.p < attr_len:
             attr = BgpAttr(self.buf[self.p:])

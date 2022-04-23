@@ -216,7 +216,7 @@ def print_route_td(args, params, m):
         else:
             return
 
-        prefix = '%s/%d' % (m['prefix'], m['prefix_length'])
+        prefix = '%s/%d' % (m['prefix'], m['length'])
         if flags & FLAG_T['ALL']:
             entry = m['rib_entries']
         else:
@@ -232,7 +232,7 @@ def print_route_td(args, params, m):
         else:
             return
 
-        prefix = '%s/%d' % (m['prefix'], m['prefix_length'])
+        prefix = '%s/%d' % (m['prefix'], m['length'])
         if params['flags'] & FLAG_T['ALL'] == 0:
             if prefix == params['prefix_before']:
                 return
@@ -332,11 +332,11 @@ def print_route_bgp4mp(args, params, m):
 
     wd_line = ''
     for wd in params['mp_withdrawn']:
-        wd_line += ' %s/%s' % (wd['prefix'], wd['prefix_length'])
+        wd_line += ' %s/%s' % (wd['prefix'], wd['length'])
 
     if len(msg['withdrawn_routes']) and params['flags'] & FLAG_T['IPv4']:
         for wd in msg['withdrawn_routes']:
-            wd_line += ' %s/%s' % (wd['prefix'], wd['prefix_length'])
+            wd_line += ' %s/%s' % (wd['prefix'], wd['length'])
 
     if len(wd_line):
         nh_line = ''
@@ -351,11 +351,11 @@ def print_route_bgp4mp(args, params, m):
 
     nlri_line = ''
     for nlri in params['mp_nlri']:
-        nlri_line += ' %s/%s' % (nlri['prefix'], nlri['prefix_length'])
+        nlri_line += ' %s/%s' % (nlri['prefix'], nlri['length'])
 
     if len(msg['nlri']) and params['flags'] & FLAG_T['IPv4']:
         for nlri in msg['nlri']:
-            nlri_line += ' %s/%s' % (nlri['prefix'], nlri['prefix_length'])
+            nlri_line += ' %s/%s' % (nlri['prefix'], nlri['length'])
 
     if len(nlri_line):
         if params['next_hop']:

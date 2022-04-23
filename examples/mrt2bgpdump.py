@@ -158,7 +158,7 @@ class BgpDump:
         self.org_time = list(m['originated_time'])[0]
         self.peer_ip = m['peer_ip']
         self.peer_as = m['peer_as']
-        self.nlri.append('%s/%d' % (m['prefix'], m['prefix_length']))
+        self.nlri.append('%s/%d' % (m['prefix'], m['length']))
         for attr in m['path_attributes']:
             self.bgp_attr(attr)
         self.print_routes()
@@ -176,7 +176,7 @@ class BgpDump:
             or st == TD_V2_ST['RIB_IPV6_UNICAST']
             or st == TD_V2_ST['RIB_IPV6_MULTICAST']):
             self.num = m['sequence_number']
-            self.nlri.append('%s/%d' % (m['prefix'], m['prefix_length']))
+            self.nlri.append('%s/%d' % (m['prefix'], m['length']))
             for entry in m['rib_entries']:
                 self.org_time = list(entry['originated_time'])[0]
                 self.peer_ip = peer[entry['peer_index']]['peer_ip']
@@ -220,13 +220,13 @@ class BgpDump:
             for withdrawn in m['bgp_message']['withdrawn_routes']:
                 self.withdrawn.append(
                     '%s/%d' % (
-                        withdrawn['prefix'], withdrawn['prefix_length']
+                        withdrawn['prefix'], withdrawn['length']
                     )
                 )
             for nlri in m['bgp_message']['nlri']:
                 self.nlri.append(
                     '%s/%d' % (
-                        nlri['prefix'], nlri['prefix_length']
+                        nlri['prefix'], nlri['length']
                     )
                 )
             self.print_routes()
@@ -268,7 +268,7 @@ class BgpDump:
             for nlri in attr['value']['nlri']:
                 self.nlri.append(
                     '%s/%d' % (
-                        nlri['prefix'], nlri['prefix_length']
+                        nlri['prefix'], nlri['length']
                     )
                 )
         elif attr_t == BGP_ATTR_T['MP_UNREACH_NLRI']:
@@ -277,7 +277,7 @@ class BgpDump:
             for withdrawn in attr['value']['withdrawn_routes']:
                 self.withdrawn.append(
                     '%s/%d' % (
-                        withdrawn['prefix'], withdrawn['prefix_length']
+                        withdrawn['prefix'], withdrawn['length']
                     )
                 )
         elif attr_t == BGP_ATTR_T['AS4_PATH']:

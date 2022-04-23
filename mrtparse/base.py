@@ -328,14 +328,14 @@ class Nlri(Base):
         '''
         if add_path:
             self.data['path_id'] = self.val_num(4)
-        self.data['prefix_length'] = plen = self.val_num(1)
+        self.data['length'] = plen = self.val_num(1)
         if saf == SAFI_T['L3VPN_UNICAST'] or saf == SAFI_T['L3VPN_MULTICAST']:
             plen = self.unpack_l3vpn(plen)
         if af == AFI_T['IPv4'] and plen > 32 \
             or af == AFI_T['IPv6'] and plen > 128:
             raise MrtFormatError(
                 'Invalid prefix length %d (%s)'
-                % (self.data['prefix_length'], AFI_T[af])
+                % (self.data['length'], AFI_T[af])
             )
         self.data['prefix'] = self.val_addr(af, plen)
         return self.p
