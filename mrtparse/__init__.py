@@ -34,7 +34,7 @@ try:
 except AttributeError:
     pass
 
-__version__ = '2.2.0.dev0'
+__version__ = '2.2.0'
 
 # Magic Number
 GZIP_MAGIC = b'\x1f\x8b'
